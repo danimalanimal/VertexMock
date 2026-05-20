@@ -1300,3 +1300,124 @@ body.bulk-mode .pchip.on .pa{
   border: 1px dashed rgba(255,255,255,.10); border-radius: 12px;
   font-size: 12.5px;
 }
+
+/* =========================================================
+   Boxing Workshop Coach Input
+   ========================================================= */
+
+/* 2-column grid of attribute cells; each cell stacks tile + slider */
+.bx-grid{ grid-template-columns: repeat(2, 1fr) !important; gap:10px; }
+.bx-cell{
+  display:flex; flex-direction:column;
+  background: rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:16px; padding:8px; gap:8px;
+  transition: border-color .12s ease, background .12s ease;
+}
+.bx-cell.on{
+  background: rgba(89,183,255,.05);
+  border-color: rgba(89,183,255,.32);
+}
+/* Inside a cell the atile loses its own outer border to avoid double-frame */
+.bx-cell .atile{
+  background: transparent; border:none; min-height:64px; padding:4px 6px 0;
+}
+.bx-cell .atile.on{
+  background: rgba(89,183,255,.10); border-radius:12px; box-shadow:none;
+}
+
+/* Slider hint micro-copy in header */
+.bx-slider-hint{
+  font-family: var(--font-mono); font-size:10.5px; letter-spacing:.04em;
+  color:#9bd2ff; opacity:.78;
+}
+
+/* Slider itself */
+.bx-slider{
+  position:relative;
+  padding: 4px 6px 6px;
+}
+.bx-slider.disabled{ opacity:.45; pointer-events:none; }
+
+.bx-slider-track{
+  position:relative; height:8px; border-radius:999px;
+  background: linear-gradient(90deg,
+    #ff8a40 0%,
+    #ffb466 28%,
+    #6bb6ff 50%,
+    #59b7ff 65%,
+    #8de08a 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.bx-slider-fill{
+  display:none; /* gradient track itself reads as the value via the thumb */
+}
+.bx-slider-thumb{
+  position:absolute; top:50%; width:18px; height:18px; border-radius:50%;
+  transform: translate(-50%, -50%);
+  background:#0c1422; border:2.5px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4), 0 0 0 3px rgba(0,0,0,.2);
+  pointer-events:none;
+}
+
+/* Tone tinting on thumb border based on current value */
+.bx-slider.tone-low  .bx-slider-thumb{ border-color:#ff8a40; }
+.bx-slider.tone-mid  .bx-slider-thumb{ border-color:#6bb6ff; }
+.bx-slider.tone-high .bx-slider-thumb{ border-color:#8de08a; }
+
+/* Numeric badge + label below the track */
+.bx-slider-badge{
+  display:flex; align-items:baseline; justify-content:space-between;
+  margin-top:6px; padding: 0 2px;
+  font-family: var(--font-mono);
+}
+.bx-slider-val{
+  font-size:13px; font-weight:700; color:var(--text);
+}
+.bx-slider-lbl{
+  font-size:10.5px; letter-spacing:.04em; text-transform:uppercase;
+  font-weight:500;
+}
+.bx-slider.tone-low  .bx-slider-lbl{ color:#ff8a40; }
+.bx-slider.tone-mid  .bx-slider-lbl{ color:#6bb6ff; }
+.bx-slider.tone-high .bx-slider-lbl{ color:#8de08a; }
+
+/* The real input that captures drag/keyboard. Absolute over the track for a
+   fat hit area; visually invisible so the styled track is what the eye sees. */
+.bx-slider-input{
+  position:absolute; left:0; right:0; top:0;
+  width:100%; height:32px;       /* generous touch target */
+  margin:0; padding:0;
+  background:transparent;
+  appearance:none; -webkit-appearance:none;
+  opacity:0;
+  cursor:pointer;
+  z-index:2;
+}
+.bx-slider-input:disabled{ cursor:not-allowed; }
+.bx-slider-input::-webkit-slider-thumb{
+  -webkit-appearance:none; width:32px; height:32px; background:transparent;
+}
+.bx-slider-input::-moz-range-thumb{
+  width:32px; height:32px; background:transparent; border:none;
+}
+
+/* Tally satisfaction badge */
+.ct-sat{
+  font-family: var(--font-mono); font-size:10.5px;
+  padding:1px 6px; border-radius:999px;
+  background: rgba(255,255,255,.05);
+  margin-left:4px;
+}
+.ct-sat.tone-low { color:#ff9a52; background: rgba(255,138,64,.10); }
+.ct-sat.tone-mid { color:#7fc1ff; background: rgba(107,182,255,.10); }
+.ct-sat.tone-high{ color:#9be598; background: rgba(141,224,138,.10); }
+
+/* Boxing-body topbar tint to differentiate from basketball */
+.boxing-body .coach-brand strong{ color:#ffb466; }
+
+/* Tighter pchip "level" tag instead of jersey number */
+.boxing-body .pchip .pp{
+  font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+}
+

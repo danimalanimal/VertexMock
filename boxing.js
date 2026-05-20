@@ -1,13 +1,18 @@
-// Vertex Coach Input — courtside, thumb-driven, 2-4 tap observation logger.
-// Stateful UI: player(s) + attribute + sentiment + phrase => one logged entry.
-// Bulk mode multiplies the player axis. Sticky context speeds repeated entries.
+// Vertex Boxing Workshop — Coach Input.
+// Mirrors coach.js structure (player + attribute + sentiment + phrase => entry)
+// with workshop-specific additions:
+//   * 5 attribute blocks (fundamentals / mitts / noodle / shields / partner)
+//   * Per-attribute satisfaction slider: orange (stagnant) -> blue -> green (excellent)
+//   * Each logged entry stores a satisfaction snapshot for that (player, attribute)
+//   * Unified feed: entries are pushed to VertexData.feed tagged discipline:'boxing'
+//   * Strict slot search: results restricted to picked attribute+sentiment
 
 (function () {
-  const D = window.VertexCoachData;
-  const FEED = (window.VertexData && window.VertexData.feed) || [];
-  const STORE_KEY = 'vertex.coach.entries.v1';
-  const FREQ_KEY  = 'vertex.coach.freq.v1';
-  const CUSTOM_KEY = 'vertex.coach.custom.v1';
+  const D = window.VertexBoxingData;
+  const STORE_KEY  = 'vertex.boxing.entries.v1';
+  const FREQ_KEY   = 'vertex.boxing.freq.v1';
+  const CUSTOM_KEY = 'vertex.boxing.custom.v1';
+  const SAT_KEY    = 'vertex.boxing.satisfaction.v1'; // { 'playerId|attribute': 0..100 }
 
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -31,43 +36,49 @@
 
   const state = {
     sessionOn: false,
-    sessionCoach: 'lin',
-    sessionKind: 'Training',
+    sessionCoach: 'kade',
+    sessionKind: 'Workshop',
     bulk: false,
-    players: [],       // selected player ids
-    attribute: null,   // attribute key
-    sentiment: null,   // '+' | '=' | '-'
-    query: '',         // phrase search query
+    players: [],
+    attribute: null,
+    sentiment: null,
+    query: '',
     entries: load(STORE_KEY, []),
-    freq: load(FREQ_KEY, {}),    // { 'attr|sent|phrase': count }
-    customs: load(CUSTOM_KEY, {}),// { 'attr|sent': ['custom phrase', ...] }
+    freq: load(FREQ_KEY, {}),
+    customs: load(CUSTOM_KEY, {}),
+    satisfaction: load(SAT_KEY, {}),  // { 'playerId|attr': 0..100 }
   };
 
   // ---------- Helpers ----------
-  const today = () => {
-    const d = new Date();
-    return d.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric' });
-  };
+  const today = () => new Date().toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric' });
   const slotKey = () => `${state.attribute}|${state.sentiment}`;
-  const phraseKey = (p) => `${slotKey()}|${p}`;
-  const getPhrases = () => {
-    if (!state.attribute || !state.sentiment) return [];
-    const seed = (D.phrases[state.attribute]?.[state.sentiment]) || [];
-    const customs = (state.customs[slotKey()] || []);
-    const all = [...customs, ...seed];
-    // Sort by usage frequency desc; ties keep author order
-    return all.map((p, i) => ({ p, f: state.freq[`${slotKey()}|${p}`] || 0, i }))
-              .sort((a, b) => b.f - a.f || a.i - b.i)
-              .map(x => ({ phrase: x.p, count: x.f, isCustom: customs.includes(x.p) }));
+
+  // Satisfaction helpers. Default 50 (mid). The active player drives the
+  // slider value — in bulk mode we use the first selected athlete as the
+  // reference for display, but write the same value to all selected athletes
+  // when the coach drags.
+  const refPlayer = () => state.players[0] || null;
+  const satKey = (pid, attr) => `${pid}|${attr}`;
+  const getSat = (pid, attr) => {
+    if (!pid || !attr) return 50;
+    const v = state.satisfaction[satKey(pid, attr)];
+    return (typeof v === 'number') ? v : 50;
+  };
+  const setSat = (attr, value) => {
+    if (!attr || state.players.length === 0) return;
+    const v = Math.max(0, Math.min(100, Math.round(value)));
+    state.players.forEach(pid => { state.satisfaction[satKey(pid, attr)] = v; });
+    save(SAT_KEY, state.satisfaction);
   };
 
-  // ---------- Render: session toggle + coaches ----------
+  // ---------- Render: session toggle ----------
   const sessToggle = $('#sessionToggle');
   const sessLabel  = sessToggle.querySelector('.cs-label');
   const sessMeta   = $('#sessionMeta');
   const coachSel   = $('#sessionCoach');
   const kindSel    = $('#sessionKind');
   D.coaches.forEach(c => coachSel.append(el('option', { value: c.id }, c.name)));
+  D.sessionKinds.forEach(k => kindSel.append(el('option', { value: k }, k)));
   coachSel.value = state.sessionCoach;
   kindSel.value  = state.sessionKind;
 
@@ -90,13 +101,13 @@
     bulkBtn.classList.toggle('on', state.bulk);
     bulkBtn.setAttribute('aria-pressed', String(state.bulk));
     document.body.classList.toggle('bulk-mode', state.bulk);
-    // Exiting bulk: collapse to first selected
     if (!state.bulk && state.players.length > 1) state.players = state.players.slice(0, 1);
     renderRoster();
+    renderAttrs();
   };
   bulkBtn.addEventListener('click', () => { state.bulk = !state.bulk; renderBulk(); });
 
-  // ---------- Render: player rail ----------
+  // ---------- Render: athlete rail ----------
   const rail = $('#playerRail');
   const clearPlayersBtn = $('#clearPlayers');
   const renderRoster = () => {
@@ -109,11 +120,11 @@
         role: 'option',
         'aria-selected': String(selected),
         'data-id': p.id,
-        title: `${p.name} \u2022 ${p.pos}`,
+        title: `${p.name} \u2022 ${p.level}`,
       },
         el('span', { class:'pa', style:`background:${p.accent};color:#0c1422` }, p.initials),
         el('span', { class:'pn' }, p.name.split(' ')[0]),
-        el('span', { class:'pp' }, `#${p.num}`),
+        el('span', { class:'pp' }, p.level),
       );
       chip.addEventListener('click', () => selectPlayer(p.id));
       rail.append(chip);
@@ -129,18 +140,34 @@
       state.players = (state.players[0] === id) ? [] : [id];
     }
     renderRoster();
+    renderAttrs();           // sliders reflect picked athlete's stored satisfaction
   };
-  clearPlayersBtn.addEventListener('click', () => { state.players = []; renderRoster(); });
+  clearPlayersBtn.addEventListener('click', () => { state.players = []; renderRoster(); renderAttrs(); });
 
-  // ---------- Render: attribute grid ----------
+  // ---------- Render: attribute grid (with per-tile satisfaction slider) ----------
   const attrGrid = $('#attrGrid');
+  const sliderHint = $('#sliderHint');
   const todayCount = (key) => state.entries.filter(e => e.attribute === key && e.date === today()).length;
+
+  const satLabel = (v) => v <= 33 ? 'Stagnant' : v <= 66 ? 'Developing' : 'Excellent';
+  const satTone = (v) => v <= 33 ? 'low' : v <= 66 ? 'mid' : 'high';
+
   const renderAttrs = () => {
     attrGrid.innerHTML = '';
+    const ref = refPlayer();
+    sliderHint.hidden = !ref;
+
     D.attributes.forEach(a => {
       const on = state.attribute === a.key;
+      const satVal = ref ? getSat(ref, a.key) : 50;
+      const sLabel = satLabel(satVal);
+      const sTone  = satTone(satVal);
+
+      // Each attribute cell stacks the tappable tile above its satisfaction slider.
+      const cell = el('div', { class:'bx-cell' + (on ? ' on' : '') });
+
       const tile = el('button', {
-        class: 'atile' + (on ? ' on' : ''),
+        class: 'atile bx-atile' + (on ? ' on' : ''),
         type: 'button',
         role: 'radio',
         'aria-checked': String(on),
@@ -150,8 +177,64 @@
         el('span', { class:'al' }, a.label),
         el('span', { class:'ac' }, String(todayCount(a.key))),
       );
-      tile.addEventListener('click', () => { state.attribute = a.key; renderAttrs(); renderPhrases(); updateReady(); });
-      attrGrid.append(tile);
+      tile.addEventListener('click', () => {
+        state.attribute = a.key;
+        renderAttrs();
+        renderPhrases();
+        updateReady();
+      });
+      cell.append(tile);
+
+      // Slider lives *below* the tile inside the same grid cell wrapper so it
+      // doesn't interfere with the tile's button hit area. Disabled if no
+      // athlete picked yet.
+      const slider = el('div', {
+        class: 'bx-slider' + (ref ? '' : ' disabled') + ' tone-' + sTone,
+        'data-attr': a.key,
+      });
+      const track = el('div', { class:'bx-slider-track' });
+      const fill = el('div', { class:'bx-slider-fill', style:`width:${satVal}%` });
+      const thumb = el('div', { class:'bx-slider-thumb', style:`left:${satVal}%`,
+        role:'slider', 'aria-label':`${a.label} satisfaction`,
+        'aria-valuemin':'0', 'aria-valuemax':'100', 'aria-valuenow':String(satVal),
+        tabindex: ref ? '0' : '-1',
+      });
+      const badge = el('span', { class:'bx-slider-badge' },
+        el('span', { class:'bx-slider-val' }, String(satVal)),
+        el('span', { class:'bx-slider-lbl' }, sLabel),
+      );
+      const input = el('input', {
+        class:'bx-slider-input',
+        type:'range', min:'0', max:'100', step:'1', value:String(satVal),
+        'aria-label':`${a.label} satisfaction`,
+        'data-attr': a.key,
+      });
+      if (!ref) input.disabled = true;
+      track.append(fill, thumb);
+      slider.append(track, badge, input);
+      // Stop slider taps from bubbling up and triggering the tile click
+      slider.addEventListener('click', (e) => e.stopPropagation());
+
+      // Live update as the coach drags. Persists to localStorage on `change`
+      // to avoid flooding writes during drag.
+      input.addEventListener('input', () => {
+        const v = Number(input.value);
+        fill.style.width = v + '%';
+        thumb.style.left = v + '%';
+        thumb.setAttribute('aria-valuenow', String(v));
+        badge.querySelector('.bx-slider-val').textContent = String(v);
+        badge.querySelector('.bx-slider-lbl').textContent = satLabel(v);
+        slider.classList.remove('tone-low','tone-mid','tone-high');
+        slider.classList.add('tone-' + satTone(v));
+      });
+      input.addEventListener('change', () => {
+        const v = Number(input.value);
+        setSat(a.key, v);
+        toast(`${a.label}: ${v} \u2022 ${satLabel(v)}`, 'ok');
+      });
+
+      cell.append(slider);
+      attrGrid.append(cell);
     });
   };
 
@@ -169,48 +252,53 @@
   }));
 
   // ---------- Search engine ----------
-  // Score a phrase against the query. Higher = better. 0 = no match.
-  // Token-prefix matches score highest, then word-boundary substring, then loose substring.
-  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const scorePhrase = (phrase, qTokens) => {
     if (qTokens.length === 0) return 0;
-    const lc = phrase.toLowerCase();
+    const p = phrase.toLowerCase();
     let score = 0;
     for (const t of qTokens) {
-      if (!t) continue;
-      const tokenRe = new RegExp('(^|[\\s\\-/\u2019\'"(])' + escapeRe(t), 'i');
-      const subAt = lc.indexOf(t);
-      if (tokenRe.test(phrase)) {
-        score += 100 + Math.min(20, t.length * 2);
-        if (lc.startsWith(t)) score += 40;
-      } else if (subAt >= 0) {
-        score += 30 + Math.min(15, t.length * 2);
-      } else {
-        return 0; // require every token to match somewhere
-      }
+      const wb = new RegExp('(^|[\\s\\-/\'"(\u2019])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      if (wb.test(p)) { score += 100 + Math.min(20, t.length * 2); continue; }
+      if (p.startsWith(t)) { score += 40 + Math.min(20, t.length * 2); continue; }
+      if (p.includes(t)) { score += 30 + Math.min(15, t.length); continue; }
+      return 0; // every token must match somewhere
     }
     return score;
   };
 
-  // Wrap matched query tokens in <mark>. Returns an array of DOM nodes.
-  const highlightMatches = (phrase, qTokens) => {
-    if (qTokens.length === 0) return [document.createTextNode(phrase)];
-    const parts = qTokens.filter(Boolean).map(escapeRe);
-    if (parts.length === 0) return [document.createTextNode(phrase)];
-    const re = new RegExp('(' + parts.join('|') + ')', 'ig');
-    const nodes = [];
-    let last = 0;
-    let m;
-    while ((m = re.exec(phrase)) !== null) {
-      if (m.index > last) nodes.push(document.createTextNode(phrase.slice(last, m.index)));
-      const mark = document.createElement('mark');
-      mark.textContent = m[0];
-      nodes.push(mark);
-      last = m.index + m[0].length;
-      if (m[0].length === 0) re.lastIndex++;
+  // Word-boundary safe highlight returning DOM fragment
+  const highlightMatches = (text, qTokens) => {
+    if (qTokens.length === 0) return document.createTextNode(text);
+    const frag = document.createDocumentFragment();
+    const lower = text.toLowerCase();
+    // Build sorted match ranges
+    const ranges = [];
+    qTokens.forEach(t => {
+      let idx = 0;
+      while ((idx = lower.indexOf(t, idx)) !== -1) {
+        ranges.push([idx, idx + t.length]);
+        idx += t.length;
+      }
+    });
+    if (ranges.length === 0) return document.createTextNode(text);
+    ranges.sort((a, b) => a[0] - b[0]);
+    // Merge overlapping
+    const merged = [ranges[0]];
+    for (let i = 1; i < ranges.length; i++) {
+      const last = merged[merged.length - 1];
+      if (ranges[i][0] <= last[1]) last[1] = Math.max(last[1], ranges[i][1]);
+      else merged.push(ranges[i]);
     }
-    if (last < phrase.length) nodes.push(document.createTextNode(phrase.slice(last)));
-    return nodes;
+    let cursor = 0;
+    for (const [s, e] of merged) {
+      if (s > cursor) frag.append(document.createTextNode(text.slice(cursor, s)));
+      const m = document.createElement('mark');
+      m.textContent = text.slice(s, e);
+      frag.append(m);
+      cursor = e;
+    }
+    if (cursor < text.length) frag.append(document.createTextNode(text.slice(cursor)));
+    return frag;
   };
 
   const buildPhraseList = () => {
@@ -220,7 +308,17 @@
 
     if (qTokens.length === 0) {
       if (!slotPicked) return { mode:'empty', items:[], qTokens };
-      const items = getPhrases().map(x => ({ ...x, attribute: state.attribute, sentiment: state.sentiment, score: 0 }));
+      const customs = state.customs[slotKey()] || [];
+      const seed = (D.phrases[state.attribute]?.[state.sentiment]) || [];
+      const items = [...customs, ...seed].map((p, i) => ({
+        phrase: p,
+        attribute: state.attribute,
+        sentiment: state.sentiment,
+        isCustom: customs.includes(p),
+        count: state.freq[`${state.attribute}|${state.sentiment}|${p}`] || 0,
+        score: 0,
+      }));
+      items.sort((a, b) => b.count - a.count);
       return { mode:'slot', items, qTokens };
     }
 
@@ -231,9 +329,7 @@
     });
     let pool = customsEntries.concat(D.allPhrases.map(p => ({ ...p, isCustom: false })));
 
-    // Strict slot filter: restrict pool to what the coach has picked.
-    // Both picked -> exact slot. Only attr -> all 3 sentiments of that attr.
-    // Only sent -> all 6 attrs of that sentiment. Neither -> entire library.
+    // Strict slot filter: restrict pool by what the coach has picked.
     if (state.attribute) pool = pool.filter(p => p.attribute === state.attribute);
     if (state.sentiment) pool = pool.filter(p => p.sentiment === state.sentiment);
 
@@ -248,7 +344,6 @@
     }
     scored.sort((a, b) => b.score - a.score);
 
-    // Mode reflects how filtered the pool is, for status-line copy.
     let mode;
     if (slotPicked) mode = 'searchSlot';
     else if (state.attribute || state.sentiment) mode = 'searchScoped';
@@ -259,12 +354,12 @@
   // ---------- Render: phrase deck ----------
   const phraseGrid = $('#phraseGrid');
   const phraseStatus = $('#phraseStatus');
-  let topMatch = null; // remembered for Enter-to-save-top
+  let topMatch = null;
 
   const addCustomTile = () => {
     const q = state.query.trim();
     const label = q
-      ? `+ Save “${q.length > 28 ? q.slice(0, 26) + '…' : q}” as phrase`
+      ? `+ Save \u201c${q.length > 28 ? q.slice(0, 26) + '\u2026' : q}\u201d as phrase`
       : '+ Custom phrase';
     const addTile = el('button', { class:'ptile add', type:'button' },
       el('span', { class:'pt-text' }, label));
@@ -285,13 +380,12 @@
     } else if (mode === 'slot') {
       const sentName = state.sentiment === '+' ? 'commend' : state.sentiment === '-' ? 'critique' : 'note';
       const attrLabel = D.attributes.find(a => a.key === state.attribute).label;
-      phraseStatus.textContent = `${attrLabel} • ${sentName} • ${items.length}`;
+      phraseStatus.textContent = `${attrLabel} \u2022 ${sentName} \u2022 ${items.length}`;
       phraseStatus.dataset.tone = state.sentiment === '+' ? 'pos' : state.sentiment === '-' ? 'neg' : 'neu';
     } else {
       let scope;
-      if (mode === 'searchAll') {
-        scope = 'all library';
-      } else if (mode === 'searchScoped') {
+      if (mode === 'searchAll') scope = 'all library';
+      else if (mode === 'searchScoped') {
         if (state.attribute) {
           const attrLabel = D.attributes.find(a => a.key === state.attribute).label;
           scope = `${attrLabel.toLowerCase()} only`;
@@ -302,7 +396,7 @@
       } else {
         scope = 'this slot only';
       }
-      phraseStatus.textContent = `${items.length} match${items.length === 1 ? '' : 'es'} • ${scope}`;
+      phraseStatus.textContent = `${items.length} match${items.length === 1 ? '' : 'es'} \u2022 ${scope}`;
       phraseStatus.dataset.tone = 'neu';
     }
 
@@ -316,7 +410,7 @@
     }
     if (items.length === 0) {
       phraseGrid.append(el('div', { class:'cp-empty' },
-        `No matches for “${state.query}”. Tap “+ Save” to add it.`));
+        `No matches for \u201c${state.query}\u201d. Tap \u201c+ Save\u201d to add it.`));
       addCustomTile();
       return;
     }
@@ -327,16 +421,17 @@
 
       const textSpan = el('span', { class:'pt-text' });
       if (crossSlot) {
-        const attrLabel = D.attributes.find(a => a.key === it.attribute)?.label || it.attribute;
-        const sentLabel = D.sentimentLabels[it.sentiment] || it.sentiment;
-        textSpan.append(el('span', { class:'pt-context ' + sentCls }, `${attrLabel} • ${sentLabel}`));
+        const attrLabel = D.attributes.find(a => a.key === it.attribute).label;
+        const sentLabel = D.sentimentLabels[it.sentiment];
+        textSpan.append(el('span', { class:'pt-context ' + sentCls }, `${attrLabel} \u2022 ${sentLabel}`));
+        textSpan.append(' ');
       }
-      highlightMatches(it.phrase, qTokens).forEach(n => textSpan.append(n));
+      const body = qTokens.length > 0 ? highlightMatches(it.phrase, qTokens) : document.createTextNode(it.phrase);
+      textSpan.append(body);
 
       const isTop = qTokens.length > 0 && idx === 0;
       const tile = el('button', {
-        class: 'ptile sent-' + sentCls
-                + (it.isCustom ? ' custom' : '')
+        class: 'ptile sent-' + sentCls + (it.isCustom ? ' custom' : '')
                 + (crossSlot ? ' cross-slot' : '')
                 + (isTop ? ' top-match' : ''),
         type: 'button',
@@ -360,10 +455,8 @@
   };
 
   // ---------- Log entry ----------
-  // Optional override allows a cross-slot search match to log against the phrase's
-  // own attribute/sentiment without disturbing the coach's current slot selection.
   const logEntry = (phrase, override) => {
-    if (state.players.length === 0) { toast('Pick a player first', 'warn'); return; }
+    if (state.players.length === 0) { toast('Pick an athlete first', 'warn'); return; }
     const useAttribute = override?.attribute || state.attribute;
     const useSentiment = override?.sentiment || state.sentiment;
     if (!useAttribute || !useSentiment) { toast('Pick attribute & sentiment first', 'warn'); return; }
@@ -375,6 +468,7 @@
       return {
         id: 'e' + Date.now() + Math.random().toString(36).slice(2, 8),
         batchId,
+        discipline: 'boxing',
         date: today(),
         time: new Date().toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' }),
         playerId: pid,
@@ -383,12 +477,12 @@
         attributeLabel: attr.label,
         sentiment: useSentiment,
         phrase,
-        coach:  state.sessionOn ? state.sessionCoach : 'lin',
-        kind:   state.sessionOn ? state.sessionKind  : 'Training',
+        satisfaction: getSat(pid, useAttribute),  // snapshot at log time
+        coach:  state.sessionOn ? state.sessionCoach : 'kade',
+        kind:   state.sessionOn ? state.sessionKind  : 'Workshop',
         session: state.sessionOn,
       };
     });
-    // Increment usage against the phrase's actual slot (so it surfaces faster next time).
     const fKey = `${useAttribute}|${useSentiment}|${phrase}`;
     state.freq[fKey] = (state.freq[fKey] || 0) + 1;
     save(FREQ_KEY, state.freq);
@@ -400,26 +494,25 @@
     toast(state.players.length > 1
       ? `Logged ${newOnes.length} entries`
       : `Logged \u2014 ${player1Name(newOnes[0])}`, 'ok');
-    // Clear the search query (if any) so next-entry typing starts fresh.
-    // This also re-renders the deck, refreshing tally counts on attribute tiles.
     if (state.query) setQuery('');
     else { renderPhrases(); renderAttrs(); }
   };
   const player1Name = (entry) => entry.playerName.split(' ')[0];
 
-  // Push entries into the live dashboard feed (in-memory + localStorage mirror).
+  // Push to unified VertexData.feed tagged as boxing.
   const pushToFeed = (entries) => {
     if (!window.VertexData) return;
     entries.forEach(e => {
       window.VertexData.feed.unshift({
-        discipline: 'basketball',
+        discipline: 'boxing',
         date:  e.date,
         coach: e.coach,
         kind:  e.kind,
         topic: D.attributes.find(a => a.key === e.attribute).topic,
-        text:  e.phrase + (e.sentiment === '+' ? '' : e.sentiment === '-' ? '' : ''),
+        text:  e.phrase,
         sentiment: e.sentiment,
-        source: 'coach-input',
+        satisfaction: e.satisfaction,
+        source: 'boxing-input',
         playerId: e.playerId,
       });
     });
@@ -433,10 +526,9 @@
     const recent = state.entries.slice(0, 20);
     tallyCount.textContent = state.entries.length;
     if (recent.length === 0) {
-      tallyList.append(el('li', { class:'ct-empty' }, 'No entries yet. Pick player \u2192 attribute \u2192 sentiment \u2192 phrase.'));
+      tallyList.append(el('li', { class:'ct-empty' }, 'No entries yet. Pick athlete \u2192 attribute \u2192 sentiment \u2192 phrase.'));
       return;
     }
-    // Group consecutive entries from the same batch
     let lastBatch = null;
     recent.forEach(e => {
       const player = D.squad.find(p => p.id === e.playerId);
@@ -448,6 +540,9 @@
             el('span', { class:'ct-name' }, player.name.split(' ')[0]),
             el('span', { class:'ct-attr' }, e.attributeLabel),
             el('span', { class:'ct-sent' }, e.sentiment),
+            typeof e.satisfaction === 'number'
+              ? el('span', { class:'ct-sat tone-' + (e.satisfaction <= 33 ? 'low' : e.satisfaction <= 66 ? 'mid' : 'high'), title:'Satisfaction at time of entry' }, `s${e.satisfaction}`)
+              : '',
             el('span', { class:'ct-time' }, e.time),
           ),
           el('div', { class:'ct-text' }, e.phrase),
@@ -472,10 +567,9 @@
     }
   });
 
-  // ---------- Undo last ----------
+  // ---------- Undo last batch ----------
   $('#undoBtn').addEventListener('click', () => {
     if (state.entries.length === 0) { toast('Nothing to undo', 'warn'); return; }
-    // Undo the whole most-recent batch
     const lastBatch = state.entries[0].batchId;
     const removed = [];
     while (state.entries.length && state.entries[0].batchId === lastBatch) removed.push(state.entries.shift());
@@ -492,7 +586,6 @@
       await navigator.clipboard.writeText(blob);
       toast('Copied to clipboard', 'ok');
     } catch {
-      // Fallback: dump into a prompt
       window.prompt('Copy entries JSON:', blob);
     }
   });
@@ -502,13 +595,11 @@
   const customText   = $('#customText');
   const openCustom = () => {
     if (!state.attribute || !state.sentiment) { toast('Pick attribute & sentiment first', 'warn'); return; }
-    // Prefill with the current search query if one is typed
     customText.value = state.query.trim();
     if (typeof customDialog.showModal === 'function') customDialog.showModal();
     else customDialog.setAttribute('open', '');
     setTimeout(() => {
       customText.focus();
-      // Place caret at end for fast editing of the prefilled query
       const v = customText.value;
       customText.setSelectionRange(v.length, v.length);
     }, 50);
@@ -524,7 +615,6 @@
     save(CUSTOM_KEY, state.customs);
     customDialog.close && customDialog.close();
     logEntry(text);
-    // Clear the search so the deck snaps back to a clean slot view
     setQuery('');
     renderPhrases();
   });
@@ -544,13 +634,10 @@
     }, 1600);
   };
 
-  // ---------- Pulse the just-tapped phrase tile (peripheral confirmation) ----------
-  // Matches by phrase text only (ignores leading context chip text on cross-slot tiles).
   const pulsePhraseSaved = (phrase) => {
     const tile = $$('.ptile').find(t => {
       const text = t.querySelector('.pt-text');
       if (!text) return false;
-      // Strip any context chip text from the comparison
       const ctx = text.querySelector('.pt-context');
       const raw = ctx ? text.textContent.replace(ctx.textContent, '').trim() : text.textContent;
       return raw === phrase;
@@ -583,7 +670,6 @@
         logEntry(topMatch.phrase, { attribute: topMatch.attribute, sentiment: topMatch.sentiment });
         setQuery('');
       } else if (state.query.trim().length > 0) {
-        // No match — jump to custom save with prefill
         openCustom();
       }
     } else if (ev.key === 'Escape') {
