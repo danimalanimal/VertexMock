@@ -1,1 +1,246 @@
-PLACEHOLDER
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Vertex Sport Systems — Player Development Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg:#05070b;--bg2:#0b1018;--card:#0d1420;--card2:#101a28;--line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.14);
+      --text:#eef4ff;--muted:#93a4bd;--soft:#657892;--blue:#59b7ff;--blue2:#9ad9ff;--violet:#7f8cff;--green:#5fe39c;--amber:#ffbf66;--red:#ff7d7d;
+      --shadow:0 10px 40px rgba(0,0,0,.35);--cut:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+    }
+    *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+    body{margin:0;font-family:Inter,sans-serif;background:radial-gradient(circle at top,#0e1723 0%,var(--bg) 42%);color:var(--text);}
+    img{max-width:100%;display:block;}
+    .app{width:min(1360px,100%);margin:0 auto;padding:16px 14px 88px;}
+    .hero{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));box-shadow:var(--shadow);clip-path:var(--cut);overflow:hidden;}
+    .hero-shell{position:relative;}
+    .hero-shell:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 18%,rgba(89,183,255,.16),transparent 30%),radial-gradient(circle at 82% 8%,rgba(127,140,255,.14),transparent 28%);pointer-events:none;}
+    .hero-top{display:grid;grid-template-columns:minmax(0,1.35fr) auto;gap:14px;align-items:center;padding:16px 16px 10px;position:relative;z-index:1;}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.24em;color:var(--blue2);margin-bottom:8px;}
+    .hero-title img{height:28px;width:auto;}
+    .hero-copy{color:var(--muted);font-size:14px;line-height:1.45;margin-top:8px;max-width:560px;}
+    .hero-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .pill{border:1px solid var(--line);background:rgba(255,255,255,.03);color:#d9e7fb;padding:7px 10px;font-size:11px;border-radius:999px;}
+    .hero-portrait{width:92px;aspect-ratio:3/4;border:1px solid var(--line-strong);border-radius:22px;overflow:hidden;box-shadow:0 8px 26px rgba(0,0,0,.28);background:#0b1018;}
+    .hero-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+    .hero-board{padding:0 12px 10px;}
+    .hero-card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));clip-path:var(--cut);padding:12px;}
+    .metric-label{font-size:11px;letter-spacing:.16em;color:var(--soft);text-transform:uppercase;}
+    .chart-frame{position:relative;width:100%;}
+    .main-grid{display:grid;grid-template-columns:290px minmax(0,1fr);gap:14px;margin-top:14px;}
+    .stack{display:grid;gap:14px;}
+    .panel{border:1px solid var(--line);background:linear-gradient(180deg,var(--card),var(--card2));clip-path:var(--cut);box-shadow:var(--shadow);overflow:hidden;}
+    .panel .hd{padding:14px 14px 0;display:flex;justify-content:space-between;align-items:end;gap:10px;}
+    .panel .hd h2{margin:0;font-size:15px;}
+    .sub{color:var(--muted);font-size:12px;}
+    .body{padding:14px;}
+    .profile-photo{border:1px solid var(--line);border-radius:18px;overflow:hidden;aspect-ratio:3/4;background:#09111a;margin-bottom:12px;}
+    .profile-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+    .player-name{font-size:26px;font-weight:800;margin:0;}
+    .player-meta{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.45;}
+    .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px;}
+    .kpi{border:1px solid var(--line);background:rgba(255,255,255,.03);padding:12px;clip-path:var(--cut);}
+    .kpi b{display:block;font-size:24px;margin-top:4px;}
+    .timeline{display:grid;gap:12px;}
+    .season{border:1px solid var(--line);background:rgba(255,255,255,.02);clip-path:var(--cut);padding:12px;}
+    .season-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+    .badge{font-size:11px;padding:6px 9px;border-radius:999px;border:1px solid var(--line);}
+    .blue{color:var(--blue2);}.green{color:var(--green);}.amber{color:var(--amber);}.red{color:var(--red);}
+    .milestone{display:grid;grid-template-columns:78px 12px 1fr;gap:10px;align-items:start;padding:9px 0;}
+    .milestone .date{font:700 11px/1.2 'Roboto Mono',monospace;color:var(--soft);text-transform:uppercase;}
+    .dot{width:12px;height:12px;border-radius:999px;background:linear-gradient(180deg,var(--blue),var(--violet));margin-top:2px;box-shadow:0 0 0 4px rgba(89,183,255,.10);}
+    .milestone p{margin:0;color:#dbe8fb;font-size:13px;line-height:1.4;}
+    .ob-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+    .obs-card{border:1px solid var(--line);background:rgba(255,255,255,.025);clip-path:var(--cut);padding:12px;}
+    .obs-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px;}
+    .trend{font-size:11px;font-weight:700;padding:5px 8px;border-radius:999px;}
+    .trend.up{background:rgba(95,227,156,.12);color:var(--green);}.trend.flat{background:rgba(255,191,102,.10);color:var(--amber);}.trend.down{background:rgba(255,125,125,.10);color:var(--red);}
+    .obs-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.45;}
+    .split-2{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;}
+    .list-card{border:1px solid var(--line);background:rgba(255,255,255,.025);clip-path:var(--cut);padding:12px;}
+    .list-card h3{margin:0 0 8px;font-size:13px;}
+    .list-card ul{padding-left:18px;margin:0;color:var(--muted);display:grid;gap:8px;font-size:13px;}
+    .feed{display:grid;gap:10px;max-height:460px;overflow:auto;padding-right:4px;}
+    .feed-item{border:1px solid var(--line);background:rgba(255,255,255,.025);clip-path:var(--cut);padding:12px;}
+    .feed-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+    .tag{font-size:10px;color:#d9e7fb;border:1px solid var(--line);padding:5px 7px;border-radius:999px;background:rgba(255,255,255,.03);}
+    .feed-item p{margin:0;color:var(--muted);font-size:13px;line-height:1.45;}
+    .insight-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+    .insight-card{border:1px solid var(--line);background:rgba(255,255,255,.025);clip-path:var(--cut);padding:12px;}
+    .insight-card h3{margin:0 0 8px;font-size:13px;}
+    .insight-card ul{padding-left:18px;margin:0;display:grid;gap:8px;color:var(--muted);font-size:13px;}
+    .support-note{margin-top:12px;padding:11px 12px;border:1px solid rgba(89,183,255,.18);background:rgba(89,183,255,.07);color:#dcecff;font-size:12px;clip-path:var(--cut);}
+    .tabbar{position:sticky;bottom:0;z-index:20;display:none;margin-top:16px;}
+    .tabinner{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border:1px solid var(--line);background:rgba(9,14,22,.92);backdrop-filter:blur(16px);padding:10px;clip-path:var(--cut);box-shadow:var(--shadow);}
+    .tabinner a{color:var(--muted);text-decoration:none;text-align:center;font-size:11px;font-weight:700;padding:10px 6px;border-radius:999px;}
+    .tabinner a.active{color:var(--text);background:rgba(89,183,255,.10);border:1px solid rgba(89,183,255,.18);}
+    @media(max-width:980px){.main-grid,.split-2,.insight-grid,.ob-grid{grid-template-columns:1fr;}.hero-top{grid-template-columns:1fr auto;}}
+    @media(max-width:640px){.app{padding:10px 10px 92px;}.hero-top{padding:14px 12px 8px;align-items:start;}.hero-title img{height:22px;}.hero-copy{font-size:13px;max-width:none;}.hero-meta{margin-top:10px;}.hero-portrait{width:72px;border-radius:16px;}.panel .hd{padding:12px 12px 0;}.body{padding:12px;}.player-name{font-size:22px;}.kpis{grid-template-columns:1fr 1fr;}.milestone{grid-template-columns:68px 10px 1fr;gap:8px;}.tabbar{display:block;}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero" id="overview">
+      <div class="hero-shell">
+        <div class="hero-top">
+          <div>
+            <div class="eyebrow">Player dashboard</div>
+            <div class="hero-title"><img src="LOGO_URI_PLACEHOLDER" alt="Vertex Sport Systems"></div>
+            <div class="hero-copy">Coach observation, two-season progression, and applied development guidance for one emerging basketball athlete.</div>
+            <div class="hero-meta">
+              <span class="pill">U16 Girls</span>
+              <span class="pill">South Metro Performance</span>
+              <span class="pill">Guard / Wing</span>
+              <span class="pill">2024–2025</span>
+            </div>
+          </div>
+          <div class="hero-portrait"><img src="PHOTO_URI_PLACEHOLDER" alt="Player portrait" loading="lazy"></div>
+        </div>
+        <div class="hero-board">
+          <div class="hero-card">
+            <div class="metric-label">Skill radar snapshot</div>
+            <div class="chart-frame" style="height:164px;margin-top:8px;"><canvas id="heroRadarChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="main-grid">
+      <aside class="stack">
+        <article class="panel">
+          <div class="hd"><h2>Player overview</h2><span class="sub">Single athlete profile</span></div>
+          <div class="body">
+            <div class="profile-photo"><img src="PHOTO_URI_PLACEHOLDER" alt="Athlete action photo" loading="lazy"></div>
+            <h1 class="player-name">Ava Thompson</h1>
+            <div class="player-meta">Age Group: U16 Girls<br>Team: South Metro Performance<br>Position: Combo Guard / Wing<br>Season range: Season 1 → Season 2</div>
+            <div class="kpis">
+              <div class="kpi"><span class="metric-label">Development score</span><b>84</b><span class="sub">Up 11 pts across 2 seasons</span></div>
+              <div class="kpi"><span class="metric-label">Coach confidence</span><b>8.7/10</b><span class="sub">High confidence in upward trend</span></div>
+              <div class="kpi"><span class="metric-label">Current stage</span><b>Build → Perform</b><span class="sub">Transitioning into impact role</span></div>
+              <div class="kpi"><span class="metric-label">Readiness</span><b>Rotation+</b><span class="sub">Trusted in pressure possessions</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="hd"><h2>Strengths and growth</h2><span class="sub">Coaching language</span></div>
+          <div class="body stack">
+            <div class="list-card"><h3>Emerging strengths</h3><ul><li>Reads help defence earlier and rotates with intent.</li><li>Improved shot selection under pressure and late clock possessions.</li><li>Greater consistency in transition effort and second actions.</li></ul></div>
+            <div class="list-card"><h3>Priority development areas</h3><ul><li>Needs to communicate switches earlier and louder.</li><li>Can still rush first dribble against physical on-ball pressure.</li><li>Leadership presence drops after mistakes in tight stretches.</li></ul></div>
+            <div class="list-card"><h3>Coach recommended focus</h3><ul><li>Daily decision-making reps from advantage/disadvantage scenarios.</li><li>Defensive shell communication standards in every team block.</li><li>Finishing balance and pace-change work against contact.</li></ul></div>
+          </div>
+        </article>
+      </aside>
+
+      <div class="stack">
+        <article class="panel" id="timeline">
+          <div class="hd"><h2>Two-season progress timeline</h2><span class="sub">Season 1 vs Season 2</span></div>
+          <div class="body split-2">
+            <div class="timeline">
+              <div class="season">
+                <div class="season-head"><strong>Season 1 · Foundation</strong><span class="badge amber">Inconsistent impact</span></div>
+                <div class="milestone"><div class="date">Feb 2024</div><div class="dot"></div><p>Showed strong effort habits in training, but delayed reads on weak-side help limited defensive impact.</p></div>
+                <div class="milestone"><div class="date">May 2024</div><div class="dot"></div><p>Confidence dipped after turnovers against pressure; coaches noted rushed decisions in early offence.</p></div>
+                <div class="milestone"><div class="date">Aug 2024</div><div class="dot"></div><p>Turning point: started recognising skip-pass windows earlier and made better second-side decisions.</p></div>
+              </div>
+              <div class="season">
+                <div class="season-head"><strong>Season 2 · Acceleration</strong><span class="badge green">Clear upward trend</span></div>
+                <div class="milestone"><div class="date">Jan 2025</div><div class="dot"></div><p>Opened season with improved pace control and more composed handle under full-court pressure.</p></div>
+                <div class="milestone"><div class="date">Jun 2025</div><div class="dot"></div><p>Major leap in shot selection under pressure; took cleaner paint touches and kick-outs.</p></div>
+                <div class="milestone"><div class="date">Sep 2025</div><div class="dot"></div><p>Turning point: trusted late in close games after stronger defensive awareness and team-first possessions.</p></div>
+              </div>
+            </div>
+            <div class="season">
+              <div class="season-head"><strong>Coach turning points</strong><span class="badge blue">Observation-led</span></div>
+              <div class="milestone"><div class="date">T1</div><div class="dot"></div><p>Shifted from reactive help defence to anticipatory positioning.</p></div>
+              <div class="milestone"><div class="date">T2</div><div class="dot"></div><p>Started selecting catch-drive-kick options rather than forcing contested pull-ups.</p></div>
+              <div class="milestone"><div class="date">T3</div><div class="dot"></div><p>Earned more trust from staff through repeated coachable responses after mistakes.</p></div>
+              <div class="milestone"><div class="date">T4</div><div class="dot"></div><p>Still needs earlier, more assertive communication to lead the back line consistently.</p></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel" id="observations">
+          <div class="hd"><h2>Coach observation summary</h2><span class="sub">Recurring themes across two seasons</span></div>
+          <div class="body ob-grid">
+            <div class="obs-card"><div class="obs-top"><strong>Decision-making</strong><span class="trend up">Improving</span></div><p>Processing advantage moments faster and making cleaner second-side reads.</p></div>
+            <div class="obs-card"><div class="obs-top"><strong>Effort</strong><span class="trend up">Improving</span></div><p>Competes through multiple actions more often and recovers better after errors.</p></div>
+            <div class="obs-card"><div class="obs-top"><strong>Defensive awareness</strong><span class="trend up">Improving</span></div><p>Reads help defence earlier and rotates with better timing from the weak side.</p></div>
+            <div class="obs-card"><div class="obs-top"><strong>Ball handling</strong><span class="trend flat">Stable</span></div><p>More composed than Season 1, but still vulnerable when first dribble is rushed.</p></div>
+            <div class="obs-card"><div class="obs-top"><strong>Shooting confidence</strong><span class="trend up">Improving</span></div><p>Improved shot selection under pressure and more trust in feet-set catch-and-shoot looks.</p></div>
+            <div class="obs-card"><div class="obs-top"><strong>Communication</strong><span class="trend down">Needs attention</span></div><p>Needs to communicate switches earlier, especially in transition and scramble defence.</p></div>
+            <div class="obs-card"><div class="obs-top"><strong>Coachability</strong><span class="trend up">Improving</span></div><p>Responds well to specific cues and generally applies corrections within the same session.</p></div>
+            <div class="obs-card"><div class="obs-top"><strong>Game IQ</strong><span class="trend up">Improving</span></div><p>Recognises momentum swings better and increasingly makes possessions easier for teammates.</p></div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="hd"><h2>Skill development radar</h2><span class="sub">Season comparison</span></div>
+          <div class="body"><div class="chart-frame" style="height:300px;"><canvas id="skillRadarChart"></canvas></div></div>
+        </article>
+
+        <section class="split-2">
+          <article class="panel">
+            <div class="hd"><h2>Observation feed</h2><span class="sub">Games · training · reviews</span></div>
+            <div class="body"><div class="feed">
+              <div class="feed-item"><div class="feed-meta"><span class="tag">12 Feb 2024</span><span class="tag">Coach Lin</span><span class="tag">Game</span><span class="tag">Help defence</span></div><p>Reads help defence earlier, but still arrives quiet — needs more early talk behind the line.</p></div>
+              <div class="feed-item"><div class="feed-meta"><span class="tag">27 Apr 2024</span><span class="tag">Coach Rivera</span><span class="tag">Training</span><span class="tag">Decision-making</span></div><p>Improved shot selection under pressure during constrained advantage drills.</p></div>
+              <div class="feed-item"><div class="feed-meta"><span class="tag">19 Jun 2024</span><span class="tag">Coach Lin</span><span class="tag">Review</span><span class="tag">Coachability</span></div><p>Took feedback well after film session and corrected spacing habits in the next team block.</p></div>
+              <div class="feed-item"><div class="feed-meta"><span class="tag">08 Jan 2025</span><span class="tag">Coach Rivera</span><span class="tag">Game</span><span class="tag">Ball handling</span></div><p>Handled pressure better with pace change, but first dribble still gets high when sped up.</p></div>
+              <div class="feed-item"><div class="feed-meta"><span class="tag">22 Mar 2025</span><span class="tag">Coach Lin</span><span class="tag">Training</span><span class="tag">Communication</span></div><p>Needs to communicate switches earlier in shell and transition coverages.</p></div>
+              <div class="feed-item"><div class="feed-meta"><span class="tag">14 Jul 2025</span><span class="tag">Coach Rivera</span><span class="tag">Game</span><span class="tag">Shot selection</span></div><p>Made two strong under-pressure kick-outs rather than forcing contested pull-ups.</p></div>
+              <div class="feed-item"><div class="feed-meta"><span class="tag">02 Sep 2025</span><span class="tag">Coach Lin</span><span class="tag">Review</span><span class="tag">Leadership</span></div><p>More settled after mistakes; beginning to steady teammates with body language, not just effort.</p></div>
+            </div></div>
+          </article>
+          <article class="panel" id="insights">
+            <div class="hd"><h2>Vertex insight panel</h2><span class="sub">AI-assisted, coach-supported</span></div>
+            <div class="body">
+              <div class="insight-grid">
+                <div class="insight-card"><h3>Recommended drills</h3><ul><li>Advantage-disadvantage decision games with short clocks.</li><li>Weak-side stunt and recover reads from shell breakdowns.</li><li>Contact finishing with pace change into second action.</li></ul></div>
+                <div class="insight-card"><h3>Tactical focuses</h3><ul><li>Earlier low-man communication in transition defence.</li><li>Catch-to-drive decisions versus tilted closeouts.</li><li>Calmer first touch in late-clock possessions.</li></ul></div>
+                <div class="insight-card"><h3>Next-best coaching actions</h3><ul><li>Keep confidence cues specific and linked to reads, not makes.</li><li>Reward early voice and organisation in film review clips.</li><li>Track decision quality, not only box-score production.</li></ul></div>
+              </div>
+              <div class="support-note">Vertex surfaces patterns from coach observations and trend data to support better decisions. It does not replace coach judgement — it sharpens what staff already see.</div>
+            </div>
+          </article>
+        </section>
+      </div>
+    </section>
+
+    <nav class="tabbar" aria-label="Primary mobile sections">
+      <div class="tabinner">
+        <a href="#overview" class="active">Overview</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#observations">Obs</a>
+        <a href="#insights">Insights</a>
+      </div>
+    </nav>
+  </main>
+
+  <script>
+    const labels = ['Technical','Tactical','Physical','Mental','Leadership','Consistency'];
+    const s1 = [62,58,66,60,49,55], s2 = [76,79,74,78,63,72];
+    const ds = [
+      {label:'Season 1',data:s1,borderColor:'rgba(127,140,255,0.9)',backgroundColor:'rgba(127,140,255,0.14)',pointBackgroundColor:'rgba(127,140,255,1)',borderWidth:2},
+      {label:'Season 2',data:s2,borderColor:'rgba(89,183,255,1)',backgroundColor:'rgba(89,183,255,0.18)',pointBackgroundColor:'rgba(154,217,255,1)',borderWidth:2}
+    ];
+    const scaleOpts = {min:0,max:100,ticks:{display:false,stepSize:20},angleLines:{color:'rgba(255,255,255,0.09)'},grid:{color:'rgba(255,255,255,0.08)'},pointLabels:{color:'#a9b7cb',font:{family:'Inter',size:11,weight:'600'}}};
+    const legendOpts = {labels:{color:'#dce9fb',usePointStyle:true,boxWidth:10,boxHeight:10,padding:18,font:{family:'Inter',size:11,weight:'600'}}};
+    new Chart(document.getElementById('heroRadarChart'),{type:'radar',data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:scaleOpts}}});
+    new Chart(document.getElementById('skillRadarChart'),{type:'radar',data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:legendOpts.labels}},scales:{r:scaleOpts}}});
+
+    // Inject embedded assets after page load
+    document.querySelectorAll('img[src="LOGO_URI_PLACEHOLDER"]').forEach(el => el.src = LOGO_DATA);
+    document.querySelectorAll('img[src="PHOTO_URI_PLACEHOLDER"]').forEach(el => el.src = PHOTO_DATA);
+  </script>
+  <script>
+    const LOGO_DATA = 'LOGO_URI';
+    const PHOTO_DATA = 'PHOTO_URI';
+  </script>
+</body>
+</html>
