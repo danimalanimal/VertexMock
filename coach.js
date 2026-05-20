@@ -229,7 +229,13 @@
       const [a, s] = k.split('|');
       (state.customs[k] || []).forEach(p => customsEntries.push({ phrase: p, attribute: a, sentiment: s, isCustom: true }));
     });
-    const pool = customsEntries.concat(D.allPhrases.map(p => ({ ...p, isCustom: false })));
+    let pool = customsEntries.concat(D.allPhrases.map(p => ({ ...p, isCustom: false })));
+
+    // Strict slot filter: restrict pool to what the coach has picked.
+    // Both picked -> exact slot. Only attr -> all 3 sentiments of that attr.
+    // Only sent -> all 6 attrs of that sentiment. Neither -> entire library.
+    if (state.attribute) pool = pool.filter(p => p.attribute === state.attribute);
+    if (state.sentiment) pool = pool.filter(p => p.sentiment === state.sentiment);
 
     const scored = [];
     for (const it of pool) {
@@ -237,12 +243,17 @@
       if (sc <= 0) continue;
       const fKey = `${it.attribute}|${it.sentiment}|${it.phrase}`;
       const freq = state.freq[fKey] || 0;
-      const inSlotBoost = (slotPicked && it.attribute === state.attribute && it.sentiment === state.sentiment) ? 50 : 0;
       const customBoost = it.isCustom ? 20 : 0;
-      scored.push({ ...it, count: freq, score: sc + inSlotBoost + customBoost + Math.min(15, freq) });
+      scored.push({ ...it, count: freq, score: sc + customBoost + Math.min(15, freq) });
     }
     scored.sort((a, b) => b.score - a.score);
-    return { mode: slotPicked ? 'searchSlot' : 'searchAll', items: scored.slice(0, 40), qTokens };
+
+    // Mode reflects how filtered the pool is, for status-line copy.
+    let mode;
+    if (slotPicked) mode = 'searchSlot';
+    else if (state.attribute || state.sentiment) mode = 'searchScoped';
+    else mode = 'searchAll';
+    return { mode, items: scored.slice(0, 40), qTokens };
   };
 
   // ---------- Render: phrase deck ----------
@@ -277,7 +288,20 @@
       phraseStatus.textContent = `${attrLabel} • ${sentName} • ${items.length}`;
       phraseStatus.dataset.tone = state.sentiment === '+' ? 'pos' : state.sentiment === '-' ? 'neg' : 'neu';
     } else {
-      const scope = mode === 'searchAll' ? 'all library' : 'current slot first';
+      let scope;
+      if (mode === 'searchAll') {
+        scope = 'all library';
+      } else if (mode === 'searchScoped') {
+        if (state.attribute) {
+          const attrLabel = D.attributes.find(a => a.key === state.attribute).label;
+          scope = `${attrLabel.toLowerCase()} only`;
+        } else {
+          const sentName = state.sentiment === '+' ? 'commend' : state.sentiment === '-' ? 'critique' : 'note';
+          scope = `${sentName} only`;
+        }
+      } else {
+        scope = 'this slot only';
+      }
       phraseStatus.textContent = `${items.length} match${items.length === 1 ? '' : 'es'} • ${scope}`;
       phraseStatus.dataset.tone = 'neu';
     }
