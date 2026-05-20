@@ -50,8 +50,12 @@
   };
 
   // ---------- Chart defaults ----------
-  Chart.defaults.font.family = 'Inter, sans-serif';
+  Chart.defaults.font.family = "'Roboto Mono', ui-monospace, monospace";
   Chart.defaults.color = '#a9b7cb';
+  Chart.defaults.animation.duration = 900;
+  Chart.defaults.animation.easing = 'easeOutQuart';
+  Chart.defaults.animations.colors = { duration: 600, easing: 'easeOutQuart' };
+  Chart.defaults.animations.numbers = { duration: 900, easing: 'easeOutQuart' };
 
   const radarScale = {
     min:0, max:100,
@@ -435,4 +439,78 @@
     D.heatValues[i].forEach(v => row.appendChild(el('td', { 'data-v':String(cap(v)), title:`${v} observation${v===1?'':'s'}` }, v ? String(v) : '')));
     heatTable.appendChild(row);
   });
+
+  // ---------- Mobile nav: hamburger + sheet + scroll-spy tab bar ----------
+  const navToggle = document.getElementById('navToggle');
+  const navSheet  = document.getElementById('navSheet');
+  const tabInner  = document.getElementById('tabInner');
+
+  const setNav = (open) => {
+    if (!navSheet || !navToggle) return;
+    navSheet.classList.toggle('open', open);
+    navToggle.classList.toggle('open', open);
+    navToggle.setAttribute('aria-expanded', String(open));
+    navSheet.setAttribute('aria-hidden', String(!open));
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  navToggle?.addEventListener('click', () => setNav(!navSheet.classList.contains('open')));
+  navSheet?.addEventListener('click', (e) => { if (e.target === navSheet) setNav(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setNav(false); });
+
+  // Close nav on jump link click; smooth-scroll handled by CSS scroll-behavior
+  document.querySelectorAll('[data-jump]').forEach(a => {
+    a.addEventListener('click', () => setNav(false));
+  });
+
+  // Scroll-spy across all sections
+  const sectionIds = ['overview','playerCard','physical','radar','statShare','nbaWatch','observations','insights','timeline'];
+  const jumpLinks  = Array.from(document.querySelectorAll('[data-jump]'));
+  const setActive = (id) => {
+    let activeTab = null;
+    jumpLinks.forEach(a => {
+      const match = a.getAttribute('href') === '#' + id;
+      a.classList.toggle('active', match);
+      if (match && a.closest('#tabInner')) activeTab = a;
+    });
+    if (activeTab && tabInner) {
+      const tabRect = tabInner.getBoundingClientRect();
+      const linkRect = activeTab.getBoundingClientRect();
+      const offset = (linkRect.left + linkRect.width / 2) - (tabRect.left + tabRect.width / 2);
+      tabInner.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  };
+
+  // Pick the section whose top is closest to (but not past) a fixed offset from the viewport top
+  const pickActive = () => {
+    const probe = window.innerHeight * 0.35;
+    let bestId = null, bestDelta = Infinity;
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      // candidates whose top is at or above the probe line
+      if (top - probe <= 0) {
+        const delta = Math.abs(top - probe);
+        if (delta < bestDelta) { bestDelta = delta; bestId = id; }
+      }
+    });
+    // fallback: nearest section if none above probe
+    if (!bestId) {
+      sectionIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const delta = Math.abs(el.getBoundingClientRect().top - probe);
+        if (delta < bestDelta) { bestDelta = delta; bestId = id; }
+      });
+    }
+    if (bestId) setActive(bestId);
+  };
+  let spyTick = null;
+  const onScroll = () => {
+    if (spyTick) return;
+    spyTick = requestAnimationFrame(() => { spyTick = null; pickActive(); });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  pickActive();
 })();

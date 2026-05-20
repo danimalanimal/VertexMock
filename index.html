@@ -6,11 +6,32 @@
   <title>Vertex Sport Systems — Player Development Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <!-- Mobile nav toggle -->
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="navSheet">
+    <span class="bars"><span></span><span></span><span></span></span>
+  </button>
+
+  <!-- Full-screen mobile nav sheet -->
+  <nav class="nav-sheet" id="navSheet" aria-label="Section navigation" aria-hidden="true">
+    <div class="nav-eyebrow">Jump to</div>
+    <ul>
+      <li><a href="#overview"     data-jump><span>Overview</span>          <span class="num">01</span></a></li>
+      <li><a href="#playerCard"   data-jump><span>Player Profile</span>    <span class="num">02</span></a></li>
+      <li><a href="#physical"     data-jump><span>Physical Projection</span><span class="num">03</span></a></li>
+      <li><a href="#radar"        data-jump><span>Skill Radar</span>       <span class="num">04</span></a></li>
+      <li><a href="#statShare"    data-jump><span>Stat Share</span>        <span class="num">05</span></a></li>
+      <li><a href="#nbaWatch"     data-jump><span>Players to Watch</span>  <span class="num">06</span></a></li>
+      <li><a href="#observations" data-jump><span>Observations</span>      <span class="num">07</span></a></li>
+      <li><a href="#insights"     data-jump><span>Insights</span>          <span class="num">08</span></a></li>
+      <li><a href="#timeline"     data-jump><span>Timeline</span>          <span class="num">09</span></a></li>
+    </ul>
+  </nav>
+
   <main class="app">
 
     <!-- ============== HERO ============== -->
@@ -44,7 +65,7 @@
 
       <!-- LEFT COLUMN -->
       <aside class="stack">
-        <article class="panel">
+        <article class="panel" id="playerCard">
           <div class="hd"><h2>Player overview</h2><span class="sub">Single athlete profile</span></div>
           <div class="body">
             <div class="profile-photo"><img src="assets/player-photo.jpeg" alt="Ava Thompson" /></div>
@@ -101,7 +122,7 @@
         </article>
 
         <!-- SKILL RADAR + VERTEX STAT SHARE -->
-        <section class="split-2">
+        <section class="split-2" id="radar">
           <article class="panel">
             <div class="hd"><h2>Skill development radar</h2><span class="sub">Season comparison + friend overlay</span></div>
             <div class="body"><div class="chart-frame" style="height:300px;"><canvas id="skillRadarChart"></canvas></div></div>
@@ -232,12 +253,17 @@
       </div>
     </dialog>
 
-    <nav class="tabbar" aria-label="Primary mobile sections">
-      <div class="tabinner">
-        <a href="#overview" class="active">Overview</a>
-        <a href="#physical">Physical</a>
-        <a href="#nbaWatch">Watch</a>
-        <a href="#timeline">Timeline</a>
+    <nav class="tabbar" id="tabbar" aria-label="Section quick-jump">
+      <div class="tabinner" id="tabInner">
+        <a href="#overview"     data-jump class="active">Overview</a>
+        <a href="#playerCard"   data-jump>Profile</a>
+        <a href="#physical"     data-jump>Physical</a>
+        <a href="#radar"        data-jump>Radar</a>
+        <a href="#statShare"    data-jump>Share</a>
+        <a href="#nbaWatch"     data-jump>Watch</a>
+        <a href="#observations" data-jump>Obs</a>
+        <a href="#insights"     data-jump>Insights</a>
+        <a href="#timeline"     data-jump>Timeline</a>
       </div>
     </nav>
   </main>
