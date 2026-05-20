@@ -8,10 +8,11 @@ The dashboard centres on one athlete (Ava Thompson, U16 Girls) and surfaces:
 
 - **Hero radar snapshot** — at-a-glance Season 1 vs Season 2 attribute comparison.
 - **Player overview** — profile, KPIs, and a live development-score sparkline.
-- **Two-season timeline** — Season 1, Season 2, and coach-led turning points; each milestone tagged with the contributing coach.
 - **Height & physical projection** — actual height samples + dashed projected trend line + ±2 cm confidence band out to the U18 window, with wingspan overlay and projection KPIs.
-- **Skill development radar with peer overlay** — toggle any player from the *Players to watch* panel to overlay their Season 2 radar on Ava's.
-- **Players to watch** — peer benchmarking watchlist with dev score, season delta, and an auto-computed "largest gap vs watch median" callout. Framed as benchmarking, not ranking.
+- **Skill development radar with friend overlay** — toggle any consenting *Vertex Stat Share* friend to overlay their Season 2 radar on Ava's.
+- **Vertex Stat Share** — mutual-consent peer benchmarking. Stats from another player only appear once both sides have accepted. Includes a *Share my stats* invite flow, consent badges (mutual / pending / not connected), per-row invite + reminder actions, and an auto-computed "largest gap vs shared median" callout. Framed as benchmarking, not ranking.
+- **Players to watch** — a curated set of NBA pros (past & present) chosen for transferable traits that map onto Ava’s growth areas. Each card has study focus tags, why-study-them notes, film cues, and the growth areas the pro addresses.
+- **Two-season timeline** — Season 1, Season 2, and coach-led turning points (now positioned at the bottom of the page); each milestone tagged with the contributing coach.
 - **Coach observation summary** — eight recurring themes, each with a trend sparkline, plain-language summary, coach contribution bar (share of observations), attribution chips, and a consensus indicator (aligned vs mixed signals).
 - **Observation feed** — chronological notes filterable by coach.
 - **Observation volume heatmap** — category × month grid showing where coach attention has concentrated; useful for spotting blind spots.

@@ -77,27 +77,6 @@
       <!-- RIGHT COLUMN -->
       <div class="stack">
 
-        <!-- TIMELINE -->
-        <article class="panel" id="timeline">
-          <div class="hd"><h2>Two-season progress timeline</h2><span class="sub">Season 1 vs Season 2</span></div>
-          <div class="body split-2">
-            <div class="timeline">
-              <div class="season">
-                <div class="season-head"><strong>Season 1 · Foundation</strong><span class="badge amber">Inconsistent impact</span></div>
-                <div id="timelineS1"></div>
-              </div>
-              <div class="season">
-                <div class="season-head"><strong>Season 2 · Acceleration</strong><span class="badge green">Clear upward trend</span></div>
-                <div id="timelineS2"></div>
-              </div>
-            </div>
-            <div class="season">
-              <div class="season-head"><strong>Coach turning points</strong><span class="badge blue">Observation-led</span></div>
-              <div id="timelineTurning"></div>
-            </div>
-          </div>
-        </article>
-
         <!-- HEIGHT & PHYSICAL PROJECTION -->
         <article class="panel" id="physical">
           <div class="hd">
@@ -121,20 +100,39 @@
           </div>
         </article>
 
-        <!-- SKILL RADAR + WATCHLIST -->
+        <!-- SKILL RADAR + VERTEX STAT SHARE -->
         <section class="split-2">
           <article class="panel">
-            <div class="hd"><h2>Skill development radar</h2><span class="sub">Season comparison + peer overlay</span></div>
+            <div class="hd"><h2>Skill development radar</h2><span class="sub">Season comparison + friend overlay</span></div>
             <div class="body"><div class="chart-frame" style="height:300px;"><canvas id="skillRadarChart"></canvas></div></div>
           </article>
-          <article class="panel" id="watchlist">
-            <div class="hd"><h2>Players to watch</h2><span class="sub">Tap to overlay on radar</span></div>
+          <article class="panel" id="statShare">
+            <div class="hd">
+              <h2>Vertex Stat Share</h2>
+              <button id="shareStatsBtn" class="share-cta-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                Share my stats
+              </button>
+            </div>
             <div class="body">
-              <div class="watch-list" id="watchList"></div>
+              <div class="consent-note"><span class="lock">🔒</span> Stats are only compared between mutually consenting Vertex friends. Either side can revoke at any time.</div>
+              <div class="share-list" id="shareList" style="margin-top:10px;"></div>
               <div class="gap-callout" id="gapCallout"></div>
             </div>
           </article>
         </section>
+
+        <!-- PLAYERS TO WATCH (NBA pros) -->
+        <article class="panel" id="nbaWatch">
+          <div class="hd">
+            <h2>Players to watch</h2>
+            <span class="sub">NBA pros (past &amp; present) matched to Ava’s growth areas</span>
+          </div>
+          <div class="body">
+            <div class="nba-grid" id="nbaWatchGrid"></div>
+            <div class="support-note" style="margin-top:14px;">Pro role models are picked for transferable traits — reads, footwork, communication, habits — not raw athleticism. Use film cues as conversation starters in review sessions.</div>
+          </div>
+        </article>
 
         <!-- OBSERVATION SUMMARY (with sparklines + coach attribution) -->
         <article class="panel" id="observations">
@@ -190,15 +188,56 @@
           </div>
         </article>
 
+        <!-- TIMELINE (moved to bottom) -->
+        <article class="panel" id="timeline">
+          <div class="hd"><h2>Two-season progress timeline</h2><span class="sub">Season 1 vs Season 2</span></div>
+          <div class="body split-2">
+            <div class="timeline">
+              <div class="season">
+                <div class="season-head"><strong>Season 1 · Foundation</strong><span class="badge amber">Inconsistent impact</span></div>
+                <div id="timelineS1"></div>
+              </div>
+              <div class="season">
+                <div class="season-head"><strong>Season 2 · Acceleration</strong><span class="badge green">Clear upward trend</span></div>
+                <div id="timelineS2"></div>
+              </div>
+            </div>
+            <div class="season">
+              <div class="season-head"><strong>Coach turning points</strong><span class="badge blue">Observation-led</span></div>
+              <div id="timelineTurning"></div>
+            </div>
+          </div>
+        </article>
+
       </div>
     </section>
+
+    <!-- Share stats dialog -->
+    <dialog id="shareDialog">
+      <div class="dlg-inner">
+        <h3>Share my stats with a Vertex friend</h3>
+        <p>Send a connection invite. Stats are only compared once both players accept. Either side can revoke sharing at any time.</p>
+        <label for="shareHandle">Friend’s Vertex handle or email</label>
+        <input id="shareHandle" type="text" placeholder="e.g. @kira.bell or kira@example.com" autocomplete="off" />
+        <div class="dlg-consent-list">
+          <strong>What gets shared on consent</strong>
+          • Skill radar (Season 1 + Season 2)<br>
+          • Development score &amp; season delta<br>
+          • Position &amp; age group
+        </div>
+        <div class="dlg-actions">
+          <button id="shareDialogClose" type="button">Cancel</button>
+          <button id="shareDialogSend" type="button" class="primary">Send invite</button>
+        </div>
+      </div>
+    </dialog>
 
     <nav class="tabbar" aria-label="Primary mobile sections">
       <div class="tabinner">
         <a href="#overview" class="active">Overview</a>
-        <a href="#timeline">Timeline</a>
         <a href="#physical">Physical</a>
-        <a href="#observations">Obs</a>
+        <a href="#nbaWatch">Watch</a>
+        <a href="#timeline">Timeline</a>
       </div>
     </nav>
   </main>

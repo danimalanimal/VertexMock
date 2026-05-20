@@ -50,12 +50,87 @@ window.VertexData = (() => {
       series:[60,61,62,64,66,68,70,72,74,76,78], coaches:{lin:0.5, rivera:0.3, vidal:0.2}, consensus:'mixed' },
   ];
 
-  // Player watchlist — peers for benchmarking
-  const watchlist = [
-    { id:'maya',  name:'Maya Okafor',  pos:'Guard',        devScore:88, delta:+9, season1:[68,64,72,66,58,64], season2:[82,80,78,80,72,78] },
-    { id:'jess',  name:'Jess Tanaka',  pos:'Wing',         devScore:81, delta:+6, season1:[60,62,68,58,52,58], season2:[74,77,76,72,66,70] },
-    { id:'priya', name:'Priya Sharma', pos:'Combo Guard',  devScore:79, delta:+4, season1:[64,60,62,60,55,58], season2:[72,72,70,74,64,68] },
-    { id:'kira',  name:'Kira Bell',    pos:'Wing/Forward', devScore:77, delta:+3, season1:[58,56,70,62,50,54], season2:[68,70,76,74,60,66] },
+  // Vertex Stat Share — peers for benchmarking.
+  // Comparison is only enabled when both players have explicitly consented (mutual friends).
+  // 'consent' = mutual share active; 'pending' = request sent or received; 'none' = not connected.
+  const statShare = [
+    { id:'maya',  name:'Maya Okafor',  pos:'Guard',        team:'Riverside Heat',     devScore:88, delta:+9, consent:'consent', season1:[68,64,72,66,58,64], season2:[82,80,78,80,72,78] },
+    { id:'jess',  name:'Jess Tanaka',  pos:'Wing',         team:'North Shore Storm',  devScore:81, delta:+6, consent:'consent', season1:[60,62,68,58,52,58], season2:[74,77,76,72,66,70] },
+    { id:'priya', name:'Priya Sharma', pos:'Combo Guard',  team:'South Metro Performance', devScore:79, delta:+4, consent:'pending', season1:[64,60,62,60,55,58], season2:[72,72,70,74,64,68] },
+    { id:'kira',  name:'Kira Bell',    pos:'Wing/Forward', team:'East City Elite',    devScore:77, delta:+3, consent:'none',    season1:[58,56,70,62,50,54], season2:[68,70,76,74,60,66] },
+  ];
+
+  // Players to watch — NBA pros (past or present) chosen for traits Ava can study
+  // to address her growth areas: decision-making, defensive comms, shot selection, leadership.
+  const nbaWatch = [
+    {
+      id:'paul',
+      name:'Chris Paul',
+      era:'2005 – present',
+      pos:'Point Guard',
+      teams:'NOH/NOP, LAC, HOU, OKC, PHX, GSW, SAS',
+      headline:'Pace control, pick-and-roll reads, on-court voice.',
+      studyFocus:['Decision-making','Communication','Leadership'],
+      addresses:['decision','communication','iq'],
+      reasons:[
+        'Manipulates ball-screen defenders with shoulder/hip angles before the read.',
+        'Calls coverages and sets teammates before the catch — model for early voice.',
+        'Mid-range pull is built on creating space, not raw athleticism.'
+      ],
+      filmCues:['Late-clock PnR vs drop coverage','Side ball-screen reads vs blitz','Defensive pre-snap pointing'],
+      highlight:'https://www.youtube.com/results?search_query=chris+paul+pick+and+roll+breakdown'
+    },
+    {
+      id:'nash',
+      name:'Steve Nash',
+      era:'1996 – 2014',
+      pos:'Point Guard',
+      teams:'PHX, DAL, LAL',
+      headline:'Spacing IQ, advantage creation, finishing touch.',
+      studyFocus:['Decision-making','Shooting','Game IQ'],
+      addresses:['decision','shooting','iq'],
+      reasons:[
+        'Reads tilted closeouts and attacks the trailing foot — direct fit for catch-to-drive growth.',
+        'Uses pace change rather than speed to get downhill.',
+        'Floater + reverse layup package for contact finishing.'
+      ],
+      filmCues:['Drag screen reads in early offence','Off-hand finishes vs help','Skip-pass timing windows'],
+      highlight:'https://www.youtube.com/results?search_query=steve+nash+pick+and+roll+masterclass'
+    },
+    {
+      id:'payton',
+      name:'Gary Payton',
+      era:'1990 – 2007',
+      pos:'Point Guard',
+      teams:'SEA, MIL, LAL, BOS, MIA',
+      headline:'Point-of-attack defence and constant communication.',
+      studyFocus:['Defensive awareness','Communication','Leadership'],
+      addresses:['defence','communication'],
+      reasons:[
+        'Talks every action — switches, screens, tags — model for the back-line voice gap.',
+        'Active hands without reaching; uses chest and angles to deny the strong side.',
+        'Anticipatory positioning, not reactive — sets the tone defensively.'
+      ],
+      filmCues:['On-ball denial vs lead guards','Help-and-recover talk','Pre-rotation pointing'],
+      highlight:'https://www.youtube.com/results?search_query=gary+payton+defensive+highlights'
+    },
+    {
+      id:'allen',
+      name:'Ray Allen',
+      era:'1996 – 2014',
+      pos:'Shooting Guard',
+      teams:'MIL, SEA, BOS, MIA',
+      headline:'Footwork, shot prep, and composure under pressure.',
+      studyFocus:['Shooting confidence','Effort','Coachability'],
+      addresses:['shooting','effort','coachability'],
+      reasons:[
+        'Feet-set catch routine is the standard for repeatable shooting confidence.',
+        'Off-ball movement creates the advantage before the ball arrives.',
+        'Famous pre-game routine — model for habit-led improvement.'
+      ],
+      filmCues:['Catch-and-shoot footwork','Pin-down to relocation reads','Late-clock confidence shots'],
+      highlight:'https://www.youtube.com/results?search_query=ray+allen+shooting+form+breakdown'
+    },
   ];
 
   // Timeline milestones — now with coach attribution
@@ -125,7 +200,7 @@ window.VertexData = (() => {
   return {
     coaches, radarLabels, seasonOne, seasonTwo, months, devScoreSeries,
     heightLabels, heightActual, heightProjected, heightBandHi, heightBandLo, wingspanActual,
-    attributeTrends, watchlist, timeline, lists, feed,
+    attributeTrends, statShare, nbaWatch, timeline, lists, feed,
     heatCategories, heatMonths, heatValues,
   };
 })();

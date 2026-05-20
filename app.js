@@ -206,34 +206,80 @@
     });
   });
 
-  // ---------- Player watchlist ----------
-  const watchListEl = $('#watchList');
+  // ---------- Vertex Stat Share (mutual-consent peer comparison) ----------
+  const shareListEl = $('#shareList');
   const gapCallout  = $('#gapCallout');
-  const activeWatch = new Set();
+  const activeShare = new Set();
 
-  const renderWatchlist = () => {
-    watchListEl.innerHTML = '';
-    D.watchlist.forEach(p => {
-      const row = el('div', { class:`watch-row${activeWatch.has(p.id)?' active':''}`, 'data-id':p.id,
-        onclick: () => togglePeer(p.id) },
-        el('div', { class:'watch-avatar' }, p.name.split(' ').map(n=>n[0]).join('')),
-        el('div', { class:'watch-info' },
-          el('span', { class:'watch-name' }, p.name),
-          el('span', { class:'watch-pos' }, p.pos)
+  const consentMeta = {
+    consent: { label:'Mutual share',  cls:'consent-ok',      action:'Compare' },
+    pending: { label:'Pending',       cls:'consent-pending', action:'Resend invite' },
+    none:    { label:'Not connected', cls:'consent-none',    action:'Send invite' },
+  };
+
+  const renderStatShare = () => {
+    shareListEl.innerHTML = '';
+    D.statShare.forEach(p => {
+      const meta = consentMeta[p.consent];
+      const canCompare = p.consent === 'consent';
+      const active = activeShare.has(p.id);
+      const row = el('div', { class:`share-row${active?' active':''}${canCompare?'':' locked'}`, 'data-id':p.id,
+          title: canCompare ? 'Tap to overlay on radar' : 'Stats locked — mutual consent required',
+          onclick: () => { if (canCompare) togglePeer(p.id); } },
+        el('div', { class:'share-avatar' }, p.name.split(' ').map(n=>n[0]).join('')),
+        el('div', { class:'share-info' },
+          el('span', { class:'share-name' }, p.name),
+          el('span', { class:'share-pos' }, `${p.pos} · ${p.team}`),
+          el('span', { class:`consent-badge ${meta.cls}` },
+            el('span', { class:'consent-dot' }),
+            meta.label
+          )
         ),
-        el('span', { class:'watch-score', title:'Current development score' }, String(p.devScore)),
-        el('span', { class:`watch-delta ${p.delta>=0?'up':'down'}` }, (p.delta>=0?'+':'')+p.delta)
+        canCompare
+          ? el('span', { class:'share-score', title:'Shared development score' }, String(p.devScore))
+          : el('span', { class:'share-score locked', title:'Mutual consent required' }, '—'),
+        canCompare
+          ? el('span', { class:`share-delta ${p.delta>=0?'up':'down'}` }, (p.delta>=0?'+':'')+p.delta)
+          : el('button', { class:'invite-btn', onclick:(e)=>{ e.stopPropagation(); inviteFlow(p); } }, meta.action)
       );
-      watchListEl.appendChild(row);
+      shareListEl.appendChild(row);
     });
     renderGap();
   };
 
+  const inviteFlow = (p) => {
+    // Mock: in production this would call the Vertex Stat Share API.
+    if (p.consent === 'none')    { p.consent = 'pending'; toast(`Invite sent to ${p.name}.`); }
+    else if (p.consent === 'pending') { toast(`Reminder sent to ${p.name}. Awaiting their consent.`); }
+    renderStatShare();
+  };
+
+  const shareMyStatsFlow = () => {
+    const dlg = $('#shareDialog');
+    if (dlg) dlg.showModal();
+  };
+  $('#shareStatsBtn')?.addEventListener('click', shareMyStatsFlow);
+  $('#shareDialogClose')?.addEventListener('click', () => $('#shareDialog').close());
+  $('#shareDialogSend')?.addEventListener('click', () => {
+    const handle = $('#shareHandle').value.trim();
+    $('#shareDialog').close();
+    if (handle) toast(`Stat-share invite sent to ${handle}. They must accept before stats are shared.`);
+  });
+
+  // Lightweight toast
+  const toast = (msg) => {
+    let t = $('#toast');
+    if (!t) { t = el('div', { id:'toast', class:'toast' }); document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+  };
+
   const togglePeer = (id) => {
-    if (activeWatch.has(id)) activeWatch.delete(id); else activeWatch.add(id);
-    // Rebuild radar datasets: base Season 1 + Season 2 + active peers (Season 2 only)
+    if (activeShare.has(id)) activeShare.delete(id); else activeShare.add(id);
     const base = radarDatasets();
-    D.watchlist.filter(p => activeWatch.has(p.id)).forEach((p, idx) => {
+    D.statShare.filter(p => activeShare.has(p.id) && p.consent === 'consent').forEach((p, idx) => {
       const palette = ['rgba(95,227,156,1)','rgba(255,191,102,1)','rgba(200,155,255,1)','rgba(255,125,125,1)'];
       const color = palette[idx % palette.length];
       base.push({
@@ -247,16 +293,15 @@
     });
     skillRadar.data.datasets = base;
     skillRadar.update();
-    renderWatchlist();
+    renderStatShare();
   };
 
   const renderGap = () => {
-    const active = D.watchlist.filter(p => activeWatch.has(p.id));
+    const active = D.statShare.filter(p => activeShare.has(p.id) && p.consent === 'consent');
     if (!active.length) {
-      gapCallout.textContent = 'Select one or more peers to overlay on the radar and surface gaps. Benchmarking, not ranking.';
+      gapCallout.textContent = 'Stats from Vertex friends only appear with mutual consent. Select a connected friend to overlay on the radar.';
       return;
     }
-    // Median per attribute across active peers (S2)
     const medians = D.radarLabels.map((_, i) => {
       const vals = active.map(p => p.season2[i]).sort((a,b)=>a-b);
       const mid = Math.floor(vals.length/2);
@@ -266,12 +311,52 @@
       .sort((a,b) => a.diff - b.diff);
     const worst = gaps[0];
     if (worst.diff >= 0) {
-      gapCallout.textContent = `Ava is at or above the watch median on every attribute. Closest gap: ${worst.label} (${worst.diff>=0?'+':''}${worst.diff}).`;
+      gapCallout.textContent = `Ava is at or above the shared median on every attribute. Closest gap: ${worst.label} (${worst.diff>=0?'+':''}${worst.diff}).`;
     } else {
-      gapCallout.innerHTML = `Largest gap vs watch median: <strong style="color:#ffe6c2">${worst.label} ${worst.diff}</strong>. Use this as a focus prompt, not a ranking.`;
+      gapCallout.innerHTML = `Largest gap vs shared median: <strong style="color:#ffe6c2">${worst.label} ${worst.diff}</strong>. Use this as a focus prompt, not a ranking.`;
     }
   };
-  renderWatchlist();
+  renderStatShare();
+
+  // ---------- Players to Watch (NBA pros) ----------
+  const attrLabelMap = {
+    decision:'Decision-making', defence:'Defensive awareness', shooting:'Shooting',
+    communication:'Communication', iq:'Game IQ', effort:'Effort', coachability:'Coachability',
+    handle:'Ball handling',
+  };
+  const nbaGrid = $('#nbaWatchGrid');
+  if (nbaGrid) {
+    D.nbaWatch.forEach(p => {
+      const card = el('article', { class:'nba-card' },
+        el('div', { class:'nba-head' },
+          el('div', { class:'nba-avatar' }, p.name.split(' ').map(n=>n[0]).join('')),
+          el('div', { class:'nba-id' },
+            el('h3', {}, p.name),
+            el('span', { class:'nba-meta' }, `${p.pos} · ${p.era}`),
+            el('span', { class:'nba-teams' }, p.teams)
+          )
+        ),
+        el('p', { class:'nba-headline' }, p.headline),
+        el('div', { class:'nba-focus' },
+          ...p.studyFocus.map(f => el('span', { class:'focus-tag' }, f))
+        ),
+        el('div', { class:'nba-section' },
+          el('h4', {}, 'Why study them'),
+          el('ul', {}, ...p.reasons.map(r => el('li', {}, r)))
+        ),
+        el('div', { class:'nba-section' },
+          el('h4', {}, 'Film cues to watch'),
+          el('div', { class:'cue-row' }, ...p.filmCues.map(c => el('span', { class:'cue-tag' }, c)))
+        ),
+        el('div', { class:'nba-section addresses' },
+          el('span', { class:'addresses-label' }, 'Addresses growth areas:'),
+          ...p.addresses.map(k => el('span', { class:'address-pill' }, attrLabelMap[k] || k))
+        ),
+        el('a', { class:'nba-cta', href:p.highlight, target:'_blank', rel:'noopener' }, 'Search film →')
+      );
+      nbaGrid.appendChild(card);
+    });
+  }
 
   // ---------- Timeline ----------
   const fillTimeline = (containerId, items) => {
