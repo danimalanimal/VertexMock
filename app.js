@@ -1,0 +1,353 @@
+// Vertex dashboard rendering & interaction
+(() => {
+  const D = window.VertexData;
+
+  // ---------- helpers ----------
+  const $  = (sel, el=document) => el.querySelector(sel);
+  const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+  const el = (tag, attrs={}, ...children) => {
+    const node = document.createElement(tag);
+    Object.entries(attrs).forEach(([k,v]) => {
+      if (k === 'class') node.className = v;
+      else if (k === 'html') node.innerHTML = v;
+      else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
+      else if (v !== null && v !== undefined) node.setAttribute(k, v);
+    });
+    children.flat().forEach(c => {
+      if (c == null) return;
+      node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return node;
+  };
+
+  const coachChip = (coachId) => {
+    const c = D.coaches[coachId];
+    if (!c) return null;
+    return el('span', { class:'coach-chip', 'data-coach':coachId, title:`${c.name} — recent contributor` },
+      el('span', { class:'ini' }, c.initials),
+      c.name.replace('Coach ',''));
+  };
+
+  const attribution = (coachIds) => {
+    const wrap = el('div', { class:'attribution' });
+    coachIds.forEach(id => { const chip = coachChip(id); if (chip) wrap.appendChild(chip); });
+    return wrap;
+  };
+
+  const contribBar = (coachWeights) => {
+    const bar = el('div', { class:'contrib-bar', title:'Share of observations by coach' });
+    Object.entries(coachWeights).forEach(([id, w]) => {
+      const c = D.coaches[id];
+      bar.appendChild(el('span', { style:`width:${(w*100).toFixed(0)}%;background:${c.color};` }));
+    });
+    return bar;
+  };
+
+  const consensusBadge = (state) => {
+    const label = state === 'aligned' ? 'Coaches aligned' : 'Mixed signals';
+    return el('span', { class:`consensus ${state}`, title:label },
+      el('span', { class:'dotc' }), label);
+  };
+
+  // ---------- Chart defaults ----------
+  Chart.defaults.font.family = 'Inter, sans-serif';
+  Chart.defaults.color = '#a9b7cb';
+
+  const radarScale = {
+    min:0, max:100,
+    ticks:{ display:false, stepSize:20 },
+    angleLines:{ color:'rgba(255,255,255,0.09)' },
+    grid:{ color:'rgba(255,255,255,0.08)' },
+    pointLabels:{ color:'#a9b7cb', font:{ family:'Inter', size:11, weight:'600' } }
+  };
+
+  // ---------- Radar charts ----------
+  const radarDatasets = () => [
+    { label:'Season 1', data:D.seasonOne, borderColor:'rgba(127,140,255,0.9)', backgroundColor:'rgba(127,140,255,0.14)', pointBackgroundColor:'rgba(127,140,255,1)', borderWidth:2 },
+    { label:'Season 2', data:D.seasonTwo, borderColor:'rgba(89,183,255,1)',  backgroundColor:'rgba(89,183,255,0.18)',  pointBackgroundColor:'rgba(154,217,255,1)', borderWidth:2 },
+  ];
+
+  new Chart($('#heroRadarChart'), {
+    type:'radar',
+    data:{ labels:D.radarLabels, datasets:radarDatasets() },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ r:radarScale } }
+  });
+
+  const skillRadar = new Chart($('#skillRadarChart'), {
+    type:'radar',
+    data:{ labels:D.radarLabels, datasets:radarDatasets() },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:'#dce9fb', usePointStyle:true, boxWidth:10, boxHeight:10, padding:18, font:{ family:'Inter', size:11, weight:'600' } } } },
+      scales:{ r:radarScale }
+    }
+  });
+
+  // ---------- Dev score sparkline (KPI) ----------
+  new Chart($('#devSpark'), {
+    type:'line',
+    data:{
+      labels:D.months,
+      datasets:[{
+        data:D.devScoreSeries,
+        borderColor:'rgba(89,183,255,1)',
+        backgroundColor:'rgba(89,183,255,0.18)',
+        fill:true, tension:.35, borderWidth:1.5, pointRadius:0
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ enabled:false } },
+      scales:{ x:{ display:false }, y:{ display:false } },
+      elements:{ line:{ borderJoinStyle:'round' } }
+    }
+  });
+
+  // ---------- Height & physical projection ----------
+  new Chart($('#heightChart'), {
+    type:'line',
+    data:{
+      labels:D.heightLabels,
+      datasets:[
+        {
+          label:'Height — actual (cm)',
+          data:D.heightActual,
+          borderColor:'rgba(89,183,255,1)',
+          backgroundColor:'rgba(89,183,255,0.12)',
+          fill:false, tension:.25, borderWidth:2.2, pointRadius:3, pointBackgroundColor:'rgba(154,217,255,1)',
+          spanGaps:false, yAxisID:'y'
+        },
+        {
+          label:'Height — projected',
+          data:D.heightProjected,
+          borderColor:'rgba(127,140,255,1)',
+          borderDash:[6,5],
+          fill:false, tension:.25, borderWidth:2, pointRadius:3, pointBackgroundColor:'rgba(127,140,255,1)',
+          spanGaps:false, yAxisID:'y'
+        },
+        {
+          label:'Confidence (+2cm)',
+          data:D.heightBandHi,
+          borderColor:'rgba(127,140,255,0)',
+          backgroundColor:'rgba(127,140,255,0.15)',
+          fill:'+1', pointRadius:0, borderWidth:0, tension:.25, spanGaps:false, yAxisID:'y'
+        },
+        {
+          label:'Confidence (-2cm)',
+          data:D.heightBandLo,
+          borderColor:'rgba(127,140,255,0)',
+          backgroundColor:'rgba(127,140,255,0.15)',
+          fill:false, pointRadius:0, borderWidth:0, tension:.25, spanGaps:false, yAxisID:'y'
+        },
+        {
+          label:'Wingspan (cm)',
+          data:D.wingspanActual,
+          borderColor:'rgba(95,227,156,0.9)',
+          backgroundColor:'rgba(95,227,156,0.1)',
+          fill:false, tension:.25, borderWidth:1.8, pointRadius:2.5, pointBackgroundColor:'rgba(95,227,156,1)',
+          spanGaps:false, yAxisID:'y'
+        },
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{
+          labels:{
+            color:'#dce9fb', usePointStyle:true, boxWidth:10, boxHeight:10, padding:14,
+            font:{ family:'Inter', size:11, weight:'600' },
+            filter: it => !it.text.startsWith('Confidence')
+          }
+        },
+        tooltip:{
+          callbacks:{
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + ' cm' : '—'}`
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#a9b7cb', font:{ size:10 } } },
+        y:{ position:'left', grid:{ color:'rgba(255,255,255,0.06)' }, ticks:{ color:'#a9b7cb', callback:v=>v+' cm' }, suggestedMin:168, suggestedMax:182 }
+      }
+    }
+  });
+
+  // ---------- Attribute sparklines + cards ----------
+  const obsGrid = $('#observationsGrid');
+  obsGrid.innerHTML = '';
+  D.attributeTrends.forEach((a, i) => {
+    const canvasId = `spark-${a.key}`;
+    const card = el('div', { class:'obs-card' },
+      el('div', { class:'obs-top' },
+        el('strong', {}, a.label),
+        el('span', { class:`trend ${a.trend}` }, a.trend === 'up' ? 'Improving' : a.trend === 'down' ? 'Needs attention' : 'Stable')
+      ),
+      el('div', { class:'chart-frame obs-spark' }, el('canvas', { id:canvasId })),
+      el('p', {}, a.text),
+      contribBar(a.coaches),
+      el('div', { class:'obs-footer' },
+        attribution(Object.keys(a.coaches)),
+        consensusBadge(a.consensus)
+      )
+    );
+    obsGrid.appendChild(card);
+
+    const color = a.trend === 'down' ? 'rgba(255,125,125,1)' : a.trend === 'flat' ? 'rgba(255,191,102,1)' : 'rgba(95,227,156,1)';
+    const fill  = a.trend === 'down' ? 'rgba(255,125,125,0.12)' : a.trend === 'flat' ? 'rgba(255,191,102,0.1)' : 'rgba(95,227,156,0.12)';
+    new Chart(document.getElementById(canvasId), {
+      type:'line',
+      data:{ labels:D.months, datasets:[{ data:a.series, borderColor:color, backgroundColor:fill, fill:true, tension:.35, borderWidth:1.5, pointRadius:0 }] },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false }, tooltip:{ enabled:false } },
+        scales:{ x:{ display:false }, y:{ display:false, suggestedMin:Math.min(...a.series)-5, suggestedMax:Math.max(...a.series)+5 } }
+      }
+    });
+  });
+
+  // ---------- Player watchlist ----------
+  const watchListEl = $('#watchList');
+  const gapCallout  = $('#gapCallout');
+  const activeWatch = new Set();
+
+  const renderWatchlist = () => {
+    watchListEl.innerHTML = '';
+    D.watchlist.forEach(p => {
+      const row = el('div', { class:`watch-row${activeWatch.has(p.id)?' active':''}`, 'data-id':p.id,
+        onclick: () => togglePeer(p.id) },
+        el('div', { class:'watch-avatar' }, p.name.split(' ').map(n=>n[0]).join('')),
+        el('div', { class:'watch-info' },
+          el('span', { class:'watch-name' }, p.name),
+          el('span', { class:'watch-pos' }, p.pos)
+        ),
+        el('span', { class:'watch-score', title:'Current development score' }, String(p.devScore)),
+        el('span', { class:`watch-delta ${p.delta>=0?'up':'down'}` }, (p.delta>=0?'+':'')+p.delta)
+      );
+      watchListEl.appendChild(row);
+    });
+    renderGap();
+  };
+
+  const togglePeer = (id) => {
+    if (activeWatch.has(id)) activeWatch.delete(id); else activeWatch.add(id);
+    // Rebuild radar datasets: base Season 1 + Season 2 + active peers (Season 2 only)
+    const base = radarDatasets();
+    D.watchlist.filter(p => activeWatch.has(p.id)).forEach((p, idx) => {
+      const palette = ['rgba(95,227,156,1)','rgba(255,191,102,1)','rgba(200,155,255,1)','rgba(255,125,125,1)'];
+      const color = palette[idx % palette.length];
+      base.push({
+        label:`${p.name} · S2`,
+        data:p.season2,
+        borderColor:color,
+        backgroundColor:color.replace('1)','0.12)'),
+        pointBackgroundColor:color,
+        borderWidth:2, borderDash:[4,4]
+      });
+    });
+    skillRadar.data.datasets = base;
+    skillRadar.update();
+    renderWatchlist();
+  };
+
+  const renderGap = () => {
+    const active = D.watchlist.filter(p => activeWatch.has(p.id));
+    if (!active.length) {
+      gapCallout.textContent = 'Select one or more peers to overlay on the radar and surface gaps. Benchmarking, not ranking.';
+      return;
+    }
+    // Median per attribute across active peers (S2)
+    const medians = D.radarLabels.map((_, i) => {
+      const vals = active.map(p => p.season2[i]).sort((a,b)=>a-b);
+      const mid = Math.floor(vals.length/2);
+      return vals.length % 2 ? vals[mid] : Math.round((vals[mid-1]+vals[mid])/2);
+    });
+    const gaps = D.radarLabels.map((label, i) => ({ label, diff: D.seasonTwo[i] - medians[i] }))
+      .sort((a,b) => a.diff - b.diff);
+    const worst = gaps[0];
+    if (worst.diff >= 0) {
+      gapCallout.textContent = `Ava is at or above the watch median on every attribute. Closest gap: ${worst.label} (${worst.diff>=0?'+':''}${worst.diff}).`;
+    } else {
+      gapCallout.innerHTML = `Largest gap vs watch median: <strong style="color:#ffe6c2">${worst.label} ${worst.diff}</strong>. Use this as a focus prompt, not a ranking.`;
+    }
+  };
+  renderWatchlist();
+
+  // ---------- Timeline ----------
+  const fillTimeline = (containerId, items) => {
+    const c = $(containerId);
+    items.forEach(m => {
+      c.appendChild(el('div', { class:'milestone' },
+        el('div', { class:'date' }, m.date),
+        el('div', { class:'dot' }),
+        el('div', {},
+          el('p', {}, m.text),
+          attribution(m.coaches || [])
+        )
+      ));
+    });
+  };
+  fillTimeline('#timelineS1', D.timeline.s1);
+  fillTimeline('#timelineS2', D.timeline.s2);
+  fillTimeline('#timelineTurning', D.timeline.turning);
+
+  // ---------- Strengths / growth / focus ----------
+  const fillList = (containerId, items) => {
+    const ul = $(containerId);
+    items.forEach(item => {
+      ul.appendChild(el('li', {},
+        document.createTextNode(item.text),
+        attribution(item.coaches || [])
+      ));
+    });
+  };
+  fillList('#listStrengths', D.lists.strengths);
+  fillList('#listGrowth',    D.lists.growth);
+  fillList('#listFocus',     D.lists.focus);
+
+  // ---------- Observation feed (filterable) ----------
+  const feedEl = $('#feed');
+  D.feed.forEach(f => {
+    const c = D.coaches[f.coach];
+    feedEl.appendChild(el('div', { class:'feed-item', 'data-coach':f.coach },
+      el('div', { class:'feed-meta' },
+        el('span', { class:'tag' }, f.date),
+        coachChip(f.coach),
+        el('span', { class:'tag' }, f.kind),
+        el('span', { class:'tag' }, f.topic)
+      ),
+      el('p', {}, f.text)
+    ));
+  });
+
+  // Coach filter
+  const filterBar = $('#coachFilter');
+  const buildFilters = () => {
+    filterBar.innerHTML = '';
+    const mk = (id, label) => {
+      const b = el('button', { 'data-filter':id, onclick: () => applyFilter(id) }, label);
+      if (id === 'all') b.classList.add('active');
+      return b;
+    };
+    filterBar.appendChild(mk('all','All coaches'));
+    Object.values(D.coaches).forEach(c => filterBar.appendChild(mk(c.id, c.name)));
+  };
+  const applyFilter = (id) => {
+    $$('#coachFilter button').forEach(b => b.classList.toggle('active', b.dataset.filter === id));
+    $$('#feed .feed-item').forEach(item => {
+      item.classList.toggle('hidden', id !== 'all' && item.dataset.coach !== id);
+    });
+  };
+  buildFilters();
+
+  // ---------- Observation volume heatmap ----------
+  const heatTable = $('#heatTable');
+  const cap = (v) => v >= 4 ? 4 : v >= 3 ? 3 : v >= 2 ? 2 : v >= 1 ? 1 : 0;
+  const thead = el('tr', {}, el('th', {}, ''), ...D.heatMonths.map(m => el('th', {}, m)));
+  heatTable.appendChild(thead);
+  D.heatCategories.forEach((cat, i) => {
+    const row = el('tr', {}, el('td', { class:'label' }, cat));
+    D.heatValues[i].forEach(v => row.appendChild(el('td', { 'data-v':String(cap(v)), title:`${v} observation${v===1?'':'s'}` }, v ? String(v) : '')));
+    heatTable.appendChild(row);
+  });
+})();
