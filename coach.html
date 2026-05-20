@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex Coach Input</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="coach-body">
+  <header class="coach-topbar">
+    <a class="coach-back" href="index.html" aria-label="Back to home">&larr; Home</a>
+    <div class="coach-brand"><strong>VERTEX</strong> <span>Coach Input</span></div>
+    <button class="coach-undo" id="undoBtn" type="button" aria-label="Undo last entry">Undo</button>
+  </header>
+
+  <!-- Session bar: optional session context that auto-tags every entry -->
+  <section class="coach-session" aria-label="Session context">
+    <div class="cs-row">
+      <button class="cs-toggle" id="sessionToggle" type="button" aria-pressed="false">
+        <span class="cs-dot" aria-hidden="true"></span>
+        <span class="cs-label">Free-fire</span>
+      </button>
+      <div class="cs-meta" id="sessionMeta" hidden>
+        <select id="sessionCoach" aria-label="Coach"></select>
+        <select id="sessionKind" aria-label="Session kind">
+          <option>Training</option><option>Game</option><option>Review</option>
+        </select>
+      </div>
+      <button class="cs-bulk" id="bulkToggle" type="button" aria-pressed="false" aria-label="Toggle bulk mode">
+        <span class="bm-icon" aria-hidden="true"></span> Bulk
+      </button>
+    </div>
+  </section>
+
+  <!-- Player rail: horizontal scroll of avatar chips. Tap to select. -->
+  <section class="coach-roster" aria-label="Squad">
+    <div class="cr-head">
+      <span class="cr-title">SQUAD</span>
+      <button class="cr-clear" id="clearPlayers" type="button" hidden>Clear</button>
+    </div>
+    <div class="cr-rail" id="playerRail" role="listbox" aria-label="Select player"></div>
+  </section>
+
+  <!-- Attribute grid: 6 tiles. Tap to lock the attribute. -->
+  <section class="coach-attrs" aria-label="Attribute">
+    <div class="cr-head"><span class="cr-title">ATTRIBUTE</span></div>
+    <div class="ca-grid" id="attrGrid" role="radiogroup" aria-label="Select attribute"></div>
+  </section>
+
+  <!-- Sentiment switch: + commend, = neutral, - critique -->
+  <section class="coach-sentiment" aria-label="Sentiment">
+    <div class="cr-head"><span class="cr-title">SENTIMENT</span></div>
+    <div class="cs-switch" role="radiogroup" aria-label="Sentiment">
+      <button class="cs-btn pos" data-sent="+" type="button" role="radio" aria-checked="false">
+        <span class="cs-glyph">+</span><span class="cs-name">Commend</span>
+      </button>
+      <button class="cs-btn neu" data-sent="=" type="button" role="radio" aria-checked="false">
+        <span class="cs-glyph">=</span><span class="cs-name">Note</span>
+      </button>
+      <button class="cs-btn neg" data-sent="-" type="button" role="radio" aria-checked="false">
+        <span class="cs-glyph">&minus;</span><span class="cs-name">Critique</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Phrase deck: filtered by attribute + sentiment -->
+  <section class="coach-phrases" aria-label="Phrase deck" id="phraseSection">
+    <div class="cr-head">
+      <span class="cr-title">PHRASES</span>
+      <span class="cp-status" id="phraseStatus">Pick attribute &amp; sentiment</span>
+    </div>
+    <div class="cp-grid" id="phraseGrid"></div>
+  </section>
+
+  <!-- Live tally strip: last entries with quick undo / re-tag -->
+  <section class="coach-tally" aria-label="Today's entries">
+    <div class="cr-head">
+      <span class="cr-title">TODAY <span class="ct-count" id="tallyCount">0</span></span>
+      <button class="ct-export" id="exportBtn" type="button" title="Copy as JSON">Export</button>
+    </div>
+    <ol class="ct-list" id="tallyList"></ol>
+  </section>
+
+  <!-- Toast confirmation -->
+  <div class="coach-toast" id="coachToast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Custom phrase composer (escape hatch) -->
+  <dialog class="coach-dialog" id="customDialog">
+    <form method="dialog" class="cd-form" id="customForm">
+      <h2>Custom phrase</h2>
+      <p class="cd-sub">Type a new observation. It becomes a tap-chip next time for this attribute and sentiment.</p>
+      <textarea id="customText" rows="3" maxlength="180" placeholder="e.g. Used split-cut instead of curl on the pin-down"></textarea>
+      <div class="cd-row">
+        <button type="button" id="customCancel" value="cancel">Cancel</button>
+        <button type="submit" id="customSave" class="primary">Save phrase</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="data.js"></script>
+  <script src="coach-data.js"></script>
+  <script src="coach.js"></script>
+</body>
+</html>
