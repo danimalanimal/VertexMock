@@ -66,11 +66,20 @@
     </div>
   </section>
 
-  <!-- Phrase deck: filtered by attribute + sentiment -->
+  <!-- Phrase deck: filtered by attribute + sentiment, with predictive search -->
   <section class="coach-phrases" aria-label="Phrase deck" id="phraseSection">
     <div class="cr-head">
       <span class="cr-title">PHRASES</span>
       <span class="cp-status" id="phraseStatus">Pick attribute &amp; sentiment</span>
+    </div>
+    <div class="cp-search">
+      <span class="cp-search-icon" aria-hidden="true">⌕</span>
+      <input id="phraseSearch" type="search" inputmode="search" autocomplete="off"
+             autocorrect="off" autocapitalize="sentences" spellcheck="true"
+             placeholder="Type to find a phrase — enter to save top…"
+             aria-label="Search phrases" />
+      <button class="cp-search-clear" id="phraseSearchClear" type="button" hidden aria-label="Clear search">&times;</button>
+      <kbd class="cp-search-hint" aria-hidden="true">↵</kbd>
     </div>
     <div class="cp-grid" id="phraseGrid"></div>
   </section>

@@ -796,7 +796,7 @@ dialog#shareDialog::backdrop{background:rgba(5,7,11,.7);backdrop-filter:blur(6px
 .coach-session{ padding: 8px 12px 0; }
 .cs-row{ display:flex; align-items:center; gap:8px; }
 .cs-toggle{
-  flex:1; display:flex; align-items:center; gap:10px; min-height:48px;
+  flex:1 1 0; min-width:0; display:flex; align-items:center; gap:10px; min-height:48px;
   background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
   border-radius:14px; padding: 0 14px; color:var(--text);
   font-family:var(--font-mono); font-size:13px; font-weight:500;
@@ -805,13 +805,14 @@ dialog#shareDialog::backdrop{background:rgba(5,7,11,.7);backdrop-filter:blur(6px
 .cs-toggle.on{ border-color: rgba(141,224,138,.36); background: rgba(141,224,138,.08); }
 .cs-toggle.on .cs-dot{ background:#8de08a; box-shadow:0 0 8px rgba(141,224,138,.7); }
 .cs-meta{ display:flex; gap:6px; }
+.cs-meta[hidden]{ display:none; }
 .cs-meta select{
   background:#121a26; color:var(--text); border:1px solid rgba(255,255,255,.08);
   border-radius:10px; padding:8px 10px; font-family:var(--font-mono); font-size:12px;
   min-height:44px;
 }
 .cs-bulk{
-  min-height:48px; padding:0 14px; border-radius:14px;
+  flex:0 0 auto; min-height:48px; padding:0 14px; border-radius:14px;
   background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
   color:var(--text); font-family:var(--font-mono); font-weight:600; font-size:12.5px;
   display:flex; align-items:center; gap:8px;
@@ -1214,4 +1215,88 @@ body.bulk-mode .pchip.on .pa{
   .home-logo{ width: 180px; }
   .hm-tile{ padding: 18px 16px 16px; min-height: auto; }
   .hm-title{ font-size: 18px; }
+}
+
+/* ===========================================================
+   Phrase search box + match highlight + cross-slot chips
+   =========================================================== */
+
+.cp-search{
+  position: sticky;
+  top: 54px; /* below the .coach-topbar */
+  z-index: 20;
+  margin: 4px 12px 10px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px;
+  background: rgba(15, 22, 34, .92);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  min-height: 48px;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  transition: border-color .15s ease, background .15s ease;
+}
+.cp-search:focus-within{
+  border-color: rgba(89,183,255,.55);
+  background: rgba(15, 22, 34, .98);
+  box-shadow: 0 0 0 3px rgba(89,183,255,.12);
+}
+.cp-search-icon{
+  color: var(--muted); font-size: 16px; line-height: 1;
+}
+.cp-search input{
+  flex: 1; min-width: 0;
+  background: transparent; border: none; outline: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 10px 0;
+}
+.cp-search input::placeholder{ color: rgba(169,183,203,.55); }
+.cp-search input::-webkit-search-cancel-button{ display: none; }
+.cp-search-clear{
+  background: transparent; color: var(--muted);
+  border: none; width: 28px; height: 28px;
+  border-radius: 8px; font-size: 16px; line-height: 1;
+}
+.cp-search-clear:active{ background: rgba(255,138,138,.15); color: #ff8a8a; }
+.cp-search-hint{
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted);
+  padding: 3px 6px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+}
+
+/* Search-mode tweaks */
+.cp-grid.searching .ptile.top-match{
+  border-color: rgba(89,183,255,.55);
+  box-shadow: 0 0 0 2px rgba(89,183,255,.18);
+}
+.cp-grid.searching .ptile .pt-text mark{
+  background: rgba(89,183,255,.22);
+  color: var(--text);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+/* Cross-slot chips: when searching globally, show attr+sentiment context */
+.ptile .pt-context{
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted);
+  padding: 2px 6px; border-radius: 999px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  margin-right: 6px;
+  flex: 0 0 auto;
+}
+.ptile.cross-slot .pt-context.pos{ color: #8de08a; border-color: rgba(141,224,138,.32); }
+.ptile.cross-slot .pt-context.neg{ color: #ff8a8a; border-color: rgba(255,138,138,.32); }
+.ptile.cross-slot .pt-context.neu{ color: #9bd2ff; border-color: rgba(155,210,255,.32); }
+
+.cp-empty{
+  padding: 18px; text-align: center; color: var(--muted);
+  border: 1px dashed rgba(255,255,255,.10); border-radius: 12px;
+  font-size: 12.5px;
 }

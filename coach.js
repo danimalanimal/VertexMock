@@ -37,6 +37,7 @@
     players: [],       // selected player ids
     attribute: null,   // attribute key
     sentiment: null,   // '+' | '=' | '-'
+    query: '',         // phrase search query
     entries: load(STORE_KEY, []),
     freq: load(FREQ_KEY, {}),    // { 'attr|sent|phrase': count }
     customs: load(CUSTOM_KEY, {}),// { 'attr|sent': ['custom phrase', ...] }
@@ -49,10 +50,6 @@
   };
   const slotKey = () => `${state.attribute}|${state.sentiment}`;
   const phraseKey = (p) => `${slotKey()}|${p}`;
-  const incFreq = (p) => {
-    state.freq[phraseKey(p)] = (state.freq[phraseKey(p)] || 0) + 1;
-    save(FREQ_KEY, state.freq);
-  };
   const getPhrases = () => {
     if (!state.attribute || !state.sentiment) return [];
     const seed = (D.phrases[state.attribute]?.[state.sentiment]) || [];
@@ -171,41 +168,165 @@
     updateReady();
   }));
 
+  // ---------- Search engine ----------
+  // Score a phrase against the query. Higher = better. 0 = no match.
+  // Token-prefix matches score highest, then word-boundary substring, then loose substring.
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const scorePhrase = (phrase, qTokens) => {
+    if (qTokens.length === 0) return 0;
+    const lc = phrase.toLowerCase();
+    let score = 0;
+    for (const t of qTokens) {
+      if (!t) continue;
+      const tokenRe = new RegExp('(^|[\\s\\-/\u2019\'"(])' + escapeRe(t), 'i');
+      const subAt = lc.indexOf(t);
+      if (tokenRe.test(phrase)) {
+        score += 100 + Math.min(20, t.length * 2);
+        if (lc.startsWith(t)) score += 40;
+      } else if (subAt >= 0) {
+        score += 30 + Math.min(15, t.length * 2);
+      } else {
+        return 0; // require every token to match somewhere
+      }
+    }
+    return score;
+  };
+
+  // Wrap matched query tokens in <mark>. Returns an array of DOM nodes.
+  const highlightMatches = (phrase, qTokens) => {
+    if (qTokens.length === 0) return [document.createTextNode(phrase)];
+    const parts = qTokens.filter(Boolean).map(escapeRe);
+    if (parts.length === 0) return [document.createTextNode(phrase)];
+    const re = new RegExp('(' + parts.join('|') + ')', 'ig');
+    const nodes = [];
+    let last = 0;
+    let m;
+    while ((m = re.exec(phrase)) !== null) {
+      if (m.index > last) nodes.push(document.createTextNode(phrase.slice(last, m.index)));
+      const mark = document.createElement('mark');
+      mark.textContent = m[0];
+      nodes.push(mark);
+      last = m.index + m[0].length;
+      if (m[0].length === 0) re.lastIndex++;
+    }
+    if (last < phrase.length) nodes.push(document.createTextNode(phrase.slice(last)));
+    return nodes;
+  };
+
+  const buildPhraseList = () => {
+    const q = state.query.trim();
+    const qTokens = q ? q.toLowerCase().split(/\s+/) : [];
+    const slotPicked = !!(state.attribute && state.sentiment);
+
+    if (qTokens.length === 0) {
+      if (!slotPicked) return { mode:'empty', items:[], qTokens };
+      const items = getPhrases().map(x => ({ ...x, attribute: state.attribute, sentiment: state.sentiment, score: 0 }));
+      return { mode:'slot', items, qTokens };
+    }
+
+    const customsEntries = [];
+    Object.keys(state.customs || {}).forEach(k => {
+      const [a, s] = k.split('|');
+      (state.customs[k] || []).forEach(p => customsEntries.push({ phrase: p, attribute: a, sentiment: s, isCustom: true }));
+    });
+    const pool = customsEntries.concat(D.allPhrases.map(p => ({ ...p, isCustom: false })));
+
+    const scored = [];
+    for (const it of pool) {
+      const sc = scorePhrase(it.phrase, qTokens);
+      if (sc <= 0) continue;
+      const fKey = `${it.attribute}|${it.sentiment}|${it.phrase}`;
+      const freq = state.freq[fKey] || 0;
+      const inSlotBoost = (slotPicked && it.attribute === state.attribute && it.sentiment === state.sentiment) ? 50 : 0;
+      const customBoost = it.isCustom ? 20 : 0;
+      scored.push({ ...it, count: freq, score: sc + inSlotBoost + customBoost + Math.min(15, freq) });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return { mode: slotPicked ? 'searchSlot' : 'searchAll', items: scored.slice(0, 40), qTokens };
+  };
+
   // ---------- Render: phrase deck ----------
   const phraseGrid = $('#phraseGrid');
   const phraseStatus = $('#phraseStatus');
+  let topMatch = null; // remembered for Enter-to-save-top
+
+  const addCustomTile = () => {
+    const q = state.query.trim();
+    const label = q
+      ? `+ Save “${q.length > 28 ? q.slice(0, 26) + '…' : q}” as phrase`
+      : '+ Custom phrase';
+    const addTile = el('button', { class:'ptile add', type:'button' },
+      el('span', { class:'pt-text' }, label));
+    addTile.addEventListener('click', openCustom);
+    phraseGrid.append(addTile);
+  };
+
   const renderPhrases = () => {
     phraseGrid.innerHTML = '';
-    if (!state.attribute || !state.sentiment) {
-      phraseStatus.textContent = 'Pick attribute & sentiment';
+    topMatch = null;
+    const built = buildPhraseList();
+    const { mode, items, qTokens } = built;
+    const slotPicked = state.attribute && state.sentiment;
+
+    if (mode === 'empty') {
+      phraseStatus.textContent = 'Pick attribute & sentiment — or type to search';
       phraseStatus.dataset.tone = 'wait';
+    } else if (mode === 'slot') {
+      const sentName = state.sentiment === '+' ? 'commend' : state.sentiment === '-' ? 'critique' : 'note';
+      const attrLabel = D.attributes.find(a => a.key === state.attribute).label;
+      phraseStatus.textContent = `${attrLabel} • ${sentName} • ${items.length}`;
+      phraseStatus.dataset.tone = state.sentiment === '+' ? 'pos' : state.sentiment === '-' ? 'neg' : 'neu';
+    } else {
+      const scope = mode === 'searchAll' ? 'all library' : 'current slot first';
+      phraseStatus.textContent = `${items.length} match${items.length === 1 ? '' : 'es'} • ${scope}`;
+      phraseStatus.dataset.tone = 'neu';
+    }
+
+    phraseGrid.classList.toggle('searching', qTokens.length > 0);
+
+    if (mode === 'empty') {
+      phraseGrid.append(el('div', { class:'cp-empty' },
+        'Pick attribute and sentiment to load phrases — or just start typing.'));
+      addCustomTile();
       return;
     }
-    const list = getPhrases();
-    const sentName = state.sentiment === '+' ? 'commend' : state.sentiment === '-' ? 'critique' : 'note';
-    const attrLabel = D.attributes.find(a => a.key === state.attribute).label;
-    phraseStatus.textContent = `${attrLabel} \u2022 ${sentName} \u2022 ${list.length}`;
-    phraseStatus.dataset.tone = state.sentiment === '+' ? 'pos' : state.sentiment === '-' ? 'neg' : 'neu';
+    if (items.length === 0) {
+      phraseGrid.append(el('div', { class:'cp-empty' },
+        `No matches for “${state.query}”. Tap “+ Save” to add it.`));
+      addCustomTile();
+      return;
+    }
 
-    list.forEach(({ phrase, count, isCustom }) => {
+    items.forEach((it, idx) => {
+      const sentCls = it.sentiment === '+' ? 'pos' : it.sentiment === '-' ? 'neg' : 'neu';
+      const crossSlot = qTokens.length > 0 && (!slotPicked || it.attribute !== state.attribute || it.sentiment !== state.sentiment);
+
+      const textSpan = el('span', { class:'pt-text' });
+      if (crossSlot) {
+        const attrLabel = D.attributes.find(a => a.key === it.attribute)?.label || it.attribute;
+        const sentLabel = D.sentimentLabels[it.sentiment] || it.sentiment;
+        textSpan.append(el('span', { class:'pt-context ' + sentCls }, `${attrLabel} • ${sentLabel}`));
+      }
+      highlightMatches(it.phrase, qTokens).forEach(n => textSpan.append(n));
+
+      const isTop = qTokens.length > 0 && idx === 0;
       const tile = el('button', {
-        class: 'ptile sent-' + (state.sentiment === '+' ? 'pos' : state.sentiment === '-' ? 'neg' : 'neu')
-                + (isCustom ? ' custom' : ''),
+        class: 'ptile sent-' + sentCls
+                + (it.isCustom ? ' custom' : '')
+                + (crossSlot ? ' cross-slot' : '')
+                + (isTop ? ' top-match' : ''),
         type: 'button',
       },
-        el('span', { class:'pt-text' }, phrase),
-        count > 0 ? el('span', { class:'pt-freq', title:`Used ${count}\u00d7` }, `\u00d7${count}`) : '',
-        isCustom ? el('span', { class:'pt-tag' }, 'custom') : '',
+        textSpan,
+        it.count > 0 ? el('span', { class:'pt-freq', title:`Used ${it.count}\u00d7` }, `\u00d7${it.count}`) : '',
+        it.isCustom ? el('span', { class:'pt-tag' }, 'custom') : '',
       );
-      tile.addEventListener('click', () => logEntry(phrase));
+      tile.addEventListener('click', () => logEntry(it.phrase, { attribute: it.attribute, sentiment: it.sentiment }));
+      if (isTop) topMatch = { phrase: it.phrase, attribute: it.attribute, sentiment: it.sentiment };
       phraseGrid.append(tile);
     });
 
-    // Custom add tile always last
-    const addTile = el('button', { class:'ptile add', type:'button' },
-      el('span', { class:'pt-text' }, '+ Custom phrase'));
-    addTile.addEventListener('click', openCustom);
-    phraseGrid.append(addTile);
+    addCustomTile();
   };
 
   // ---------- Ready/Disabled state ----------
@@ -215,11 +336,15 @@
   };
 
   // ---------- Log entry ----------
-  const logEntry = (phrase) => {
+  // Optional override allows a cross-slot search match to log against the phrase's
+  // own attribute/sentiment without disturbing the coach's current slot selection.
+  const logEntry = (phrase, override) => {
     if (state.players.length === 0) { toast('Pick a player first', 'warn'); return; }
-    if (!state.attribute || !state.sentiment) { toast('Pick attribute & sentiment', 'warn'); return; }
+    const useAttribute = override?.attribute || state.attribute;
+    const useSentiment = override?.sentiment || state.sentiment;
+    if (!useAttribute || !useSentiment) { toast('Pick attribute & sentiment first', 'warn'); return; }
 
-    const attr = D.attributes.find(a => a.key === state.attribute);
+    const attr = D.attributes.find(a => a.key === useAttribute);
     const batchId = 'b' + Date.now() + Math.random().toString(36).slice(2, 6);
     const newOnes = state.players.map(pid => {
       const player = D.squad.find(p => p.id === pid);
@@ -230,25 +355,31 @@
         time: new Date().toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' }),
         playerId: pid,
         playerName: player.name,
-        attribute: state.attribute,
+        attribute: useAttribute,
         attributeLabel: attr.label,
-        sentiment: state.sentiment,
+        sentiment: useSentiment,
         phrase,
         coach:  state.sessionOn ? state.sessionCoach : 'lin',
         kind:   state.sessionOn ? state.sessionKind  : 'Training',
         session: state.sessionOn,
       };
     });
-    incFreq(phrase);
+    // Increment usage against the phrase's actual slot (so it surfaces faster next time).
+    const fKey = `${useAttribute}|${useSentiment}|${phrase}`;
+    state.freq[fKey] = (state.freq[fKey] || 0) + 1;
+    save(FREQ_KEY, state.freq);
     state.entries.unshift(...newOnes);
     save(STORE_KEY, state.entries);
     pushToFeed(newOnes);
     renderTally();
-    renderAttrs(); // refresh tally count on tiles
     pulsePhraseSaved(phrase);
     toast(state.players.length > 1
       ? `Logged ${newOnes.length} entries`
       : `Logged \u2014 ${player1Name(newOnes[0])}`, 'ok');
+    // Clear the search query (if any) so next-entry typing starts fresh.
+    // This also re-renders the deck, refreshing tally counts on attribute tiles.
+    if (state.query) setQuery('');
+    else { renderPhrases(); renderAttrs(); }
   };
   const player1Name = (entry) => entry.playerName.split(' ')[0];
 
@@ -346,10 +477,16 @@
   const customText   = $('#customText');
   const openCustom = () => {
     if (!state.attribute || !state.sentiment) { toast('Pick attribute & sentiment first', 'warn'); return; }
-    customText.value = '';
+    // Prefill with the current search query if one is typed
+    customText.value = state.query.trim();
     if (typeof customDialog.showModal === 'function') customDialog.showModal();
     else customDialog.setAttribute('open', '');
-    setTimeout(() => customText.focus(), 50);
+    setTimeout(() => {
+      customText.focus();
+      // Place caret at end for fast editing of the prefilled query
+      const v = customText.value;
+      customText.setSelectionRange(v.length, v.length);
+    }, 50);
   };
   $('#customCancel').addEventListener('click', () => customDialog.close && customDialog.close());
   $('#customForm').addEventListener('submit', (ev) => {
@@ -362,6 +499,8 @@
     save(CUSTOM_KEY, state.customs);
     customDialog.close && customDialog.close();
     logEntry(text);
+    // Clear the search so the deck snaps back to a clean slot view
+    setQuery('');
     renderPhrases();
   });
 
@@ -381,13 +520,56 @@
   };
 
   // ---------- Pulse the just-tapped phrase tile (peripheral confirmation) ----------
+  // Matches by phrase text only (ignores leading context chip text on cross-slot tiles).
   const pulsePhraseSaved = (phrase) => {
-    const tile = $$('.ptile').find(t => t.querySelector('.pt-text')?.textContent === phrase);
+    const tile = $$('.ptile').find(t => {
+      const text = t.querySelector('.pt-text');
+      if (!text) return false;
+      // Strip any context chip text from the comparison
+      const ctx = text.querySelector('.pt-context');
+      const raw = ctx ? text.textContent.replace(ctx.textContent, '').trim() : text.textContent;
+      return raw === phrase;
+    });
     if (!tile) return;
     tile.classList.remove('flash');
-    void tile.offsetWidth; // restart animation
+    void tile.offsetWidth;
     tile.classList.add('flash');
   };
+
+  // ---------- Phrase search input ----------
+  const searchInput = $('#phraseSearch');
+  const searchClear = $('#phraseSearchClear');
+  let searchDebounce = null;
+  const setQuery = (q) => {
+    state.query = q || '';
+    if (searchInput.value !== state.query) searchInput.value = state.query;
+    searchClear.hidden = state.query.length === 0;
+    renderPhrases();
+  };
+  searchInput.addEventListener('input', (ev) => {
+    const v = ev.target.value;
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => setQuery(v), 60);
+  });
+  searchInput.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      if (topMatch) {
+        logEntry(topMatch.phrase, { attribute: topMatch.attribute, sentiment: topMatch.sentiment });
+        setQuery('');
+      } else if (state.query.trim().length > 0) {
+        // No match — jump to custom save with prefill
+        openCustom();
+      }
+    } else if (ev.key === 'Escape') {
+      setQuery('');
+      searchInput.blur();
+    }
+  });
+  searchClear.addEventListener('click', () => {
+    setQuery('');
+    searchInput.focus();
+  });
 
   // ---------- First paint ----------
   renderRoster();
