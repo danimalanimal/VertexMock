@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Shuttle Tests</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span id="topbarTitle">Shuttle Tests</span></div>
+    <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Protocol picker -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Protocol</h2></div>
+      <div class="proto-switch" role="radiogroup" aria-label="Test protocol">
+        <button class="proto-btn on" data-proto="beep" type="button" role="radio" aria-checked="true">
+          <span class="pb-name">Beep test</span>
+          <span class="pb-sub">Léger 20m MSFT</span>
+        </button>
+        <button class="proto-btn" data-proto="yoyoIR1" type="button" role="radio" aria-checked="false">
+          <span class="pb-name">Yo-Yo IR1</span>
+          <span class="pb-sub">20m + 10s recovery</span>
+        </button>
+        <button class="proto-btn" data-proto="ift3015" type="button" role="radio" aria-checked="false">
+          <span class="pb-name">30-15 IFT</span>
+          <span class="pb-sub">30s run / 15s rest</span>
+        </button>
+      </div>
+      <p class="proto-blurb" id="protoBlurb">Léger 20m beep test — standard aerobic capacity benchmark.</p>
+    </section>
+
+    <!-- Pre-test guidance (protocol-aware) -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2 id="guideTitle">How to run the beep test</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody"></div>
+    </section>
+
+    <!-- Coach checklist -->
+    <section class="beep-card check-card">
+      <div class="beep-card-head"><h2>Pre-test checklist</h2></div>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <!-- Audio test -->
+    <section class="beep-card audio-card">
+      <div class="beep-card-head"><h2>Audio check</h2></div>
+      <p class="audio-copy">Tap to play a sample beep at session volume. Stand at the furthest line — if you can't hear it clearly, raise volume or move the device closer to centre court.</p>
+      <button class="audio-test-btn" id="audioTestBtn" type="button">▶ Play sample beep</button>
+    </section>
+
+    <!-- Roster picker -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head">
+        <h2>Select athletes</h2>
+        <div class="roster-actions">
+          <span class="roster-count" id="rosterCount">0 / 12 selected</span>
+          <button class="roster-all" id="selectAllBtn" type="button">Select all</button>
+          <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes for shuttle test"></div>
+    </section>
+
+    <!-- Start CTA -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">▶</span>
+        <span class="bs-label">Start session</span>
+        <span class="bs-sub" id="startSub">Pick at least one athlete</span>
+      </button>
+      <p class="beep-start-foot">3-second countdown plays before stage 1 begins.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — LIVE RUNNER
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run" hidden>
+
+    <!-- Phase pill (only shown for protocols that have phases) -->
+    <div class="phase-pill" id="phasePill" hidden>
+      <span class="pp-text" id="phaseText">RUN</span>
+      <span class="pp-time" id="phaseTime">—</span>
+    </div>
+
+    <!-- Live HUD -->
+    <section class="run-hud">
+      <div class="hud-cell hud-level">
+        <span class="hud-label" id="hudLevelLabel">Level</span>
+        <span class="hud-value" id="hudLevel">—</span>
+      </div>
+      <div class="hud-cell hud-shuttle">
+        <span class="hud-label" id="hudShuttleLabel">Shuttle</span>
+        <span class="hud-value" id="hudShuttle">—</span>
+      </div>
+      <div class="hud-cell hud-time">
+        <span class="hud-label">Time</span>
+        <span class="hud-value" id="hudTime">0:00</span>
+      </div>
+      <div class="hud-cell hud-active">
+        <span class="hud-label">Active</span>
+        <span class="hud-value" id="hudActive">— / —</span>
+      </div>
+    </section>
+
+    <!-- Cadence ribbon -->
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Speed</span><span class="rb-v" id="rbSpeed">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Pace</span><span class="rb-v" id="rbPace">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k" id="rbNextK">Next stage</span><span class="rb-v" id="rbNext">—</span></div>
+    </section>
+
+    <!-- Active athletes grid -->
+    <section class="run-grid-wrap">
+      <div class="run-head"><span>STILL IN — tap to drop out</span></div>
+      <div class="run-grid" id="runGrid"></div>
+    </section>
+
+    <!-- Out strip -->
+    <section class="out-wrap">
+      <div class="run-head"><span>OUT</span><span class="out-count" id="outCount">0</span></div>
+      <div class="out-strip" id="outStrip"></div>
+    </section>
+
+    <!-- Control bar -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="pauseBtn" type="button">⏸ Pause</button>
+      <button class="ctl ctl-stop"  id="stopBtn"  type="button">⏹ Stop</button>
+    </nav>
+
+    <!-- Undo toast -->
+    <div class="beep-toast" id="undoToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg" id="undoMsg">Dropped athlete</span>
+      <button class="bt-undo" id="undoBtn" type="button">Undo</button>
+    </div>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Session complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Athletes</span><span class="rs-v" id="rsAthletes">—</span></div>
+        <div class="rs-tile"><span class="rs-k" id="rsMaxK">Max level</span><span class="rs-v" id="rsMax">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Duration</span><span class="rs-v" id="rsDur">—</span></div>
+      </div>
+    </section>
+
+    <!-- Protocol-specific extra coaching output (e.g. 95% VIFT for 30-15) -->
+    <section class="beep-card" id="protoExtra" hidden>
+      <div class="beep-card-head"><h2 id="extraTitle">Coaching output</h2></div>
+      <div id="extraBody"></div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Results</h2></div>
+      <table class="results-table">
+        <thead id="resultsHead"></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot" id="resultsFoot"></p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="shuttle-tests.js"></script>
+</body>
+</html>
