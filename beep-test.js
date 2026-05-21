@@ -336,18 +336,34 @@
     undoMsg.textContent = msg;
     undoToast.hidden = false;
     clearTimeout(showUndo._t);
-    showUndo._t = setTimeout(() => { undoToast.hidden = true; }, 2500);
+    showUndo._t = setTimeout(() => { undoToast.hidden = true; }, 5000);
   }
-  undoBtn.addEventListener('click', () => {
+  function doUndo(ev) {
+    if (ev) { ev.preventDefault(); ev.stopPropagation(); }
     const rec = state.undoStack.pop();
-    if (!rec) return;
+    if (!rec) { undoToast.hidden = true; return; }
     state.active.add(rec.id);
     state.out = state.out.filter(r => r !== rec);
     renderRunGrid();
     renderOutStrip();
     updateHud();
+    clearTimeout(showUndo._t);
     undoToast.hidden = true;
-  });
+  }
+  undoBtn.addEventListener('click', doUndo);
+  // iOS fast-tap: fire on touchend before the 300ms click delay can lose the tap
+  undoBtn.addEventListener('touchend', (e) => {
+    // only treat as a tap if the touch didn’t move (i.e. not a scroll)
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t || !undoBtn._touchStart) return doUndo(e);
+    const dx = Math.abs(t.clientX - undoBtn._touchStart.x);
+    const dy = Math.abs(t.clientY - undoBtn._touchStart.y);
+    if (dx < 10 && dy < 10) doUndo(e);
+  }, { passive: false });
+  undoBtn.addEventListener('touchstart', (e) => {
+    const t = e.changedTouches && e.changedTouches[0];
+    if (t) undoBtn._touchStart = { x: t.clientX, y: t.clientY };
+  }, { passive: true });
 
   // ----------------------------- Pause / Stop ------------------------------
   pauseBtn.addEventListener('click', () => {

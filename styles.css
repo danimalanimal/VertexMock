@@ -2324,17 +2324,37 @@ body.bulk-mode .pchip.on .pa{
 /* Toasts */
 .beep-toast {
   position: fixed; left: 14px; right: 14px;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  /* sit well above the bottom controls so it can’t share tap space with them */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
   background: var(--card); border: 1px solid var(--line-strong);
-  border-radius: 14px; padding: 12px 14px;
-  display: flex; align-items: center; justify-content: space-between;
-  box-shadow: var(--shadow); z-index: 60;
+  border-radius: 14px; padding: 10px 12px 10px 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  box-shadow: var(--shadow); z-index: 1000;
   font-size: 13px;
+  pointer-events: auto;
+  animation: toastIn .22s var(--ease-out);
+}
+.beep-toast .bt-msg {
+  flex: 1; min-width: 0;
+  /* keep the message from squeezing the button */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .bt-undo {
   appearance: none; background: var(--blue); color: #04101e;
-  border: 0; border-radius: 10px; padding: 8px 14px;
-  font: 700 13px var(--font-mono); cursor: pointer;
+  border: 0; border-radius: 12px;
+  padding: 12px 22px;
+  font: 700 15px var(--font-mono); cursor: pointer;
+  min-height: 48px; min-width: 96px;
+  /* iOS: kill the 300ms double-tap delay so the tap fires immediately */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(89,183,255,.4);
+  /* defensive: ensure taps always hit */
+  pointer-events: auto; position: relative; z-index: 1;
+}
+.bt-undo:active { transform: scale(.96); background: var(--blue2); }
+@keyframes toastIn {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
 }
 
 /* ======================================================================
