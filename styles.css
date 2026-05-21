@@ -1520,3 +1520,108 @@ body.bulk-mode .pchip.on .pa{
 @media (max-width: 640px){
   .roster-picker{ max-width:100%; }
 }
+
+/* ============================================================
+   Physical panel: tabbed Anthropometrics + Fitness benchmarks
+   ============================================================ */
+
+/* Top-level tabs (Anthropometrics | Fitness benchmarks) */
+.phys-tabs{
+  display:flex; gap:4px;
+  border-bottom:1px solid var(--line);
+  margin:0 0 16px;
+}
+.phys-tab{
+  appearance:none; background:transparent; border:0;
+  color:var(--muted); font:600 12px/1 'Inter', system-ui, sans-serif;
+  letter-spacing:.04em; text-transform:uppercase;
+  padding:10px 14px; cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color .18s ease, border-color .18s ease, background .18s ease;
+  border-radius:6px 6px 0 0;
+}
+.phys-tab:hover{ color:#dce9fb; background:rgba(89,183,255,.05); }
+.phys-tab.active{
+  color:#dce9fb;
+  border-bottom-color:rgba(89,183,255,.85);
+  background:rgba(89,183,255,.06);
+}
+.phys-section{ animation:fade-in .25s ease-out; }
+.phys-section[hidden]{ display:none; }
+@keyframes fade-in{ from{opacity:0;transform:translateY(2px);} to{opacity:1;transform:none;} }
+
+/* Sub-tabs (chart metric: Weight | Height | Wingspan) */
+.sub-tabs{
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin:14px 0 10px;
+}
+.sub-tab{
+  appearance:none; background:rgba(255,255,255,.03);
+  border:1px solid var(--line);
+  color:var(--muted); font:600 11px/1 'Inter', system-ui, sans-serif;
+  letter-spacing:.04em;
+  padding:7px 12px; border-radius:999px; cursor:pointer;
+  transition:color .18s ease, border-color .18s ease, background .18s ease;
+}
+.sub-tab:hover{ color:#dce9fb; border-color:var(--line-strong); }
+.sub-tab.active{
+  color:#0a1224; background:rgba(154,217,255,.92);
+  border-color:rgba(154,217,255,.92);
+}
+
+/* Anthro KPI tiles (4 across) */
+.anthro-kpis{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px; margin-bottom:6px; min-width:0;
+}
+.anthro-kpis .kpi b{ font-size:16px; }
+@media (max-width: 720px){
+  .anthro-kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+/* Fitness benchmarks grid */
+.fit-grid{
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+@media (max-width: 720px){
+  .fit-grid{ grid-template-columns:1fr; }
+}
+.fit-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--line); border-radius:10px;
+  padding:11px 12px 9px;
+  display:flex; flex-direction:column; gap:6px;
+  transition:border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.fit-card:hover{
+  border-color:var(--line-strong);
+  background:rgba(255,255,255,.04);
+  transform:translateY(-1px);
+}
+.fit-top{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:8px;
+}
+.fit-top strong{
+  font:600 12px/1.2 'Inter', system-ui, sans-serif;
+  color:#dce9fb; letter-spacing:.02em;
+}
+.fit-current{
+  display:flex; align-items:baseline; gap:8px;
+  flex-wrap:wrap;
+}
+.fit-value{
+  font:600 19px/1 'Roboto Mono', ui-monospace, monospace;
+  color:#fff; letter-spacing:.01em;
+}
+.fit-delta{
+  font:500 10.5px/1 'Roboto Mono', ui-monospace, monospace;
+  color:var(--muted); letter-spacing:.04em;
+}
+.fit-spark{ height:42px; }
+.fit-foot{
+  font-size:10px; color:var(--muted);
+  letter-spacing:.05em; text-transform:uppercase;
+  margin-top:2px;
+}

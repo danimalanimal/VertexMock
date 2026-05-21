@@ -22,7 +22,7 @@
     <ul>
       <li><a href="#overview"     data-jump><span>Overview</span>             <span class="num">01</span></a></li>
       <li><a href="#playerCard"   data-jump><span>Athlete Profile</span>      <span class="num">02</span></a></li>
-      <li><a href="#physical"     data-jump><span>Weight Projection</span>    <span class="num">03</span></a></li>
+      <li><a href="#physical"     data-jump><span>Physical Development</span><span class="num">03</span></a></li>
       <li><a href="#radar"        data-jump><span>Skill Radar</span>          <span class="num">04</span></a></li>
       <li><a href="#statShare"    data-jump><span>Workshop Cohort</span>      <span class="num">05</span></a></li>
       <li><a href="#observations" data-jump><span>Observations</span>         <span class="num">06</span></a></li>
@@ -108,26 +108,47 @@
       <!-- RIGHT COLUMN -->
       <div class="stack">
 
-        <!-- WEIGHT & CONDITIONING PROJECTION -->
+        <!-- PHYSICAL: ANTHROPOMETRICS + FITNESS BENCHMARKS (tabbed) -->
         <article class="panel" id="physical">
           <div class="hd">
-            <h2>Weight &amp; conditioning projection</h2>
-            <span class="sub">Actual + trend projection to next competition window</span>
+            <h2>Physical development</h2>
+            <span class="sub">Anthropometrics &amp; standardised fitness tests</span>
           </div>
           <div class="body">
-            <div class="chart-frame" style="height:280px;"><canvas id="weightChart"></canvas></div>
-            <div class="projection-legend">
-              <span><span class="swatch" style="background:rgba(89,183,255,1);"></span>Actual weight</span>
-              <span><span class="swatch" style="background:rgba(127,140,255,1);border-top:2px dashed rgba(127,140,255,1);height:0;"></span>Projected trend</span>
-              <span><span class="swatch" style="background:rgba(127,140,255,0.3);"></span>Projection band</span>
-              <span><span class="swatch" style="background:rgba(95,227,156,1);"></span>Conditioning index</span>
+
+            <!-- Top-level tabs -->
+            <div class="phys-tabs" role="tablist" aria-label="Physical development sections">
+              <button type="button" class="phys-tab active" data-phys-section="anthro"  role="tab" aria-selected="true">Anthropometrics</button>
+              <button type="button" class="phys-tab"        data-phys-section="fitness" role="tab" aria-selected="false">Fitness benchmarks</button>
             </div>
-            <div class="proj-stats">
-              <div class="kpi"><span class="metric-label">Current</span><b>67.5 kg</b><span class="sub">May 2026 measure</span></div>
-              <div class="kpi"><span class="metric-label">12-mo trend</span><b>+1.0 kg</b><span class="sub">Controlled, mostly lean</span></div>
-              <div class="kpi"><span class="metric-label">Projected May 27</span><b>70.4 kg</b><span class="sub">71 kg division window</span></div>
-              <div class="kpi"><span class="metric-label">Conditioning</span><b>54.1</b><span class="sub">VO₂ proxy · +6.1 in 12 mo</span></div>
-            </div>
+
+            <!-- ANTHROPOMETRICS SECTION -->
+            <section class="phys-section active" data-phys-pane="anthro" role="tabpanel">
+              <div class="anthro-kpis">
+                <div class="kpi"><span class="metric-label">Age</span><b id="anthroAge">—</b><span class="sub" id="anthroAgeSub">Youth</span></div>
+                <div class="kpi"><span class="metric-label">Current weight</span><b id="anthroWeight">—</b><span class="sub" id="anthroWeightSub">—</span></div>
+                <div class="kpi"><span class="metric-label">Current height</span><b id="anthroHeight">—</b><span class="sub" id="anthroHeightSub">—</span></div>
+                <div class="kpi"><span class="metric-label">Wingspan</span><b id="anthroWingspan">—</b><span class="sub" id="anthroWingspanSub">—</span></div>
+              </div>
+
+              <div class="sub-tabs" role="tablist" aria-label="Anthropometric chart">
+                <button type="button" class="sub-tab active" data-anthro="weight"   role="tab" aria-selected="true">Weight</button>
+                <button type="button" class="sub-tab"        data-anthro="height"   role="tab" aria-selected="false">Height</button>
+                <button type="button" class="sub-tab"        data-anthro="wingspan" role="tab" aria-selected="false">Wingspan</button>
+              </div>
+              <div class="chart-frame" style="height:280px;"><canvas id="anthroChart"></canvas></div>
+              <div class="projection-legend" id="anthroLegend"></div>
+            </section>
+
+            <!-- FITNESS BENCHMARKS SECTION -->
+            <section class="phys-section" data-phys-pane="fitness" role="tabpanel" hidden>
+              <p class="sub" style="margin:6px 0 10px;">
+                Standardised tests retaken every 8 weeks. Track changes over time — not raw
+                rankings. Latest result + trend shown per test.
+              </p>
+              <div class="fit-grid" id="fitnessGrid"></div>
+            </section>
+
           </div>
         </article>
 
@@ -240,7 +261,7 @@
       <div class="tabinner" id="tabInner">
         <a href="#overview"     data-jump class="active">Overview</a>
         <a href="#playerCard"   data-jump>Profile</a>
-        <a href="#physical"     data-jump>Weight</a>
+        <a href="#physical"     data-jump>Physical</a>
         <a href="#radar"        data-jump>Radar</a>
         <a href="#statShare"    data-jump>Cohort</a>
         <a href="#observations" data-jump>Obs</a>

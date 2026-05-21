@@ -16,34 +16,46 @@ window.BoxerData = (() => {
   const athletes = [
     {
       id:'mateo',  name:'Mateo Reyes',   level:'Advanced',     stance:'Orthodox',
-      ageGroup:'Open · 22 yrs', team:'Iron Vine Boxing',       portrait:'assets/player-photo.jpeg',
+      ageGroup:'Youth \u00b7 13 yrs', team:'Rage Boxing Workshop', portrait:'assets/boxer-photo.jpeg',
       initials:'MR', accent:'#9bd2ff',
+      age:13, height:158, weight:48, wingspan:160,
       devScore:84, delta:+12, confidence:'8.9/10', stage:'Build \u2192 Perform', readiness:'Workshop lead+',
       season1:[64,58,55,60,62], season2:[80,78,76,78,82],
       satisfaction:[82,78,72,80,84],   // current coach slider snapshot per attribute
       hero:true,
     },
     { id:'jaylen', name:'Jaylen Brooks',  level:'Intermediate', stance:'Orthodox', initials:'JB', accent:'#7ed7c5',
+      age:14, height:163, weight:52, wingspan:166,
       devScore:74, delta:+8,  season1:[58,55,52,54,60], season2:[72,70,66,68,78], satisfaction:[72,70,62,68,80] },
     { id:'zaid',   name:'Zaid Karim',     level:'Beginner',     stance:'Orthodox', initials:'ZK', accent:'#ffbf66',
+      age:12, height:152, weight:44, wingspan:153,
       devScore:62, delta:+10, season1:[44,40,42,46,52], season2:[60,58,60,62,72], satisfaction:[58,52,55,60,72] },
     { id:'tariq',  name:'Tariq Owens',    level:'Intermediate', stance:'Southpaw', initials:'TO', accent:'#c89bff',
+      age:15, height:170, weight:60, wingspan:173,
       devScore:71, delta:+5,  season1:[60,58,54,56,58], season2:[70,72,66,66,74], satisfaction:[70,72,62,62,76] },
     { id:'leon',   name:'Leon Petros',    level:'Advanced',     stance:'Orthodox', initials:'LP', accent:'#ff9bb6',
+      age:16, height:174, weight:64, wingspan:177,
       devScore:81, delta:+6,  season1:[68,64,64,70,68], season2:[80,78,76,82,82], satisfaction:[78,76,72,82,84] },
     { id:'kofi',   name:'Kofi Annang',    level:'Beginner',     stance:'Orthodox', initials:'KA', accent:'#8de08a',
+      age:11, height:147, weight:39, wingspan:148,
       devScore:60, delta:+9,  season1:[48,44,42,40,52], season2:[60,58,56,54,72], satisfaction:[58,52,50,48,70] },
     { id:'devin',  name:'Devin Mahoney',  level:'Intermediate', stance:'Orthodox', initials:'DM', accent:'#ffd56b',
+      age:14, height:165, weight:54, wingspan:167,
       devScore:73, delta:+7,  season1:[58,60,52,56,60], season2:[72,74,66,68,76], satisfaction:[72,72,60,66,76] },
     { id:'marcus', name:'Marcus Cole',    level:'Advanced',     stance:'Southpaw', initials:'MC', accent:'#ff8a8a',
+      age:15, height:172, weight:61, wingspan:175,
       devScore:79, delta:+4,  season1:[68,66,62,66,66], season2:[78,76,72,80,78], satisfaction:[78,76,68,82,80] },
     { id:'andre',  name:'Andre Volkov',   level:'Intermediate', stance:'Orthodox', initials:'AV', accent:'#6bd5ff',
+      age:13, height:160, weight:50, wingspan:161,
       devScore:72, delta:+6,  season1:[58,56,56,54,60], season2:[70,72,66,64,76], satisfaction:[68,72,64,62,76] },
     { id:'omar',   name:'Omar Daher',     level:'Beginner',     stance:'Orthodox', initials:'OD', accent:'#ffafef',
+      age:11, height:144, weight:37, wingspan:144,
       devScore:58, delta:+8,  season1:[42,40,40,42,48], season2:[58,56,54,56,68], satisfaction:[56,52,50,54,68] },
     { id:'kai',    name:'Kai Nakamura',   level:'Intermediate', stance:'Southpaw', initials:'KN', accent:'#a8e063',
+      age:14, height:166, weight:55, wingspan:168,
       devScore:75, delta:+9,  season1:[60,58,58,56,60], season2:[74,74,70,68,78], satisfaction:[74,72,68,66,78] },
     { id:'rico',   name:'Rico Bautista',  level:'Advanced',     stance:'Orthodox', initials:'RB', accent:'#bda6ff',
+      age:16, height:175, weight:66, wingspan:179,
       devScore:82, delta:+7,  season1:[70,66,66,68,70], season2:[82,78,76,82,80], satisfaction:[82,78,76,84,82] },
   ];
 
@@ -60,18 +72,149 @@ window.BoxerData = (() => {
   const months = ['Feb 25','Apr','Jun','Aug','Oct','Dec','Feb 26','Apr','May'];
   const devScoreSeries = [72,73,75,76,77,79,81,83,84];
 
-  // ---------- Weight & conditioning projection (replaces height) ----------
-  // Mateo is a 67kg fighter trending into the 71kg division.
-  const weightLabels = [
+  // ---------- Anthropometrics (Age + Weight + Height + Wingspan) ----------
+  // Eight history points (Feb 25 \u2192 May 26) + four projected points (Aug 26 \u2192 May 27).
+  // Asterisks (*) mark projected labels.
+  const anthroLabels = [
     'Feb 25','Apr 25','Jun 25','Aug 25','Oct 25','Dec 25','Feb 26','May 26',
     'Aug 26*','Nov 26*','Feb 27*','May 27*'
   ];
-  const weightActual    = [65.0,65.6,66.2,66.5,66.8,67.0,67.3,67.5,null,null,null,null];
-  const weightProjected = [null,null,null,null,null,null,null,67.5,68.2,69.0,69.7,70.4];
-  const weightBandHi    = [null,null,null,null,null,null,null,67.5,68.9,70.0,71.0,72.0];
-  const weightBandLo    = [null,null,null,null,null,null,null,67.5,67.5,68.0,68.4,68.8];
-  // VO2 / conditioning index proxy (illustrative)
-  const conditioningActual = [48.0,49.2,50.5,51.4,52.0,52.6,53.4,54.1,null,null,null,null];
+
+  // Build per-athlete history + projection series for weight, height, wingspan.
+  // Inputs are the current (May 26) values on the athlete record. Growth rates
+  // are tuned by age: 11\u201312 grow fast, 13\u201314 peak velocity, 15\u201316 decelerate.
+  const ageGrowth = (a) => {
+    if (a.age <= 12) return { heightGain:5.0,  weightGain:3.2, wingspanGain:5.4 };
+    if (a.age <= 13) return { heightGain:5.6,  weightGain:3.6, wingspanGain:6.0 };
+    if (a.age <= 14) return { heightGain:5.4,  weightGain:4.0, wingspanGain:5.6 };
+    if (a.age <= 15) return { heightGain:3.8,  weightGain:4.2, wingspanGain:4.0 };
+    return            { heightGain:2.0,  weightGain:3.6, wingspanGain:2.2 };
+  };
+
+  // 8 history months span the last 12 months; projection runs another 12.
+  // We back-cast from the current measurement using the same rate so the
+  // history slopes match the projected slope (smooth handover at May 26).
+  const ramp = (target, gainPerYear, historyMonths = 12, projMonths = 12) => {
+    // historyPoints = 8 covers months -14..0 (every ~2 months)
+    // projectedPoints = 4 covers months +3, +6, +9, +12 from May 26
+    const monthsHist = [-14,-12,-10,-8,-6,-4,-2,0];
+    const monthsProj = [+3,+6,+9,+12];
+    const monthly = gainPerYear / 12;
+    const hist = monthsHist.map(m => +(target + m * monthly).toFixed(1));
+    const proj = monthsProj.map(m => +(target + m * monthly).toFixed(1));
+    return { hist, proj };
+  };
+
+  // Per-athlete anthro series builder used both for hero and roster picker.
+  const anthroFor = (a) => {
+    const g = ageGrowth(a);
+    const w = ramp(a.weight,   g.weightGain);
+    const h = ramp(a.height,   g.heightGain);
+    const s = ramp(a.wingspan, g.wingspanGain);
+
+    // Bands: \u00b1 a fraction of next-12-mo gain.
+    const band = (target, projArr, frac) => {
+      const hi = [target, ...projArr.map((v,i) => +(v + (projArr[i]-target) * frac).toFixed(1))];
+      const lo = [target, ...projArr.map((v,i) => +(v - (projArr[i]-target) * frac).toFixed(1))];
+      // pad with leading nulls so the band only paints over the projection window
+      const pad = Array(7).fill(null);
+      return {
+        hi: [...pad, ...hi],
+        lo: [...pad, ...lo],
+      };
+    };
+
+    // Pad nulls so history and projection align in the same labels array (length 12).
+    const histPad = Array(4).fill(null);
+    const projLead = [a.weight, ...w.proj];  // dummy first cell replaced per-series
+
+    const padHistOnly = (hist) => [...hist, null, null, null, null];
+    const padProjOnly = (curr, proj) => [null,null,null,null,null,null,null, curr, ...proj];
+
+    // Conditioning index (VO\u2082 proxy) keyed off the beep test result.
+    const baseVo2 = 42 + Math.round((a.devScore - 60) * 0.25); // 42\u201348-ish
+    const condHist = [-14,-12,-10,-8,-6,-4,-2,0].map(m => +(baseVo2 + (m + 14) * 0.55).toFixed(1));
+
+    return {
+      labels: anthroLabels,
+      weightActual:    padHistOnly(w.hist),
+      weightProjected: padProjOnly(a.weight, w.proj),
+      weightBandHi:    band(a.weight, w.proj, +0.35).hi,
+      weightBandLo:    band(a.weight, w.proj, +0.35).lo,
+      heightActual:    padHistOnly(h.hist),
+      heightProjected: padProjOnly(a.height, h.proj),
+      heightBandHi:    band(a.height, h.proj, +0.30).hi,
+      heightBandLo:    band(a.height, h.proj, +0.30).lo,
+      wingspanActual:  padHistOnly(s.hist),
+      wingspanProjected: padProjOnly(a.wingspan, s.proj),
+      wingspanBandHi:  band(a.wingspan, s.proj, +0.30).hi,
+      wingspanBandLo:  band(a.wingspan, s.proj, +0.30).lo,
+      conditioningActual: padHistOnly(condHist),
+    };
+  };
+
+  // ---------- Fitness benchmarks (tracked over time) ----------
+  // Eight test-date stamps spanning the same 14-month window as anthro history.
+  const fitnessLabels = ['Mar 25','May 25','Jul 25','Sep 25','Nov 25','Jan 26','Mar 26','May 26'];
+
+  // Per-athlete fitness curve. Each athlete's current (latest) result is
+  // derived from their devScore so stronger athletes test better; history is
+  // a smooth ramp to that current value.
+  // Test catalogue (units, direction): higher-is-better unless 'lowerBetter'.
+  const fitnessCatalogue = [
+    { key:'beep',     label:'Beep test (level)',  unit:'level',  lowerBetter:false, baseHero:11.2, spread:2.8 },
+    { key:'vertical', label:'Vertical jump',      unit:'cm',     lowerBetter:false, baseHero:48,   spread:10  },
+    { key:'broad',    label:'Broad jump',         unit:'cm',     lowerBetter:false, baseHero:212,  spread:34  },
+    { key:'sprint20', label:'20m sprint',         unit:'s',      lowerBetter:true,  baseHero:3.20, spread:0.42 },
+    { key:'sitReach', label:'Sit-and-reach',      unit:'cm',     lowerBetter:false, baseHero:24,   spread:9   },
+    { key:'pushup',   label:'Push-ups (60s)',     unit:'reps',   lowerBetter:false, baseHero:46,   spread:18  },
+    { key:'plank',    label:'Plank hold',         unit:'s',      lowerBetter:false, baseHero:140,  spread:50  },
+    { key:'rhr',      label:'Resting heart rate', unit:'bpm',    lowerBetter:true,  baseHero:58,   spread:10  },
+  ];
+
+  const fitnessFor = (a) => {
+    // Skill factor: 0 (lowest devScore in roster) \u2192 1 (highest)
+    const minScore = Math.min(...athletes.map(x => x.devScore));
+    const maxScore = Math.max(...athletes.map(x => x.devScore));
+    const sk = (a.devScore - minScore) / Math.max(1, (maxScore - minScore));
+
+    return fitnessCatalogue.map(t => {
+      const dir = t.lowerBetter ? -1 : +1;
+      // Current value scales with skill
+      const current = +(t.baseHero + dir * (sk - 0.5) * t.spread).toFixed(t.unit === 's' ? 2 : 1);
+      // History: 8 points improving over time. Starts ~12% worse, ends at current.
+      const startGap = t.baseHero * 0.12 * dir;
+      const series = Array.from({ length: 8 }, (_, i) => {
+        const t01 = i / 7;
+        const v = (current - startGap) + (startGap) * (1 - t01) + (current - (current - startGap)) * t01;
+        // smoother: linear from (current - startGap) \u2192 current
+        const lerp = (current - startGap) + (startGap) * t01;
+        return +lerp.toFixed(t.unit === 's' ? 2 : 1);
+      });
+      // Replace the formula above with a clean linear lerp.
+      const histStart = +(current - startGap).toFixed(t.unit === 's' ? 2 : 1);
+      const lerpSeries = Array.from({ length: 8 }, (_, i) => {
+        const v = histStart + (current - histStart) * (i / 7);
+        return +v.toFixed(t.unit === 's' ? 2 : 1);
+      });
+      // Trend label: improving when latest beats first by enough margin.
+      const delta = lerpSeries[7] - lerpSeries[0];
+      const better = t.lowerBetter ? delta < 0 : delta > 0;
+      const magnitude = Math.abs(delta) / Math.max(0.0001, Math.abs(lerpSeries[0]));
+      const trend = magnitude < 0.04 ? 'flat' : (better ? 'up' : 'down');
+
+      return {
+        key: t.key,
+        label: t.label,
+        unit: t.unit,
+        lowerBetter: t.lowerBetter,
+        current,
+        first: lerpSeries[0],
+        series: lerpSeries,
+        trend,
+      };
+    });
+  };
 
   // ---------- Per-attribute trends (the small multiples panel) ----------
   // Boxing-specific themes that map to fundamentals/mitts/noodle/shields/partner.
@@ -188,7 +331,8 @@ window.BoxerData = (() => {
 
   return {
     coaches, athletes, cohort, radarLabels, months, devScoreSeries,
-    weightLabels, weightActual, weightProjected, weightBandHi, weightBandLo, conditioningActual,
+    // Anthro + fitness helpers
+    anthroLabels, fitnessLabels, anthroFor, fitnessFor, fitnessCatalogue,
     attributeTrends, statShare, timeline, lists, seedFeed,
     heatCategories, heatMonths, heatValues,
   };

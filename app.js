@@ -107,52 +107,68 @@
     }
   });
 
-  // ---------- Height & physical projection ----------
-  new Chart($('#heightChart'), {
+  // ---------- Anthropometrics chart (Weight / Height / Wingspan) ----------
+  // Single Chart.js instance whose datasets are swapped when the user picks a metric.
+  const heroAthlete = D.hero;
+  const anthroMeta = {
+    weight:   { label:'Weight',   unit:'kg', color:'rgba(89,183,255,1)',  fillCol:'rgba(89,183,255,0.12)' },
+    height:   { label:'Height',   unit:'cm', color:'rgba(95,227,156,1)',  fillCol:'rgba(95,227,156,0.10)' },
+    wingspan: { label:'Wingspan', unit:'cm', color:'rgba(200,155,255,1)', fillCol:'rgba(200,155,255,0.10)' },
+  };
+
+  let activeAnthro = 'weight';
+  let anthroCache = D.anthroFor(heroAthlete);
+
+  const anthroDatasetsFor = (metric) => {
+    const m = anthroMeta[metric];
+    const data = anthroCache;
+    return [
+      {
+        label:`${m.label} — actual`,
+        data:data[`${metric}Actual`],
+        borderColor:m.color, backgroundColor:m.fillCol,
+        fill:false, tension:.25, borderWidth:2.2, pointRadius:3,
+        pointBackgroundColor:m.color,
+        spanGaps:false, yAxisID:'y'
+      },
+      {
+        label:`${m.label} — projected`,
+        data:data[`${metric}Projected`],
+        borderColor:'rgba(127,140,255,1)', borderDash:[6,5],
+        fill:false, tension:.25, borderWidth:2, pointRadius:3,
+        pointBackgroundColor:'rgba(127,140,255,1)',
+        spanGaps:false, yAxisID:'y'
+      },
+      {
+        label:'Band high', data:data[`${metric}BandHi`],
+        borderColor:'rgba(127,140,255,0)', backgroundColor:'rgba(127,140,255,0.15)',
+        fill:'+1', pointRadius:0, borderWidth:0, tension:.25, spanGaps:false, yAxisID:'y'
+      },
+      {
+        label:'Band low', data:data[`${metric}BandLo`],
+        borderColor:'rgba(127,140,255,0)', backgroundColor:'rgba(127,140,255,0.15)',
+        fill:false, pointRadius:0, borderWidth:0, tension:.25, spanGaps:false, yAxisID:'y'
+      },
+    ];
+  };
+
+  const anthroAxisRange = (metric) => {
+    const data = anthroCache;
+    const all = [
+      ...(data[`${metric}Actual`]||[]),
+      ...(data[`${metric}Projected`]||[]),
+      ...(data[`${metric}BandHi`]||[]),
+      ...(data[`${metric}BandLo`]||[]),
+    ].filter(v => v != null);
+    const min = Math.min(...all);
+    const max = Math.max(...all);
+    const pad = (max - min) * 0.18 || 1;
+    return { min: Math.floor(min - pad), max: Math.ceil(max + pad) };
+  };
+
+  const anthroChart = new Chart($('#anthroChart'), {
     type:'line',
-    data:{
-      labels:D.heightLabels,
-      datasets:[
-        {
-          label:'Height — actual (cm)',
-          data:D.heightActual,
-          borderColor:'rgba(89,183,255,1)',
-          backgroundColor:'rgba(89,183,255,0.12)',
-          fill:false, tension:.25, borderWidth:2.2, pointRadius:3, pointBackgroundColor:'rgba(154,217,255,1)',
-          spanGaps:false, yAxisID:'y'
-        },
-        {
-          label:'Height — projected',
-          data:D.heightProjected,
-          borderColor:'rgba(127,140,255,1)',
-          borderDash:[6,5],
-          fill:false, tension:.25, borderWidth:2, pointRadius:3, pointBackgroundColor:'rgba(127,140,255,1)',
-          spanGaps:false, yAxisID:'y'
-        },
-        {
-          label:'Confidence (+2cm)',
-          data:D.heightBandHi,
-          borderColor:'rgba(127,140,255,0)',
-          backgroundColor:'rgba(127,140,255,0.15)',
-          fill:'+1', pointRadius:0, borderWidth:0, tension:.25, spanGaps:false, yAxisID:'y'
-        },
-        {
-          label:'Confidence (-2cm)',
-          data:D.heightBandLo,
-          borderColor:'rgba(127,140,255,0)',
-          backgroundColor:'rgba(127,140,255,0.15)',
-          fill:false, pointRadius:0, borderWidth:0, tension:.25, spanGaps:false, yAxisID:'y'
-        },
-        {
-          label:'Wingspan (cm)',
-          data:D.wingspanActual,
-          borderColor:'rgba(95,227,156,0.9)',
-          backgroundColor:'rgba(95,227,156,0.1)',
-          fill:false, tension:.25, borderWidth:1.8, pointRadius:2.5, pointBackgroundColor:'rgba(95,227,156,1)',
-          spanGaps:false, yAxisID:'y'
-        },
-      ]
-    },
+    data:{ labels:D.anthroLabels, datasets:anthroDatasetsFor('weight') },
     options:{
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
@@ -161,21 +177,145 @@
           labels:{
             color:'#dce9fb', usePointStyle:true, boxWidth:10, boxHeight:10, padding:14,
             font:{ family:'Inter', size:11, weight:'600' },
-            filter: it => !it.text.startsWith('Confidence')
+            filter: it => !it.text.startsWith('Band')
           }
         },
         tooltip:{
           callbacks:{
-            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + ' cm' : '—'}`
+            label: (ctx) => {
+              const v = ctx.parsed.y;
+              if (v == null) return `${ctx.dataset.label}: —`;
+              const unit = anthroMeta[activeAnthro].unit;
+              return `${ctx.dataset.label}: ${v.toFixed(1)} ${unit}`;
+            }
           }
         }
       },
       scales:{
         x:{ grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#a9b7cb', font:{ size:10 } } },
-        y:{ position:'left', grid:{ color:'rgba(255,255,255,0.06)' }, ticks:{ color:'#a9b7cb', callback:v=>v+' cm' }, suggestedMin:168, suggestedMax:182 }
+        y:{ position:'left', grid:{ color:'rgba(255,255,255,0.06)' },
+            ticks:{ color:'#a9b7cb', callback:v => v + ' ' + anthroMeta['weight'].unit },
+            ...anthroAxisRange('weight') }
       }
     }
   });
+
+  const renderAnthroLegend = () => {
+    const m = anthroMeta[activeAnthro];
+    const legend = $('#anthroLegend');
+    legend.innerHTML = '';
+    legend.appendChild(el('span', {}, el('span', { class:'swatch', style:`background:${m.color};` }), `Actual ${m.label.toLowerCase()}`));
+    legend.appendChild(el('span', {},
+      el('span', { class:'swatch', style:'background:rgba(127,140,255,1);border-top:2px dashed rgba(127,140,255,1);height:0;' }),
+      'Projected trend'));
+    legend.appendChild(el('span', {}, el('span', { class:'swatch', style:'background:rgba(127,140,255,0.3);' }), 'Projection band'));
+  };
+  renderAnthroLegend();
+
+  const switchAnthro = (metric) => {
+    activeAnthro = metric;
+    const m = anthroMeta[metric];
+    anthroChart.data.datasets = anthroDatasetsFor(metric);
+    const r = anthroAxisRange(metric);
+    anthroChart.options.scales.y.min = r.min;
+    anthroChart.options.scales.y.max = r.max;
+    anthroChart.options.scales.y.ticks.callback = v => v + ' ' + m.unit;
+    anthroChart.update();
+    renderAnthroLegend();
+    $$('.sub-tab').forEach(b => {
+      const on = b.dataset.anthro === metric;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', String(on));
+    });
+  };
+
+  $$('.sub-tab').forEach(b => b.addEventListener('click', () => switchAnthro(b.dataset.anthro)));
+
+  // ---------- Physical-panel top-level tabs (Anthro / Fitness) ----------
+  const switchPhysSection = (id) => {
+    $$('.phys-tab').forEach(b => {
+      const on = b.dataset.physSection === id;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', String(on));
+    });
+    $$('.phys-section').forEach(s => {
+      const on = s.dataset.physPane === id;
+      s.classList.toggle('active', on);
+      if (on) s.removeAttribute('hidden'); else s.setAttribute('hidden', '');
+    });
+    if (id === 'anthro')  { anthroChart.resize(); }
+    if (id === 'fitness') { fitnessSparks.forEach(c => c.resize()); }
+  };
+  $$('.phys-tab').forEach(b => b.addEventListener('click', () => switchPhysSection(b.dataset.physSection)));
+
+  // ---------- Fitness benchmarks grid ----------
+  const fitnessGrid = $('#fitnessGrid');
+  const fitnessSparks = [];
+  const formatVal = (v, unit) => unit === 's' ? v.toFixed(2) + ' s' : `${v} ${unit}`;
+  const renderFitness = (a) => {
+    fitnessGrid.innerHTML = '';
+    fitnessSparks.length = 0;
+    const tests = D.fitnessFor(a);
+    tests.forEach(t => {
+      const canvasId = `fit-${t.key}`;
+      const delta = +(t.series[7] - t.series[0]).toFixed(2);
+      const direction = t.trend === 'up' ? 'Improving' : t.trend === 'down' ? 'Regressing' : 'Stable';
+      const deltaStr = (delta > 0 ? '+' : '') + (Math.abs(delta) < 1 ? delta.toFixed(2) : delta.toFixed(1));
+
+      const card = el('div', { class:'fit-card' },
+        el('div', { class:'fit-top' },
+          el('strong', {}, t.label),
+          el('span', { class:`trend ${t.trend}` }, direction)
+        ),
+        el('div', { class:'fit-current' },
+          el('span', { class:'fit-value' }, formatVal(t.current, t.unit)),
+          el('span', { class:'fit-delta' }, `${deltaStr} ${t.unit} 14-mo`)
+        ),
+        el('div', { class:'chart-frame fit-spark' }, el('canvas', { id:canvasId })),
+        el('div', { class:'fit-foot sub' },
+          t.lowerBetter ? 'Lower is better' : 'Higher is better'
+        )
+      );
+      fitnessGrid.appendChild(card);
+
+      const color = t.trend === 'down' ? 'rgba(255,125,125,1)' : t.trend === 'flat' ? 'rgba(255,191,102,1)' : 'rgba(95,227,156,1)';
+      const fill  = t.trend === 'down' ? 'rgba(255,125,125,0.12)' : t.trend === 'flat' ? 'rgba(255,191,102,0.1)' : 'rgba(95,227,156,0.12)';
+      const c = new Chart(document.getElementById(canvasId), {
+        type:'line',
+        data:{ labels:D.fitnessLabels, datasets:[{ data:t.series, borderColor:color, backgroundColor:fill, fill:true, tension:.35, borderWidth:1.5, pointRadius:0 }] },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => `${D.fitnessLabels[ctx.dataIndex]}: ${formatVal(ctx.parsed.y, t.unit)}` } } },
+          scales:{ x:{ display:false }, y:{ display:false, suggestedMin:Math.min(...t.series)*0.95, suggestedMax:Math.max(...t.series)*1.05, reverse: t.lowerBetter } }
+        }
+      });
+      fitnessSparks.push(c);
+    });
+  };
+  renderFitness(heroAthlete);
+
+  // ---------- Anthro KPI tiles ----------
+  const updateAnthroKpis = (a) => {
+    const data = D.anthroFor(a);
+    const last = arr => { for (let i = arr.length - 1; i >= 0; i--) { if (arr[i] != null) return arr[i]; } return null; };
+    const projEnd = (key) => last(data[`${key}Projected`]);
+    const gain = (key, current) => {
+      const end = projEnd(key);
+      if (end == null) return '—';
+      const d = +(end - current).toFixed(1);
+      return (d>=0?'+':'') + d;
+    };
+    $('#anthroAge').textContent = a.age + ' yrs';
+    $('#anthroAgeSub').textContent = a.level + ' · ' + a.position;
+    $('#anthroWeight').textContent = a.weight.toFixed(1) + ' kg';
+    $('#anthroWeightSub').textContent = `Projected ${gain('weight', a.weight)} kg by May 27`;
+    $('#anthroHeight').textContent = a.height.toFixed(1) + ' cm';
+    $('#anthroHeightSub').textContent = `Projected ${gain('height', a.height)} cm by May 27`;
+    $('#anthroWingspan').textContent = a.wingspan.toFixed(1) + ' cm';
+    const ratio = (a.wingspan / a.height).toFixed(2);
+    $('#anthroWingspanSub').textContent = `Ratio ${ratio} · projected ${gain('wingspan', a.wingspan)} cm`;
+  };
+  updateAnthroKpis(heroAthlete);
 
   // ---------- Attribute sparklines + cards ----------
   const obsGrid = $('#observationsGrid');

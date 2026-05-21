@@ -18,17 +18,108 @@ window.VertexData = (() => {
 
   const devScoreSeries = [73,74,75,76,76,78,80,81,82,83,84];
 
-  // Height in cm — actual samples then projected to U18 (Sep 26)
-  const heightLabels = [
-    'Feb 24','May 24','Aug 24','Nov 24','Feb 25','May 25','Aug 25','Sep 25',
-    'Dec 25*','Mar 26*','Jun 26*','Sep 26*'
+  // ---------- Hero athlete (Ava) anthropometric record ----------
+  // Single source of truth for age + current measurements; the anthroFor()
+  // builder below produces history + projection series from these fields.
+  const hero = {
+    id:'ava', name:'Ava Thompson', level:'U16 Girls', position:'Combo Guard/Wing',
+    age:16, height:175.0, weight:64.5, wingspan:178.6, devScore:84,
+  };
+
+  // ---------- Anthropometrics (Age + Weight + Height + Wingspan) ----------
+  // Eight history points (Feb 25 \u2192 May 26) + four projected points (Aug 26 \u2192 May 27).
+  // Asterisks (*) mark projected labels.
+  const anthroLabels = [
+    'Feb 25','Apr 25','Jun 25','Aug 25','Oct 25','Dec 25','Feb 26','May 26',
+    'Aug 26*','Nov 26*','Feb 27*','May 27*'
   ];
-  const heightActual    = [170.2,171.1,172.0,172.8,173.6,174.3,174.8,175.0,null,null,null,null];
-  // Projected continues smoothly; linear-ish with decelerating growth
-  const heightProjected = [null,null,null,null,null,null,null,175.0,175.6,176.1,176.5,176.8];
-  const heightBandHi    = [null,null,null,null,null,null,null,175.0,176.8,177.5,178.1,178.6];
-  const heightBandLo    = [null,null,null,null,null,null,null,175.0,174.4,174.7,174.9,175.0];
-  const wingspanActual  = [173.5,174.4,175.2,176.1,177.0,177.8,178.4,178.6,null,null,null,null];
+
+  // Growth rates tuned by age — basketball females decelerate earlier than
+  // adolescent males but still gain conditioning weight + wingspan reach.
+  const ageGrowth = (a) => {
+    if (a.age <= 13) return { heightGain:4.2, weightGain:3.4, wingspanGain:4.6 };
+    if (a.age <= 14) return { heightGain:3.8, weightGain:3.6, wingspanGain:4.0 };
+    if (a.age <= 15) return { heightGain:2.6, weightGain:3.4, wingspanGain:2.8 };
+    if (a.age <= 16) return { heightGain:1.6, weightGain:2.8, wingspanGain:1.8 };
+    return            { heightGain:0.8, weightGain:2.2, wingspanGain:1.0 };
+  };
+
+  const ramp = (target, gainPerYear) => {
+    const monthsHist = [-14,-12,-10,-8,-6,-4,-2,0];
+    const monthsProj = [+3,+6,+9,+12];
+    const monthly = gainPerYear / 12;
+    const hist = monthsHist.map(m => +(target + m * monthly).toFixed(1));
+    const proj = monthsProj.map(m => +(target + m * monthly).toFixed(1));
+    return { hist, proj };
+  };
+
+  const anthroFor = (a) => {
+    const g = ageGrowth(a);
+    const w = ramp(a.weight,   g.weightGain);
+    const h = ramp(a.height,   g.heightGain);
+    const s = ramp(a.wingspan, g.wingspanGain);
+    const band = (target, projArr, frac) => {
+      const hi = [target, ...projArr.map(v => +(target + (v-target) * (1+frac)).toFixed(1))];
+      const lo = [target, ...projArr.map(v => +(target + (v-target) * (1-frac)).toFixed(1))];
+      const pad = Array(7).fill(null);
+      return { hi:[...pad, ...hi], lo:[...pad, ...lo] };
+    };
+    const padHistOnly = (hist) => [...hist, null, null, null, null];
+    const padProjOnly = (curr, proj) => [null,null,null,null,null,null,null, curr, ...proj];
+    return {
+      labels: anthroLabels,
+      weightActual:    padHistOnly(w.hist),
+      weightProjected: padProjOnly(a.weight, w.proj),
+      weightBandHi:    band(a.weight, w.proj, +0.35).hi,
+      weightBandLo:    band(a.weight, w.proj, +0.35).lo,
+      heightActual:    padHistOnly(h.hist),
+      heightProjected: padProjOnly(a.height, h.proj),
+      heightBandHi:    band(a.height, h.proj, +0.30).hi,
+      heightBandLo:    band(a.height, h.proj, +0.30).lo,
+      wingspanActual:  padHistOnly(s.hist),
+      wingspanProjected: padProjOnly(a.wingspan, s.proj),
+      wingspanBandHi:  band(a.wingspan, s.proj, +0.30).hi,
+      wingspanBandLo:  band(a.wingspan, s.proj, +0.30).lo,
+    };
+  };
+
+  // ---------- Fitness benchmarks ----------
+  // Eight test-date stamps spanning the same 14-month window as anthro history.
+  const fitnessLabels = ['Mar 25','May 25','Jul 25','Sep 25','Nov 25','Jan 26','Mar 26','May 26'];
+
+  // Test catalogue (units, direction). Same 8 standardised tests as boxing —
+  // industry standard for youth athletic profiling; cross-sport comparable.
+  const fitnessCatalogue = [
+    { key:'beep',     label:'Beep test (level)',  unit:'level',  lowerBetter:false, baseHero:10.2, spread:2.4 },
+    { key:'vertical', label:'Vertical jump',      unit:'cm',     lowerBetter:false, baseHero:52,   spread:12  },
+    { key:'broad',    label:'Broad jump',         unit:'cm',     lowerBetter:false, baseHero:208,  spread:30  },
+    { key:'sprint20', label:'20m sprint',         unit:'s',      lowerBetter:true,  baseHero:3.18, spread:0.36 },
+    { key:'sitReach', label:'Sit-and-reach',      unit:'cm',     lowerBetter:false, baseHero:28,   spread:9   },
+    { key:'pushup',   label:'Push-ups (60s)',     unit:'reps',   lowerBetter:false, baseHero:40,   spread:16  },
+    { key:'plank',    label:'Plank hold',         unit:'s',      lowerBetter:false, baseHero:150,  spread:50  },
+    { key:'rhr',      label:'Resting heart rate', unit:'bpm',    lowerBetter:true,  baseHero:60,   spread:9   },
+  ];
+
+  const fitnessFor = (a) => {
+    // Basketball roster isn't multi-athlete yet (Ava is hero) — skill factor
+    // is 0.5 by default; scaffolded for future expansion when roster lands.
+    const sk = 0.6; // Ava sits a touch above mock baseline
+    return fitnessCatalogue.map(t => {
+      const dir = t.lowerBetter ? -1 : +1;
+      const current = +(t.baseHero + dir * (sk - 0.5) * t.spread).toFixed(t.unit === 's' ? 2 : 1);
+      const startGap = t.baseHero * 0.12 * dir;
+      const histStart = +(current - startGap).toFixed(t.unit === 's' ? 2 : 1);
+      const series = Array.from({ length: 8 }, (_, i) =>
+        +(histStart + (current - histStart) * (i / 7)).toFixed(t.unit === 's' ? 2 : 1)
+      );
+      const delta = series[7] - series[0];
+      const better = t.lowerBetter ? delta < 0 : delta > 0;
+      const magnitude = Math.abs(delta) / Math.max(0.0001, Math.abs(series[0]));
+      const trend = magnitude < 0.04 ? 'flat' : (better ? 'up' : 'down');
+      return { key:t.key, label:t.label, unit:t.unit, lowerBetter:t.lowerBetter,
+               current, first:series[0], series, trend };
+    });
+  };
 
   // Per-attribute trends (small multiples). Coach attribution per attribute.
   const attributeTrends = [
@@ -199,7 +290,7 @@ window.VertexData = (() => {
 
   return {
     coaches, radarLabels, seasonOne, seasonTwo, months, devScoreSeries,
-    heightLabels, heightActual, heightProjected, heightBandHi, heightBandLo, wingspanActual,
+    hero, anthroLabels, anthroFor, fitnessLabels, fitnessCatalogue, fitnessFor,
     attributeTrends, statShare, nbaWatch, timeline, lists, feed,
     heatCategories, heatMonths, heatValues,
   };
