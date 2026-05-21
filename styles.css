@@ -1421,3 +1421,102 @@ body.bulk-mode .pchip.on .pa{
   font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
 }
 
+
+/* ========== Boxer Dashboard additions ========== */
+
+/* Roster picker (hero) */
+.roster-picker{
+  margin-top:14px;
+  display:flex; flex-direction:column; gap:6px;
+  max-width:340px;
+}
+.roster-label{
+  font-family: var(--font-mono);
+  font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:#a9b7cb;
+}
+.roster-select-wrap{ position:relative; }
+.roster-select{
+  width:100%;
+  appearance:none; -webkit-appearance:none;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius:10px;
+  color:#eaf2ff;
+  font: 600 13px/1.2 'Inter', system-ui, sans-serif;
+  padding:10px 38px 10px 12px;
+  cursor:pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.roster-select:hover{ border-color: rgba(154,217,255,.45); background: rgba(255,255,255,0.06); }
+.roster-select:focus{ outline:none; border-color: rgba(89,183,255,.7); box-shadow: 0 0 0 3px rgba(89,183,255,.18); }
+.roster-chev{
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  pointer-events:none; color:#9bb0c8; font-size:14px;
+}
+.roster-sub{
+  font-family: var(--font-mono);
+  font-size:11px; color:#9bb0c8;
+}
+
+/* Hero portrait fallback when an athlete has no photo */
+.hero-portrait[data-initials]{
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08));
+  display:flex; align-items:center; justify-content:center;
+}
+.hero-portrait[data-initials]::after{
+  content: attr(data-initials);
+  font: 700 42px 'Inter', system-ui, sans-serif;
+  color: var(--accent, #9bd2ff);
+  letter-spacing:.02em;
+}
+.profile-photo[data-initials]{
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08));
+  display:flex; align-items:center; justify-content:center;
+}
+.profile-photo[data-initials]::after{
+  content: attr(data-initials);
+  font: 700 28px 'Inter', system-ui, sans-serif;
+  color: var(--accent, #9bd2ff);
+}
+
+/* Satisfaction tone legend under the radar */
+.sat-legend{
+  margin-top:12px;
+  display:flex; flex-wrap:wrap; gap:10px;
+  align-items:center;
+  font-family: var(--font-mono);
+  font-size:11px; color:#a9b7cb;
+}
+.sat-legend .sat-key{
+  letter-spacing:.06em; text-transform:uppercase;
+  color:#dce9fb; margin-right:2px;
+}
+.sat-dot{
+  display:inline-block; width:10px; height:10px; border-radius:50%;
+  margin: 0 4px 0 8px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset;
+}
+.sat-dot.tone-low { background:#ff8a40; }
+.sat-dot.tone-mid { background:#6bb6ff; }
+.sat-dot.tone-high{ background:#8de08a; }
+
+/* Cohort row (workshop squad average) — visually distinct from peers */
+.share-row.cohort{
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border-color: rgba(255,255,255,0.18);
+}
+.share-row.cohort .share-avatar{
+  background: rgba(255,255,255,0.14);
+  color:#ffe8b2;
+}
+.share-row.cohort .share-name::after{
+  content:'AVG'; margin-left:8px;
+  font-family: var(--font-mono); font-size:9.5px;
+  letter-spacing:.08em; padding:1px 6px; border-radius:999px;
+  background: rgba(255,255,255,.08); color:#dce9fb;
+}
+
+@media (max-width: 640px){
+  .roster-picker{ max-width:100%; }
+}

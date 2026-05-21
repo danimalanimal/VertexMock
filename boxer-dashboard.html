@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Vertex Sport Systems — Boxer Development Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Mobile nav toggle -->
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="navSheet">
+    <span class="bars"><span></span><span></span><span></span></span>
+  </button>
+
+  <!-- Full-screen mobile nav sheet -->
+  <nav class="nav-sheet" id="navSheet" aria-label="Section navigation" aria-hidden="true">
+    <div class="nav-eyebrow">Jump to</div>
+    <ul>
+      <li><a href="#overview"     data-jump><span>Overview</span>             <span class="num">01</span></a></li>
+      <li><a href="#playerCard"   data-jump><span>Athlete Profile</span>      <span class="num">02</span></a></li>
+      <li><a href="#physical"     data-jump><span>Weight Projection</span>    <span class="num">03</span></a></li>
+      <li><a href="#radar"        data-jump><span>Skill Radar</span>          <span class="num">04</span></a></li>
+      <li><a href="#statShare"    data-jump><span>Workshop Cohort</span>      <span class="num">05</span></a></li>
+      <li><a href="#observations" data-jump><span>Observations</span>         <span class="num">06</span></a></li>
+      <li><a href="#insights"     data-jump><span>Insights</span>             <span class="num">07</span></a></li>
+      <li><a href="#timeline"     data-jump><span>Timeline</span>             <span class="num">08</span></a></li>
+    </ul>
+    <a class="nav-cta" href="index.html">
+      <span>← Home</span>
+      <span class="nav-cta-sub">All Vertex mockups</span>
+    </a>
+  </nav>
+
+  <main class="app">
+
+    <!-- ============== HERO ============== -->
+    <header class="hero" id="overview">
+      <div class="hero-shell">
+        <div class="hero-top">
+          <div>
+            <div class="eyebrow">Boxer dashboard</div>
+            <div class="hero-title"><img src="assets/vertex-logo-inverted.svg" alt="Vertex Sport Systems" /></div>
+            <div class="hero-copy">Workshop-coach observation, two-season progression, projected weight &amp; conditioning, and squad-cohort comparison for one combat-skill athlete.</div>
+            <div class="hero-meta" id="heroMetaPills">
+              <!-- filled by boxer-app.js based on selected athlete -->
+            </div>
+
+            <!-- Roster picker (swap hero athlete) -->
+            <div class="roster-picker" id="rosterPicker">
+              <label for="rosterSelect" class="roster-label">Workshop athlete</label>
+              <div class="roster-select-wrap">
+                <select id="rosterSelect" class="roster-select" aria-label="Switch athlete"></select>
+                <span class="roster-chev" aria-hidden="true">▾</span>
+              </div>
+              <div class="roster-sub" id="rosterSub"></div>
+            </div>
+          </div>
+          <div class="hero-portrait"><img id="heroPortrait" src="assets/player-photo.jpeg" alt="" /></div>
+        </div>
+        <div class="hero-board">
+          <div class="hero-card">
+            <div class="metric-label">Skill radar snapshot</div>
+            <div class="chart-frame" style="height:164px;margin-top:8px;"><canvas id="heroRadarChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============== MAIN GRID ============== -->
+    <section class="main-grid">
+
+      <!-- LEFT COLUMN -->
+      <aside class="stack">
+        <article class="panel" id="playerCard">
+          <div class="hd"><h2>Athlete overview</h2><span class="sub">Single boxer profile</span></div>
+          <div class="body">
+            <div class="profile-photo"><img id="profilePortrait" src="assets/player-photo.jpeg" alt="" /></div>
+            <h1 class="player-name" id="profileName">—</h1>
+            <div class="player-meta" id="profileMeta"></div>
+            <div class="kpis">
+              <div class="kpi">
+                <span class="metric-label">Development score</span>
+                <b id="kpiDev">—</b>
+                <span class="sub" id="kpiDevSub">—</span>
+                <div class="chart-frame spark"><canvas id="devSpark"></canvas></div>
+              </div>
+              <div class="kpi"><span class="metric-label">Coach confidence</span><b id="kpiConf">—</b><span class="sub">High confidence in upward trend</span></div>
+              <div class="kpi"><span class="metric-label">Current stage</span><b id="kpiStage">—</b><span class="sub">Transitioning into workshop leadership</span></div>
+              <div class="kpi"><span class="metric-label">Readiness</span><b id="kpiReady">—</b><span class="sub">Trusted to demo combinations</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="hd"><h2>Strengths and growth</h2><span class="sub">Coaching language</span></div>
+          <div class="body stack">
+            <div class="list-card"><h3>Emerging strengths</h3><ul id="listStrengths"></ul></div>
+            <div class="list-card"><h3>Priority development areas</h3><ul id="listGrowth"></ul></div>
+            <div class="list-card"><h3>Coach recommended focus</h3><ul id="listFocus"></ul></div>
+          </div>
+        </article>
+      </aside>
+
+      <!-- RIGHT COLUMN -->
+      <div class="stack">
+
+        <!-- WEIGHT & CONDITIONING PROJECTION -->
+        <article class="panel" id="physical">
+          <div class="hd">
+            <h2>Weight &amp; conditioning projection</h2>
+            <span class="sub">Actual + trend projection to next competition window</span>
+          </div>
+          <div class="body">
+            <div class="chart-frame" style="height:280px;"><canvas id="weightChart"></canvas></div>
+            <div class="projection-legend">
+              <span><span class="swatch" style="background:rgba(89,183,255,1);"></span>Actual weight</span>
+              <span><span class="swatch" style="background:rgba(127,140,255,1);border-top:2px dashed rgba(127,140,255,1);height:0;"></span>Projected trend</span>
+              <span><span class="swatch" style="background:rgba(127,140,255,0.3);"></span>Projection band</span>
+              <span><span class="swatch" style="background:rgba(95,227,156,1);"></span>Conditioning index</span>
+            </div>
+            <div class="proj-stats">
+              <div class="kpi"><span class="metric-label">Current</span><b>67.5 kg</b><span class="sub">May 2026 measure</span></div>
+              <div class="kpi"><span class="metric-label">12-mo trend</span><b>+1.0 kg</b><span class="sub">Controlled, mostly lean</span></div>
+              <div class="kpi"><span class="metric-label">Projected May 27</span><b>70.4 kg</b><span class="sub">71 kg division window</span></div>
+              <div class="kpi"><span class="metric-label">Conditioning</span><b>54.1</b><span class="sub">VO₂ proxy · +6.1 in 12 mo</span></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SKILL RADAR + WORKSHOP COHORT -->
+        <section class="split-2" id="radar">
+          <article class="panel">
+            <div class="hd"><h2>Skill development radar</h2><span class="sub">Two seasons + coach satisfaction overlay</span></div>
+            <div class="body">
+              <div class="chart-frame" style="height:300px;"><canvas id="skillRadarChart"></canvas></div>
+              <div class="sat-legend" aria-label="Satisfaction tone key">
+                <span class="sat-key">Satisfaction overlay:</span>
+                <span class="sat-dot tone-low"></span>Stagnant
+                <span class="sat-dot tone-mid"></span>Developing
+                <span class="sat-dot tone-high"></span>Excellent
+              </div>
+            </div>
+          </article>
+          <article class="panel" id="statShare">
+            <div class="hd">
+              <h2>Workshop cohort</h2>
+              <span class="sub">Squad-average vs hero + visible peers</span>
+            </div>
+            <div class="body">
+              <div class="consent-note"><span class="lock">🔒</span> Peer scores show only between mutually consenting workshop boxers. Either side can revoke at any time.</div>
+              <div class="share-list" id="shareList" style="margin-top:10px;"></div>
+              <div class="gap-callout" id="gapCallout"></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- OBSERVATION SUMMARY (with sparklines + coach attribution) -->
+        <article class="panel" id="observations">
+          <div class="hd">
+            <h2>Coach observation summary</h2>
+            <span class="sub">Recurring themes · trend + coach attribution</span>
+          </div>
+          <div class="body">
+            <div class="ob-grid" id="observationsGrid"></div>
+          </div>
+        </article>
+
+        <!-- OBSERVATION FEED + HEATMAP -->
+        <section class="split-2">
+          <article class="panel">
+            <div class="hd">
+              <h2>Observation feed</h2>
+              <div class="coach-filter" id="coachFilter"></div>
+            </div>
+            <div class="body"><div class="feed" id="feed"></div></div>
+          </article>
+          <article class="panel">
+            <div class="hd"><h2>Observation volume</h2><span class="sub">Attribute × month — coach attention</span></div>
+            <div class="body">
+              <div class="heatmap"><table id="heatTable"></table></div>
+              <div class="sub" style="margin-top:10px;">Darker cells indicate more coach observations recorded that month. Use it to spot blind spots and over-indexed themes.</div>
+            </div>
+          </article>
+        </section>
+
+        <!-- INSIGHTS -->
+        <article class="panel" id="insights">
+          <div class="hd"><h2>Vertex insight panel</h2><span class="sub">AI-assisted, coach-supported</span></div>
+          <div class="body">
+            <div class="insight-grid">
+              <div class="insight-card"><h3>Recommended drills</h3><ul>
+                <li>Three-count slip-pivot ladders at sustained mitt tempo.</li>
+                <li>Mirror-cued lead-hook reps to lock elbow-line consistency.</li>
+                <li>Cross-rotation finishing through shield padding, partner-fed.</li>
+              </ul></div>
+              <div class="insight-card"><h3>Tactical focuses</h3><ul>
+                <li>Earlier guard return after every combination.</li>
+                <li>Calmer pivot-exit when slip chains exceed three counts.</li>
+                <li>Verbal partner-reset language during noodle and shield blocks.</li>
+              </ul></div>
+              <div class="insight-card"><h3>Next-best coaching actions</h3><ul>
+                <li>Keep cues specific to mechanics, not outcome.</li>
+                <li>Reward observable resets in partner work, not just clean technique.</li>
+                <li>Track satisfaction trend per attribute, not just absolute score.</li>
+              </ul></div>
+            </div>
+            <div class="support-note">Vertex surfaces patterns from coach observations and trend data to support better decisions. It does not replace coach judgement — it sharpens what staff already see.</div>
+          </div>
+        </article>
+
+        <!-- TIMELINE -->
+        <article class="panel" id="timeline">
+          <div class="hd"><h2>Two-season progress timeline</h2><span class="sub">Season 1 vs Season 2</span></div>
+          <div class="body split-2">
+            <div class="timeline">
+              <div class="season">
+                <div class="season-head"><strong>Season 1 · Foundation</strong><span class="badge amber">Inconsistent guard return</span></div>
+                <div id="timelineS1"></div>
+              </div>
+              <div class="season">
+                <div class="season-head"><strong>Season 2 · Acceleration</strong><span class="badge green">Clear upward trend</span></div>
+                <div id="timelineS2"></div>
+              </div>
+            </div>
+            <div class="season">
+              <div class="season-head"><strong>Coach turning points</strong><span class="badge blue">Observation-led</span></div>
+              <div id="timelineTurning"></div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <nav class="tabbar" id="tabbar" aria-label="Section quick-jump">
+      <div class="tabinner" id="tabInner">
+        <a href="#overview"     data-jump class="active">Overview</a>
+        <a href="#playerCard"   data-jump>Profile</a>
+        <a href="#physical"     data-jump>Weight</a>
+        <a href="#radar"        data-jump>Radar</a>
+        <a href="#statShare"    data-jump>Cohort</a>
+        <a href="#observations" data-jump>Obs</a>
+        <a href="#insights"     data-jump>Insights</a>
+        <a href="#timeline"     data-jump>Timeline</a>
+      </div>
+    </nav>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="boxer-data.js"></script>
+  <script src="boxer-app.js"></script>
+</body>
+</html>
