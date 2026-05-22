@@ -85,21 +85,155 @@
         <span class="hm-cta">Open boxer dashboard &rarr;</span>
       </a>
 
-      <a class="hm-tile" href="fitness-tests.html">
-        <div class="hm-num">05</div>
-        <div class="hm-title">Fitness Tests Battery</div>
-        <p class="hm-desc">
-          Standardised athletic assessments with shared roster + audio + results infrastructure.
-          Live: shuttle tests (Beep, Yo-Yo IR1, 30-15 IFT). Planned: time trial, plank, broad jump,
-          T-test, agility, free throw, reaction, PPM, sparring rounds.
-        </p>
-        <ul class="hm-meta">
-          <li>iPhone-first</li>
-          <li>Audio cadence + voice</li>
-          <li>VO&#8322;max &amp; V-IFT</li>
-        </ul>
-        <span class="hm-cta">Open test battery &rarr;</span>
-      </a>
+    </section>
+
+    <!-- ========================================================
+         FITNESS BATTERY — surfaced directly on the home page
+         ======================================================== -->
+    <section class="hub-shell" aria-label="Fitness battery" style="padding: 8px 0 0; max-width: 100%;">
+      <div class="hub-intro">
+        <h1>Fitness battery</h1>
+        <p>Standardised assessments grouped by what they measure. Tap any live test to start; planned tests show the protocol they'll follow.</p>
+      </div>
+
+      <!-- ============ CONDITIONING ============ -->
+      <section class="hub-cat">
+        <div class="hub-cat-head"><h2>Conditioning</h2><span class="hub-cat-tag">Aerobic / Anaerobic</span></div>
+        <div class="hub-grid">
+
+          <a class="hub-tile live" href="shuttle-tests.html">
+            <div class="ht-icon">🏃</div>
+            <div class="ht-title">Shuttle Tests</div>
+            <p class="ht-desc">Group-run cadence test with one-tap eliminations. Three protocols: Beep test (Léger), Yo-Yo IR1, and 30-15 IFT.</p>
+            <span class="ht-tag live">LIVE · 3 protocols</span>
+          </a>
+
+          <a class="hub-tile live" href="time-trial.html">
+            <div class="ht-icon">⏱</div>
+            <div class="ht-title">Time Trial</div>
+            <p class="ht-desc">Group runs a set distance; coach taps each athlete as they cross the finish line. Presets: 400m · 800m · 1km · 1.6km · 3km · 5km · custom.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+          <div class="hub-tile soon">
+            <div class="ht-icon">🌀</div>
+            <div class="ht-title">Cooper 12-min</div>
+            <p class="ht-desc">Fixed-duration max distance run. Auto-stops at 12:00, coach taps laps + final partial distance per athlete.</p>
+            <span class="ht-tag soon">Coming soon</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============ STRENGTH / POWER ============ -->
+      <section class="hub-cat">
+        <div class="hub-cat-head"><h2>Strength &amp; Power</h2><span class="hub-cat-tag">Explosive · Endurance</span></div>
+        <div class="hub-grid">
+
+          <a class="hub-tile live" href="broad-jump.html">
+            <div class="ht-icon">↗</div>
+            <div class="ht-title">Standing Broad Jump</div>
+            <p class="ht-desc">3 attempts per athlete, best of 3. Roster grid with cm or inches inputs; auto-ranks with age-band scoring.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+          <a class="hub-tile live" href="vertical-jump.html">
+            <div class="ht-icon">⬇</div>
+            <div class="ht-title">Drop Jump</div>
+            <p class="ht-desc">Step off a low box, land, rebound. Mic detects drop → scuff → landing → height + RSI. Manual fallback always available.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+          <a class="hub-tile soon" href="cmj.html">
+            <div class="ht-icon">🎥</div>
+            <div class="ht-title">CMJ (Video)</div>
+            <p class="ht-desc">Pure counter-movement jump, measured by phone camera. No box, no equipment. Coming soon.</p>
+            <span class="ht-tag soon">Coming soon</span>
+          </a>
+
+          <a class="hub-tile live" href="plank-test.html">
+            <div class="ht-icon">🧘</div>
+            <div class="ht-title">Plank Timer</div>
+            <p class="ht-desc">Group plank with shared count-up timer + milestone beeps; tap each athlete out on form break. Age-banded scoring.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ============ AGILITY ============ -->
+      <section class="hub-cat">
+        <div class="hub-cat-head"><h2>Agility</h2><span class="hub-cat-tag">Change-of-direction</span></div>
+        <div class="hub-grid">
+
+          <a class="hub-tile live" href="agility-tests.html?proto=ttest">
+            <div class="ht-icon">✖</div>
+            <div class="ht-title">T-Test</div>
+            <p class="ht-desc">Forward sprint, side shuffle, backpedal — standard 4-cone T course. Best of 2.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+          <a class="hub-tile live" href="agility-tests.html?proto=lane">
+            <div class="ht-icon">▭</div>
+            <div class="ht-title">NBA Lane Agility</div>
+            <p class="ht-desc">Sprint-shuffle-backpedal-shuffle around the painted key. Best of 2.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+          <div class="hub-tile soon">
+            <div class="ht-icon">⇆</div>
+            <div class="ht-title">Suicide / Line Drills</div>
+            <p class="ht-desc">17s, Pro Suicides, or custom segments. Coach taps reps; auto-ranks by reps + time.</p>
+            <span class="ht-tag soon">Coming soon</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============ SKILL ============ -->
+      <section class="hub-cat">
+        <div class="hub-cat-head"><h2>Skill</h2><span class="hub-cat-tag">Sport-specific</span></div>
+        <div class="hub-grid">
+
+          <a class="hub-tile live" href="free-throw.html">
+            <div class="ht-icon">🏀</div>
+            <div class="ht-title">Free Throw %</div>
+            <p class="ht-desc">Tap make / miss per attempt. Set sizes 10 · 25 · 50 · 100. Streak + per-set %.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+          <a class="hub-tile live" href="reaction-time.html">
+            <div class="ht-icon">⚡</div>
+            <div class="ht-title">Hand Reaction Time</div>
+            <p class="ht-desc">Random visual cue; athlete taps screen. 5 trials, drops best+worst, averages middle.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ============ COMBAT ============ -->
+      <section class="hub-cat">
+        <div class="hub-cat-head"><h2>Combat</h2><span class="hub-cat-tag">Boxing-specific</span></div>
+        <div class="hub-grid">
+
+          <a class="hub-tile live" href="punches-per-min.html">
+            <div class="ht-icon">🥊</div>
+            <div class="ht-title">Punches Per Minute</div>
+            <p class="ht-desc">Big centre-screen tap pad; counts clean punches. 30s · 60s · 3-min rounds.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+          <a class="hub-tile live" href="sparring-rounds.html">
+            <div class="ht-icon">🔔</div>
+            <div class="ht-title">Sparring Round Counter</div>
+            <p class="ht-desc">Configurable work/rest cycles, auto-bell, knockdown + standing-8 event log.</p>
+            <span class="ht-tag live">LIVE</span>
+          </a>
+
+        </div>
+      </section>
+
     </section>
 
     <footer class="home-foot">

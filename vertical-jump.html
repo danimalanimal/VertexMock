@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Vertex · Vertical Jump</title>
+  <title>Vertex · Drop Jump</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -12,8 +12,8 @@
 <body class="beep-body">
 
   <header class="beep-topbar">
-    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
-    <div class="beep-brand"><strong>VERTEX</strong> <span>Vertical Jump</span></div>
+    <a class="beep-back" href="index.html" aria-label="Back to home">&larr; Home</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Drop Jump</span></div>
     <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
   </header>
 
@@ -29,7 +29,7 @@
         <button class="mode-btn on" data-mode="audio" type="button" role="radio" aria-checked="true">
           <span class="mb-glyph">🎙</span>
           <span class="mb-title">Audio</span>
-          <span class="mb-sub">Phone on floor — listens for take-off + landing</span>
+          <span class="mb-sub">Phone on floor — detects drop, scuff &amp; landing</span>
         </button>
         <button class="mode-btn" data-mode="manual" type="button" role="radio" aria-checked="false">
           <span class="mb-glyph">📏</span>
@@ -39,21 +39,21 @@
       </div>
     </section>
 
-    <!-- Jump type -->
+    <!-- Box height -->
     <section class="beep-card protocol-card">
-      <div class="beep-card-head"><h2>Jump type</h2></div>
-      <div class="proto-switch" role="radiogroup" aria-label="Jump type">
-        <button class="proto-btn on" data-jt="cmj" type="button" role="radio" aria-checked="true">
-          <span class="pb-name">CMJ</span><span class="pb-sub">Counter-movement (default)</span>
+      <div class="beep-card-head"><h2>Drop box height</h2></div>
+      <div class="proto-switch" role="radiogroup" aria-label="Box height">
+        <button class="proto-btn"    data-jt="box15" type="button" role="radio" aria-checked="false">
+          <span class="pb-name">15 cm</span><span class="pb-sub">Beginner / youth</span>
         </button>
-        <button class="proto-btn" data-jt="sj" type="button" role="radio" aria-checked="false">
-          <span class="pb-name">SJ</span><span class="pb-sub">Squat jump · pure concentric</span>
+        <button class="proto-btn on" data-jt="box20" type="button" role="radio" aria-checked="true">
+          <span class="pb-name">20 cm</span><span class="pb-sub">Standard (default)</span>
         </button>
-        <button class="proto-btn" data-jt="approach" type="button" role="radio" aria-checked="false" disabled aria-disabled="true">
-          <span class="pb-name">Approach</span><span class="pb-sub">Run-up · Manual mode only</span>
+        <button class="proto-btn"    data-jt="box30" type="button" role="radio" aria-checked="false">
+          <span class="pb-name">30 cm</span><span class="pb-sub">Advanced</span>
         </button>
       </div>
-      <p class="proto-blurb" id="jtBlurb">Counter-movement jump — squat then jump in one fluid motion. Tests reactive strength.</p>
+      <p class="proto-blurb" id="jtBlurb">Standard 20 cm box — athletes step off, land both feet, immediately rebound jump for max height. Two solid impacts (drop + landing) and a faint take-off scuff in between.</p>
     </section>
 
     <!-- Attempts -->
@@ -76,15 +76,18 @@
       <div class="guide-body" id="guideBody">
         <ol class="guide-steps">
           <li><div class="gs-num">1</div><div><strong>Floor surface</strong><p>Hardwood, concrete or sprung gym floor. <b>Not</b> carpet, rubber mats, or grass — audio detection needs a hard surface to transmit impact sound.</p></div></li>
-          <li><div class="gs-num">2</div><div><strong>Phone placement</strong><p>Phone <b>flat on the floor</b>, 1-2m from the athlete's jump spot. Not under feet, not propped up. Volume up so cues are audible.</p></div></li>
-          <li><div class="gs-num">3</div><div><strong>Calibrate</strong><p>App listens for 2 seconds to learn the room's background noise. You'll see a verdict — quiet, mixed, or too loud.</p></div></li>
-          <li><div class="gs-num">4</div><div><strong>Verify with one jump</strong><p>Coach does a verification jump first. App detects take-off + landing and shows the waveform. Confirms everything works before any athlete is tested.</p></div></li>
-          <li><div class="gs-num">5</div><div><strong>Run the class</strong><p>Phone listens continuously. Athlete jumps → result appears. Tap ✓ to accept, ↺ to redo, or ✎ to override. Auto-advances after 4s.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Set up the box</strong><p>Sturdy plyo box or step at the chosen height (15 / 20 / 30 cm). Place it 30–60 cm from the phone, with the landing spot directly between box and phone.</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Phone placement</strong><p>Phone <b>flat on the floor</b>, 1–2 m from the landing spot. Not under feet, not propped up. Volume up so cues are audible.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Calibrate</strong><p>App listens for 2 seconds to learn the room's background noise. You'll see a verdict — quiet, mixed, or too loud.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Verify with one drop jump</strong><p>Coach steps off the box, lands, immediately rebounds. App listens for three impacts: drop landing → take-off scuff → rebound landing. Confirms everything works before any athlete is tested.</p></div></li>
+          <li><div class="gs-num">6</div><div><strong>Run the class</strong><p>Phone listens continuously. Athlete steps off, lands, rebounds → result appears with jump height + RSI. Tap ✓ to accept, ↺ to redo, or ✎ to override. Auto-advances after 4s.</p></div></li>
         </ol>
         <div class="guide-safety"><strong>Safety</strong><ul>
-          <li>10-min warm-up: jog + dynamic squats + 2 practice half-effort jumps</li>
+          <li>10-min warm-up: jog + dynamic squats + 2 practice half-effort drops</li>
+          <li>Step off the box — do <b>not</b> jump off; land on both feet simultaneously</li>
           <li>Stop on knee or ankle pain — refer for assessment</li>
           <li>Hard landings: cue athletes to bend knees on impact</li>
+          <li>Skip drop-jump for athletes &lt;13 yrs or &gt;100 kg until cleared</li>
         </ul></div>
       </div>
     </section>
@@ -94,9 +97,10 @@
       <div class="beep-card-head"><h2>Pre-test checklist</h2></div>
       <div class="checklist vj-check" id="checklist">
         <label class="cl-row"><input type="checkbox" class="cl-box" data-c="floor"><span>Floor is hard (hardwood, concrete, sprung gym)</span></label>
-        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="phone"><span>Phone placed flat on floor near jump spot</span></label>
+        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="box"><span>Drop box is sturdy and positioned near phone</span></label>
+        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="phone"><span>Phone placed flat on floor near landing spot</span></label>
         <label class="cl-row"><input type="checkbox" class="cl-box" data-c="quiet"><span>Room is quiet (no music, traffic)</span></label>
-        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="brief"><span>Athletes briefed: land firmly, same spot</span></label>
+        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="brief"><span>Athletes briefed: step off, land firm, rebound fast</span></label>
       </div>
     </section>
 
@@ -110,7 +114,7 @@
           <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
         </div>
       </div>
-      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes for vertical jump"></div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes for drop jump"></div>
     </section>
 
     <!-- Start CTA -->
@@ -189,8 +193,8 @@
     </section>
 
     <section class="beep-card vj-cal-card">
-      <div class="beep-card-head"><h2>Verification jump</h2></div>
-      <p class="vj-cal-blurb">Coach does one jump near the phone. The app must detect two clean impacts before the class can run.</p>
+      <div class="beep-card-head"><h2>Verification drop jump</h2></div>
+      <p class="vj-cal-blurb">Coach steps off the box, lands, immediately rebounds. The app needs to detect three impacts (drop → scuff → land) before the class can run — two-impact fallback is accepted with reduced confidence.</p>
 
       <!-- HUD -->
       <div class="round-hud rh-ready vj-hud" id="verHud">
@@ -332,10 +336,10 @@
     <section class="beep-card">
       <div class="beep-card-head"><h2>Results</h2></div>
       <table class="results-table">
-        <thead><tr><th>#</th><th>Athlete</th><th>Best</th><th>Attempts</th><th>Conf</th></tr></thead>
+        <thead><tr><th>#</th><th>Athlete</th><th>Best</th><th>RSI</th><th>Attempts</th><th>Conf</th></tr></thead>
         <tbody id="resultsBody"></tbody>
       </table>
-      <p class="results-foot">Confidence dots show audio quality. Solid dots = clean two-spike detection; faded = manual entry / edited.</p>
+      <p class="results-foot">Best = jump height (cm). RSI = Reactive Strength Index (height m ÷ contact s). Confidence dots: solid = clean drop→scuff→land detected; faded = scuff missed, manual entry, or edited.</p>
     </section>
 
     <section class="results-cta">

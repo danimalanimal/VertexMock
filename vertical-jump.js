@@ -1,5 +1,6 @@
 /* ===========================================================================
-   Vertex Vertical Jump — mic impact detection + manual fallback
+   Vertex Drop Jump — 3-impact mic detection + manual fallback
+   (drop landing → take-off scuff → rebound landing)
    Flow: setup → calibrate → verify → run → results
    =========================================================================== */
 (() => {
@@ -11,9 +12,22 @@
   const G = 9.81;
   // flight time (s) -> jump height (cm)
   function heightCmFromFlight(tSec) { return (G * tSec * tSec) / 8 * 100; }
-  // Plausibility window for flight time
-  const T_MIN = 0.25;   // 8 cm — implausibly low
-  const T_MAX = 0.90;   // ~99 cm — beyond elite
+  // RSI = jump height (m) / contact time (s)  — reactive strength index
+  function rsiFor(cm, contactSec) {
+    if (!isFinite(cm) || !isFinite(contactSec) || contactSec <= 0) return null;
+    return (cm / 100) / contactSec;
+  }
+  // Plausibility windows
+  const T_FLIGHT_MIN   = 0.20;  // ~5 cm rebound — implausibly low
+  const T_FLIGHT_MAX   = 0.85;  // ~89 cm — beyond elite
+  const T_CONTACT_MIN  = 0.08;  // sub-80ms is suspicious (false trigger)
+  const T_CONTACT_MAX  = 0.45;  // 450ms+ = squat-jump, not reactive
+  // Backwards-compat aliases used by older logic paths
+  const T_MIN = T_FLIGHT_MIN;
+  const T_MAX = T_FLIGHT_MAX;
+  // Secondary-threshold window (catches the faint take-off scuff)
+  const SCUFF_WINDOW_MS = 400;
+  const SCUFF_THRESH_FACTOR = 3;   // baseThresh ÷ (6/3) = scuff threshold (half of base)
   // Auto-accept countdown
   const AUTO_ACCEPT_SEC = 4;
   // Cooldown between athletes
@@ -22,11 +36,11 @@
   /* ---------------- State ---------------- */
   const state = {
     mode: 'audio',                 // 'audio' | 'manual'
-    jumpType: 'cmj',
+    jumpType: 'box20',  // 'box15' | 'box20' | 'box30' — drop box height
     attempts: 3,
     athletes: window.BoxerData ? BoxerData.athletes : [],
     selected: new Set(),
-    checks: { floor: false, phone: false, quiet: false, brief: false },
+    checks: { floor: false, box: false, phone: false, quiet: false, brief: false },
 
     // Audio detector
     det: null,
@@ -72,22 +86,10 @@
       $('startLabel').textContent = 'Start session';
       $('startSub').textContent = state.selected.size ? `${state.selected.size} athletes · 3 attempts · manual entry` : 'Pick at least one athlete';
       $('startFoot').textContent = 'Manual mode skips calibration. You\'ll enter each jump with the number pad.';
-      // Enable Approach option
-      const approachBtn = document.querySelector('.proto-btn[data-jt="approach"]');
-      approachBtn.disabled = false; approachBtn.removeAttribute('aria-disabled');
     } else {
       $('startLabel').textContent = 'Calibrate microphone';
       $('startSub').textContent = state.selected.size ? `${state.selected.size} athletes · calibrate then run` : 'Pick at least one athlete';
       $('startFoot').textContent = 'Audio mode needs calibration + verification before running the class.';
-      // Disable Approach + force off
-      const approachBtn = document.querySelector('.proto-btn[data-jt="approach"]');
-      approachBtn.disabled = true; approachBtn.setAttribute('aria-disabled', 'true');
-      if (state.jumpType === 'approach') {
-        state.jumpType = 'cmj';
-        document.querySelectorAll('.proto-btn').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-checked', 'false'); });
-        const cmj = document.querySelector('.proto-btn[data-jt="cmj"]');
-        cmj.classList.add('on'); cmj.setAttribute('aria-checked', 'true');
-      }
     }
     refreshStartGuard();
   }
@@ -99,11 +101,11 @@
       b.classList.add('on'); b.setAttribute('aria-checked', 'true');
       state.jumpType = b.dataset.jt;
       const blurbs = {
-        cmj: 'Counter-movement jump — squat then jump in one fluid motion. Tests reactive strength.',
-        sj:  'Squat jump — pause for 1-2s in the squat before jumping. Tests pure concentric power.',
-        approach: 'Approach jump — short run-up before the jump. Manual entry only (audio can\'t isolate take-off).',
+        box15: '15 cm box — lower drop force, suitable for beginners or younger athletes. Easier to control landing.',
+        box20: 'Standard 20 cm box — athletes step off, land both feet, immediately rebound jump for max height. Two solid impacts (drop + landing) and a faint take-off scuff in between.',
+        box30: '30 cm box — higher drop force, more reactive demand. Use only with athletes who already nail the 20 cm version with clean form.',
       };
-      $('jtBlurb').textContent = blurbs[state.jumpType];
+      $('jtBlurb').textContent = blurbs[state.jumpType] || blurbs.box20;
     });
   });
 
@@ -364,52 +366,46 @@
   }
   function startVerifyListen() {
     state.verifyOnsets = [];
-    setVerHud('listen', 'NOW', 'Listening for take-off + landing');
+    setVerHud('listen', 'NOW', 'Listening for drop → scuff → land');
     $('verStatus').textContent = 'Listening';
-    // Arm onset handler
+    // Arm onset handler. Drop-jump expects up to 3 impacts:
+    //   t0 = drop landing  (loud)
+    //   t1 = rebound take-off scuff  (faint — lowered threshold window)
+    //   t2 = rebound landing  (loud)
     state.det.setHandlers({
       onLevel: (rms) => { updateVu('verVuFill', rms); updateVu('vuFill', rms); },
       onOnset: (t) => {
         state.verifyOnsets.push(t);
-        if (state.verifyOnsets.length >= 2) {
-          // Stop listening on 2nd onset, plus small grace
+        const n = state.verifyOnsets.length;
+        if (n === 1) {
+          // Open scuff window after first impact
+          state.det.setSecondaryThreshold(state.threshold / SCUFF_THRESH_FACTOR, SCUFF_WINDOW_MS);
+        }
+        if (n >= 3) {
+          // Got all three — finish
           clearTimeout(state.verifyTimer);
           setTimeout(finishVerify, 50);
         }
       },
     });
-    // Timeout for no-second-onset
-    state.verifyTimer = setTimeout(finishVerify, 2500);
+    // Timeout for incomplete sequence
+    state.verifyTimer = setTimeout(finishVerify, 3000);
   }
   function finishVerify() {
     state.det.setHandlers({ onOnset: () => {} });
+    state.det.setSecondaryThreshold(null);
     const onsets = state.verifyOnsets;
-    let cm = null, flight = null, ok = false, reason = '';
-    if (onsets.length < 1) {
-      reason = 'No impact heard — phone may be too far from the jump spot, or floor too soft';
-    } else if (onsets.length === 1) {
-      reason = 'Only heard one impact — was the landing too soft?';
-    } else if (onsets.length > 2) {
-      // Pick first + last as plausible take-off/landing
-      const t = onsets[onsets.length - 1] - onsets[0];
-      if (t >= T_MIN && t <= T_MAX) {
-        flight = t; cm = heightCmFromFlight(t); ok = true;
-        reason = `${onsets.length} impacts detected — using first + last. Watch for cheers / shouts.`;
-      } else {
-        reason = `${onsets.length} impacts heard — couldn\'t isolate a clean jump. Try again in quieter conditions.`;
-      }
-    } else {
-      const t = onsets[1] - onsets[0];
-      if (t < T_MIN) reason = `Impacts too close (${(t*1000).toFixed(0)}ms) — likely a stumble or shuffle`;
-      else if (t > T_MAX) reason = `Impacts too far apart (${t.toFixed(2)}s) — likely a delayed landing`;
-      else { flight = t; cm = heightCmFromFlight(t); ok = true; reason = 'Two clean impacts detected'; }
-    }
+    const parsed = parseDropJumpOnsets(onsets);
+    const { ok, cm, flight, contact, rsi, reason, conf } = parsed;
+
     state.verifyOk = ok;
     setVerHud(ok ? 'done' : 'ready', ok ? '✓' : '✗', reason);
     $('verResult').removeAttribute('hidden');
     if (ok) {
       $('verResultHeadline').textContent = `${cm.toFixed(1)} cm`;
-      $('verResultMeta').textContent = `flight ${(flight*1000).toFixed(0)}ms — sample only, not saved`;
+      const rsiStr = rsi != null ? ` · RSI ${rsi.toFixed(2)}` : ' · RSI —';
+      const ctStr = contact != null ? ` · contact ${(contact*1000).toFixed(0)}ms` : '';
+      $('verResultMeta').textContent = `flight ${(flight*1000).toFixed(0)}ms${ctStr}${rsiStr} — sample only`;
       $('verBest').textContent = `${cm.toFixed(1)} cm`;
       $('verStatus').textContent = 'Verified ✓';
       $('verAcceptBtn').removeAttribute('hidden');
@@ -420,10 +416,76 @@
       $('verResultMeta').textContent = reason;
       $('verStatus').textContent = 'Retry';
       $('verRetryBtn').removeAttribute('hidden');
-      // Still draw waveform if we got any samples — helps debug
       try { drawWaveform('verWave', state.det.getRecentSamples(2.5), onsets, state.det.getNowSec()); } catch (_) {}
       beep({ freq: 220, dur: 0.4 });
     }
+  }
+
+  /**
+   * Parse a sequence of onset timestamps into a drop-jump result.
+   * Tries 3-impact (drop → scuff → land) first; falls back to 2-impact
+   * (drop → land, RSI unavailable).
+   */
+  function parseDropJumpOnsets(onsets) {
+    if (!onsets || onsets.length < 1) {
+      return { ok: false, reason: 'No impact heard — phone too far, or drop landing too soft' };
+    }
+    if (onsets.length === 1) {
+      return { ok: false, reason: 'Only heard the drop landing — did the rebound jump miss the spot?' };
+    }
+    // Try 3-impact path: pick first + middle + last that satisfies windows
+    if (onsets.length >= 3) {
+      // Pick the triple that gives a valid drop→scuff→land pattern.
+      // Strategy: t0 = onsets[0]; t2 = last onset within plausible total time;
+      // t1 = any middle onset that splits contact + flight plausibly.
+      const t0 = onsets[0];
+      const t2 = onsets[onsets.length - 1];
+      // Find candidate t1 between t0 and t2 — prefer one that makes both windows valid
+      let bestTriple = null;
+      for (let i = 1; i < onsets.length - 1; i++) {
+        const t1 = onsets[i];
+        const contact = t1 - t0;
+        const flight  = t2 - t1;
+        if (contact >= T_CONTACT_MIN && contact <= T_CONTACT_MAX &&
+            flight  >= T_FLIGHT_MIN  && flight  <= T_FLIGHT_MAX) {
+          bestTriple = { t0, t1, t2, contact, flight };
+          break;
+        }
+      }
+      if (bestTriple) {
+        const cm = heightCmFromFlight(bestTriple.flight);
+        const rsi = rsiFor(cm, bestTriple.contact);
+        return {
+          ok: true, cm, flight: bestTriple.flight, contact: bestTriple.contact,
+          rsi, conf: 'high',
+          reason: 'Drop → scuff → landing detected'
+        };
+      }
+      // Triple didn't fit windows — fall through to two-impact attempt
+    }
+    // Two-impact fallback: assume scuff was missed; treat onsets[0]→onsets[last] as drop→land
+    // and split nominal contact (assume 200ms) so we report a flight estimate.
+    const t0 = onsets[0];
+    const tEnd = onsets[onsets.length - 1];
+    const totalGap = tEnd - t0;
+    if (totalGap < T_FLIGHT_MIN + T_CONTACT_MIN) {
+      return { ok: false, reason: `Impacts too close (${(totalGap*1000).toFixed(0)}ms) — likely a stumble` };
+    }
+    if (totalGap > T_FLIGHT_MAX + T_CONTACT_MAX) {
+      return { ok: false, reason: `Impacts too far apart (${totalGap.toFixed(2)}s) — retry` };
+    }
+    // Estimate flight by subtracting nominal contact (200ms) from total gap
+    const NOMINAL_CONTACT = 0.20;
+    const flightEst = totalGap - NOMINAL_CONTACT;
+    if (flightEst < T_FLIGHT_MIN || flightEst > T_FLIGHT_MAX) {
+      return { ok: false, reason: `Couldn\'t resolve clean drop→rebound (gap ${(totalGap*1000).toFixed(0)}ms)` };
+    }
+    const cm = heightCmFromFlight(flightEst);
+    return {
+      ok: true, cm, flight: flightEst, contact: null, rsi: null,
+      conf: 'medium',
+      reason: 'Scuff missed — height estimated, RSI unavailable'
+    };
   }
 
   /* ---------------- Manual fallback switcher ---------------- */
@@ -475,8 +537,8 @@
       $('vjListenSub').textContent = 'Tap the screen to enter jump height';
       openNumpadFor('manual-run');
     } else {
-      $('vjListenState').textContent = 'Listening for jump...';
-      $('vjListenSub').textContent = 'Athlete jumps when ready';
+      $('vjListenState').textContent = 'Listening for drop → rebound';
+      $('vjListenSub').textContent = 'Step off the box when ready';
     }
   }
 
@@ -504,39 +566,47 @@
   function onRunOnset(t) {
     if (!state.runListening || state.pendingResult) return;
     state.currentOnsets.push(t);
-    if (state.currentOnsets.length === 1) {
-      // Wait for second onset; if it doesn't come in 1.5s, treat as bail
+    const n = state.currentOnsets.length;
+
+    if (n === 1) {
+      // Drop landing detected — open scuff window
+      try { state.det.setSecondaryThreshold(state.threshold / SCUFF_THRESH_FACTOR, SCUFF_WINDOW_MS); } catch (_) {}
+      // Schedule a finalize attempt if no further impacts arrive within rebound window
       clearTimeout(state.onsetWindowTimer);
       state.onsetWindowTimer = setTimeout(() => {
-        if (state.currentOnsets.length === 1) {
-          showSoftLandingPrompt();
-        }
-      }, 1500);
-    } else if (state.currentOnsets.length === 2) {
-      clearTimeout(state.onsetWindowTimer);
-      const flight = state.currentOnsets[1] - state.currentOnsets[0];
-      if (flight < T_MIN) {
-        // Likely false trigger from coach/audience — reset and keep listening
-        flashListenWarning('Impacts too close — listening...');
-        state.currentOnsets = [];
-      } else if (flight > T_MAX) {
-        flashListenWarning('Impacts too far apart — listening...');
-        state.currentOnsets = [];
+        if (state.currentOnsets.length === 1) showSoftLandingPrompt();
+      }, 1700);
+    } else if (n === 2 || n === 3) {
+      // Try to parse — if we have a valid 3-impact triple, emit; if 2-impact and total gap
+      // is already past max plausible, fall back; otherwise wait briefly for a third.
+      const parsed = parseDropJumpOnsets(state.currentOnsets);
+      if (parsed.ok) {
+        clearTimeout(state.onsetWindowTimer);
+        emitDropJumpResult(parsed, 'audio');
+      } else if (n === 2) {
+        // Wait up to 200ms more for a possible third impact (scuff → landing)
+        clearTimeout(state.onsetWindowTimer);
+        state.onsetWindowTimer = setTimeout(() => {
+          const reparsed = parseDropJumpOnsets(state.currentOnsets);
+          if (reparsed.ok) emitDropJumpResult(reparsed, 'audio');
+          else { flashListenWarning(reparsed.reason); state.currentOnsets = []; }
+        }, 250);
       } else {
-        // Valid jump
-        emitResult(flight, 'audio', confidenceFor(state.currentOnsets));
+        flashListenWarning(parsed.reason);
+        state.currentOnsets = [];
       }
-    } else if (state.currentOnsets.length > 2) {
-      // Keep collecting; pick the best plausible pair below
-      const last = state.currentOnsets[state.currentOnsets.length - 1];
-      const first = state.currentOnsets[0];
-      const t = last - first;
-      if (t > T_MAX) {
-        // Re-anchor: use the last two onsets
-        state.currentOnsets = state.currentOnsets.slice(-2);
-        const t2 = state.currentOnsets[1] - state.currentOnsets[0];
-        if (t2 >= T_MIN && t2 <= T_MAX) {
-          emitResult(t2, 'audio', 'medium');
+    } else if (n > 3) {
+      // Trim to a reasonable sliding window; try parsing the latest triple
+      state.currentOnsets = state.currentOnsets.slice(-3);
+      const reparsed = parseDropJumpOnsets(state.currentOnsets);
+      if (reparsed.ok) {
+        emitDropJumpResult(reparsed, 'audio');
+      } else {
+        const last = state.currentOnsets[state.currentOnsets.length - 1];
+        const first = state.currentOnsets[0];
+        const total = last - first;
+        if (total > T_FLIGHT_MAX + T_CONTACT_MAX) {
+          state.currentOnsets = state.currentOnsets.slice(-1);
         }
       }
     }
@@ -553,22 +623,37 @@
   }
   function showSoftLandingPrompt() {
     if (state.pendingResult) return;
-    $('vjListenSub').textContent = 'Only heard take-off — ask athlete to land more firmly';
+    $('vjListenSub').textContent = 'Heard the drop — missed the rebound. Land firmer';
     setTimeout(() => {
       if (state.runListening && !state.pendingResult) {
         state.currentOnsets = [];
-        $('vjListenSub').textContent = 'Athlete jumps when ready';
+        $('vjListenSub').textContent = 'Step off the box when ready';
       }
     }, 2500);
   }
   function emitResult(flightSec, source, conf) {
+    // Legacy two-impact entry point (kept for backwards compat with edit/numpad path)
+    const parsed = {
+      ok: true,
+      cm: heightCmFromFlight(flightSec),
+      flight: flightSec,
+      contact: null,
+      rsi: null,
+      conf,
+    };
+    emitDropJumpResult(parsed, source);
+  }
+  function emitDropJumpResult(parsed, source) {
     stopRunListening();
-    const cm = heightCmFromFlight(flightSec);
+    try { state.det && state.det.setSecondaryThreshold(null); } catch (_) {}
     const { athleteId, attemptIdx } = state.queue[state.cursor];
     state.pendingResult = {
       athleteId, attempt: attemptIdx,
-      cm, flightMs: Math.round(flightSec * 1000),
-      source, conf,
+      cm: parsed.cm,
+      flightMs: Math.round(parsed.flight * 1000),
+      contactMs: parsed.contact != null ? Math.round(parsed.contact * 1000) : null,
+      rsi: parsed.rsi,
+      source, conf: parsed.conf,
       onsets: state.currentOnsets.slice(),
       wave: state.det ? state.det.getRecentSamples(2.5) : null,
       nowSec: state.det ? state.det.getNowSec() : 0,
@@ -582,7 +667,10 @@
     $('vjResultStage').removeAttribute('hidden');
     const r = state.pendingResult;
     $('vjResultCm').textContent = `${r.cm.toFixed(1)} cm`;
-    $('vjResultMeta').textContent = `flight ${r.flightMs}ms · ${r.source === 'audio' ? 'auto' : r.source}`;
+    const ctStr = r.contactMs != null ? ` · contact ${r.contactMs}ms` : '';
+    const rsiStr = r.rsi != null ? ` · RSI ${r.rsi.toFixed(2)}` : '';
+    const srcLabel = r.source === 'audio' ? 'auto' : r.source;
+    $('vjResultMeta').textContent = `flight ${r.flightMs}ms${ctStr}${rsiStr} · ${srcLabel}`;
     if (r.wave) drawWaveform('vjWave', r.wave, r.onsets, r.nowSec);
     else { const c = $('vjWave').getContext('2d'); c.clearRect(0,0,$('vjWave').width,$('vjWave').height); }
   }
@@ -616,8 +704,14 @@
     if (!r) return;
     // Store
     const ar = state.results[r.athleteId];
-    ar.attempts[r.attempt] = { cm: r.cm, flightMs: r.flightMs, source: r.source, conf: r.conf };
+    ar.attempts[r.attempt] = {
+      cm: r.cm, flightMs: r.flightMs,
+      contactMs: r.contactMs, rsi: r.rsi,
+      source: r.source, conf: r.conf,
+    };
     if (ar.best == null || r.cm > ar.best) ar.best = r.cm;
+    // Track best RSI per athlete too
+    if (r.rsi != null && (ar.bestRsi == null || r.rsi > ar.bestRsi)) ar.bestRsi = r.rsi;
     state.lastAccepted = { athleteId: r.athleteId, attempt: r.attempt };
     state.pendingResult = null;
     // Advance
@@ -764,10 +858,14 @@
       const confs = row.r.attempts.filter(Boolean).map(att => att.conf);
       const conf = confs.includes('high') ? 'high' : confs.includes('medium') ? 'medium' : 'low';
       const dots = conf === 'high' ? '●●●' : conf === 'medium' ? '●●○' : '●○○';
+      const rsiCell = row.r.bestRsi != null
+        ? `<b>${row.r.bestRsi.toFixed(2)}</b>`
+        : '<span class="att-empty">—</span>';
       tr.innerHTML = `
         <td>${i+1}</td>
         <td>${row.a?.name || '—'}</td>
         <td><b>${row.r.best != null ? row.r.best.toFixed(1) + ' cm' : '—'}</b></td>
+        <td>${rsiCell}</td>
         <td>${attemptsStr}</td>
         <td><span class="conf-dots conf-${conf}">${dots}</span></td>`;
       body.appendChild(tr);
@@ -780,11 +878,16 @@
       return {
         id, name: a?.name, age: a?.age,
         best: r.best,
-        attempts: r.attempts.map(att => att ? { cm: att.cm, flightMs: att.flightMs, source: att.source, conf: att.conf } : null),
+        bestRsi: r.bestRsi != null ? r.bestRsi : null,
+        attempts: r.attempts.map(att => att ? {
+          cm: att.cm, flightMs: att.flightMs,
+          contactMs: att.contactMs, rsi: att.rsi,
+          source: att.source, conf: att.conf
+        } : null),
       };
     });
-    VertexResults.save('vertical-jump', payload, {
-      protocol: 'vertical-jump',
+    VertexResults.save('drop-jump', payload, {
+      protocol: 'drop-jump',
       jumpType: state.jumpType,
       mode: state.mode,
       attempts: state.attempts,
@@ -795,7 +898,7 @@
   $('againBtn').addEventListener('click', () => location.reload());
   $('exportBtn').addEventListener('click', () => {
     const data = {
-      protocol: 'vertical-jump',
+      protocol: 'drop-jump',
       jumpType: state.jumpType,
       mode: state.mode,
       attempts: state.attempts,
@@ -804,7 +907,7 @@
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const dl = document.createElement('a'); dl.href = url; dl.download = `vertical-jump-${Date.now()}.json`; dl.click();
+    const dl = document.createElement('a'); dl.href = url; dl.download = `drop-jump-${Date.now()}.json`; dl.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 

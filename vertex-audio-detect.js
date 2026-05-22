@@ -49,6 +49,9 @@
       analyser: null,
       processor: null,
       threshold: 0.05,        // sensible default; calibrate will override
+      baseThreshold: 0.05,     // primary threshold; restored when secondary window expires
+      secondaryThreshold: null,// lower threshold active during scuff window
+      secondaryUntil: 0,       // AudioContext seconds — secondary expires at this time
       lastOnsetTime: 0,        // AudioContext seconds
       preFrameRms: 0,          // for spectral-flux-ish gating
       running: false,
@@ -151,9 +154,21 @@
       // Onset detection: rising-edge above threshold, with dead-time
       const now = state.ctx.currentTime;
       const sinceLast = (now - state.lastOnsetTime) * 1000; // ms
-      const wasQuiet = state.preFrameRms < state.threshold * 0.6; // hysteresis
 
-      if (rms >= state.threshold && wasQuiet && sinceLast >= state.deadTimeMs) {
+      // Pick active threshold (secondary if window still open, else base)
+      let activeThresh = state.baseThreshold;
+      if (state.secondaryThreshold != null && now < state.secondaryUntil) {
+        activeThresh = state.secondaryThreshold;
+      } else if (state.secondaryThreshold != null && now >= state.secondaryUntil) {
+        // Secondary expired — clear it
+        state.secondaryThreshold = null;
+      }
+      // Mirror to .threshold so external callers (e.g. VU threshold marker) see current
+      state.threshold = activeThresh;
+
+      const wasQuiet = state.preFrameRms < activeThresh * 0.6; // hysteresis
+
+      if (rms >= activeThresh && wasQuiet && sinceLast >= state.deadTimeMs) {
         state.lastOnsetTime = now;
         try { state.onOnset(now, rms); } catch (_) {}
       }
@@ -244,8 +259,30 @@
       });
     }
 
-    function setThreshold(v) { state.threshold = Math.max(v, 0.005); }
+    function setThreshold(v) {
+      const safe = Math.max(v, 0.005);
+      state.baseThreshold = safe;
+      // If no secondary active, mirror to live threshold
+      if (state.secondaryThreshold == null) state.threshold = safe;
+    }
     function getThreshold()  { return state.threshold; }
+
+    /**
+     * Open a temporary lowered-threshold window. Used to catch a faint mid-event
+     * (e.g. take-off scuff between two louder impacts) without permanently
+     * lowering sensitivity. After `windowMs` the threshold reverts to base.
+     *
+     * Pass v=null to clear an active secondary window immediately.
+     */
+    function setSecondaryThreshold(v, windowMs = 400) {
+      if (v == null) {
+        state.secondaryThreshold = null;
+        state.secondaryUntil = 0;
+        return;
+      }
+      state.secondaryThreshold = Math.max(v, 0.003);
+      state.secondaryUntil = (state.ctx ? state.ctx.currentTime : 0) + (windowMs / 1000);
+    }
 
     function getRecentSamples(seconds) {
       const want = Math.min(state.ctx.sampleRate * seconds, state.ringBuffer.length);
@@ -264,7 +301,7 @@
 
     return {
       requestMic, start, stop, dispose, calibrate,
-      setThreshold, getThreshold,
+      setThreshold, getThreshold, setSecondaryThreshold,
       getRecentSamples, getNowSec,
       get state() { return state.micPermission; },
       // Allow runtime swap of handlers (used during state changes)
