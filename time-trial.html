@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Time Trial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Time Trial</span></div>
+    <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Distance picker -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Distance</h2></div>
+      <div class="dist-switch" role="radiogroup" aria-label="Trial distance">
+        <button class="dist-btn" data-dist="400"  type="button" role="radio" aria-checked="false"><span class="db-name">400m</span><span class="db-sub">1 lap track</span></button>
+        <button class="dist-btn" data-dist="800"  type="button" role="radio" aria-checked="false"><span class="db-name">800m</span><span class="db-sub">2 laps</span></button>
+        <button class="dist-btn on" data-dist="1000" type="button" role="radio" aria-checked="true"><span class="db-name">1 km</span><span class="db-sub">2.5 laps</span></button>
+        <button class="dist-btn" data-dist="1600" type="button" role="radio" aria-checked="false"><span class="db-name">1.6 km</span><span class="db-sub">~1 mile</span></button>
+        <button class="dist-btn" data-dist="3000" type="button" role="radio" aria-checked="false"><span class="db-name">3 km</span><span class="db-sub">7.5 laps</span></button>
+        <button class="dist-btn" data-dist="5000" type="button" role="radio" aria-checked="false"><span class="db-name">5 km</span><span class="db-sub">12.5 laps</span></button>
+        <button class="dist-btn dist-custom" data-dist="custom" type="button" role="radio" aria-checked="false"><span class="db-name">Custom</span><span class="db-sub" id="customDistSub">Enter metres</span></button>
+      </div>
+      <div class="dist-custom-wrap" id="distCustomWrap" hidden>
+        <label class="dist-custom-label" for="customDistInput">Custom distance (m)</label>
+        <input class="dist-custom-input" id="customDistInput" type="number" min="50" max="50000" step="50" placeholder="e.g. 2400" />
+      </div>
+      <p class="proto-blurb" id="distBlurb">1 km — standard youth aerobic benchmark.</p>
+    </section>
+
+    <!-- Course type -->
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Course</h2></div>
+      <div class="course-switch" role="radiogroup" aria-label="Course type">
+        <button class="course-btn on" data-course="track" type="button" role="radio" aria-checked="true">🏟 Track</button>
+        <button class="course-btn"    data-course="road"  type="button" role="radio" aria-checked="false">🛣 Road / oval</button>
+        <button class="course-btn"    data-course="treadmill" type="button" role="radio" aria-checked="false">🏃 Treadmill</button>
+      </div>
+    </section>
+
+    <!-- Guide -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to run a time trial</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps">
+          <li><div class="gs-num">1</div><div><strong>Course</strong><p>Confirm exact distance. On a 400m track: 1 lap = 400m, 4 laps = 1 mile, 12.5 laps = 5km (start at the staggered 5km line). For road, mark start + finish with cones.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Brief athletes</strong><p>"Run as fast as you can sustain for the whole distance — even pacing wins, don't sprint the first lap." Encourage but don't pace them.</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Start cue</strong><p>"On your marks — set — GO." Audio beep on GO starts the clock. Stand at the finish line with your phone.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Finish taps</strong><p>As each athlete crosses, <b>tap their tile</b> — their split locks immediately. Audio cue confirms. Undo gives you 5s if you mis-tap.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Scoring</strong><p>Results ranked fastest first, with pace per km. Save to fitness stats so it appears on athlete progress reports.</p></div></li>
+        </ol>
+        <div class="guide-safety"><strong>Safety</strong><ul>
+          <li>10-min jog + dynamic warm-up first</li>
+          <li>Hot day? Earlier start, water at start + finish</li>
+          <li>Cool-down jog 5 min then walk — never stop dead at the finish line</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section class="beep-card check-card">
+      <div class="beep-card-head"><h2>Pre-test checklist</h2></div>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <!-- Audio check -->
+    <section class="beep-card audio-card">
+      <div class="beep-card-head"><h2>Audio check</h2></div>
+      <p class="audio-copy">Start beep + per-tap confirmation tones. Test before athletes line up.</p>
+      <button class="audio-test-btn" id="audioTestBtn" type="button">▶ Play sample beep</button>
+    </section>
+
+    <!-- Roster -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head">
+        <h2>Select athletes</h2>
+        <div class="roster-actions">
+          <span class="roster-count" id="rosterCount">0 / 12 selected</span>
+          <button class="roster-all" id="selectAllBtn" type="button">Select all</button>
+          <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes for time trial"></div>
+    </section>
+
+    <!-- Start CTA -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">▶</span>
+        <span class="bs-label">Start trial</span>
+        <span class="bs-sub" id="startSub">Pick at least one athlete</span>
+      </button>
+      <p class="beep-start-foot">3-second countdown plays before the clock starts on "GO".</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — LIVE RUNNER
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run" hidden>
+
+    <!-- Big clock -->
+    <section class="big-clock-wrap">
+      <div class="big-clock" id="bigClock">0:00.0</div>
+      <div class="big-clock-sub" id="bigClockSub"><span id="bcDist">1 km</span> · elapsed</div>
+    </section>
+
+    <!-- Ribbon -->
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Finished</span><span class="rb-v" id="rbFin">0 / 0</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Last finish</span><span class="rb-v" id="rbLast">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Avg pace</span><span class="rb-v" id="rbPace">—</span></div>
+    </section>
+
+    <!-- Active athletes grid -->
+    <section class="run-grid-wrap">
+      <div class="run-head"><span>STILL RUNNING — tap as they cross the line</span></div>
+      <div class="run-grid" id="runGrid"></div>
+    </section>
+
+    <!-- Out strip — finished -->
+    <section class="out-wrap">
+      <div class="run-head"><span>FINISHED</span><span class="out-count" id="outCount">0</span></div>
+      <div class="out-strip" id="outStrip"></div>
+    </section>
+
+    <!-- Controls -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="pauseBtn" type="button">⏸ Pause</button>
+      <button class="ctl ctl-stop"  id="stopBtn"  type="button">⏹ End trial</button>
+    </nav>
+
+    <!-- Undo toast -->
+    <div class="beep-toast" id="undoToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg" id="undoMsg">Logged athlete</span>
+      <button class="bt-undo" id="undoBtn" type="button">Undo</button>
+    </div>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Trial complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Distance</span><span class="rs-v" id="rsDist">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Fastest</span><span class="rs-v" id="rsBest">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Avg time</span><span class="rs-v" id="rsAvg">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Results</h2></div>
+      <table class="results-table">
+        <thead><tr><th>#</th><th>Athlete</th><th>Time</th><th>Pace</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot">Pace calculated per kilometre. Results saved namespaced by distance — you can compare across sessions on athlete progress reports.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="vertex-timer.js"></script>
+  <script src="time-trial.js"></script>
+</body>
+</html>

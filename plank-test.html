@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Plank Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Plank Test</span></div>
+    <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Guidance -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to run a group plank</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps">
+          <li><div class="gs-num">1</div><div><strong>Set-up</strong><p>Mats spaced so you can walk between athletes. Elbows under shoulders, forearms parallel, hands relaxed (not clasped). Feet hip-width.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Form</strong><p>Straight line from <b>ears → shoulders → hips → heels</b>. No sag, no pike. Neutral neck (eyes down, not forward). Glutes engaged. Breathe normally.</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Cue + start</strong><p>"3, 2, 1, hold." Start the timer on "hold". Milestone beeps fire at 30s, 1:00, 1:30, 2:00, 3:00 so athletes know their splits without watching.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Form breaks</strong><p>One verbal warning. If they can't correct within 3s, tap their tile to record the time and drop them. Be strict — partial planks aren't useful data.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Scoring</strong><p>Score is hold time in seconds. Age-banded benchmarks shown on the results screen. Excellent (12-14 yrs): 2:00+. Excellent (15-17): 2:30+.</p></div></li>
+        </ol>
+        <div class="guide-safety"><strong>Safety</strong><ul>
+          <li>Stop on lower-back pain or shoulder pinch</li>
+          <li>No competing through trembling — that's the end</li>
+          <li>Hydrate after; light cool-down stretch (cat-cow + child's pose)</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Coach checklist -->
+    <section class="beep-card check-card">
+      <div class="beep-card-head"><h2>Pre-test checklist</h2></div>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <!-- Audio test -->
+    <section class="beep-card audio-card">
+      <div class="beep-card-head"><h2>Audio check</h2></div>
+      <p class="audio-copy">Milestone beeps fire at 30s · 1:00 · 1:30 · 2:00 · 3:00 so athletes hear their splits without lifting their heads.</p>
+      <button class="audio-test-btn" id="audioTestBtn" type="button">▶ Play sample beep</button>
+    </section>
+
+    <!-- Roster picker -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head">
+        <h2>Select athletes</h2>
+        <div class="roster-actions">
+          <span class="roster-count" id="rosterCount">0 / 12 selected</span>
+          <button class="roster-all" id="selectAllBtn" type="button">Select all</button>
+          <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes for plank test"></div>
+    </section>
+
+    <!-- Start CTA -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">▶</span>
+        <span class="bs-label">Start plank</span>
+        <span class="bs-sub" id="startSub">Pick at least one athlete</span>
+      </button>
+      <p class="beep-start-foot">3-second countdown plays before the clock starts.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — LIVE RUNNER
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run" hidden>
+
+    <!-- Big clock -->
+    <section class="big-clock-wrap">
+      <div class="big-clock" id="bigClock">0:00</div>
+      <div class="big-clock-sub" id="bigClockSub">elapsed</div>
+    </section>
+
+    <!-- Cadence ribbon — last milestone -->
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Last cue</span><span class="rb-v" id="rbLast">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Next cue</span><span class="rb-v" id="rbNext">0:30</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Active</span><span class="rb-v" id="rbActive">— / —</span></div>
+    </section>
+
+    <!-- Active athletes grid -->
+    <section class="run-grid-wrap">
+      <div class="run-head"><span>STILL HOLDING — tap on form break</span></div>
+      <div class="run-grid" id="runGrid"></div>
+    </section>
+
+    <!-- Out strip -->
+    <section class="out-wrap">
+      <div class="run-head"><span>DROPPED</span><span class="out-count" id="outCount">0</span></div>
+      <div class="out-strip" id="outStrip"></div>
+    </section>
+
+    <!-- Control bar -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="pauseBtn" type="button">⏸ Pause</button>
+      <button class="ctl ctl-stop"  id="stopBtn"  type="button">⏹ End test</button>
+    </nav>
+
+    <!-- Undo toast -->
+    <div class="beep-toast" id="undoToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg" id="undoMsg">Dropped athlete</span>
+      <button class="bt-undo" id="undoBtn" type="button">Undo</button>
+    </div>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Session complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Athletes</span><span class="rs-v" id="rsAthletes">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Best hold</span><span class="rs-v" id="rsBest">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Avg hold</span><span class="rs-v" id="rsAvg">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Results</h2></div>
+      <table class="results-table">
+        <thead><tr><th>#</th><th>Athlete</th><th>Hold</th><th>Band</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot">Bands are age-relative reference ranges for healthy youth athletes. Hold time only — not a substitute for full core assessment.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="vertex-timer.js"></script>
+  <script src="plank-test.js"></script>
+</body>
+</html>

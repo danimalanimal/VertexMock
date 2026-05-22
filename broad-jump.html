@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Standing Broad Jump</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Broad Jump</span></div>
+    <span class="hub-spacer" aria-hidden="true"></span>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Units -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Units</h2></div>
+      <div class="unit-switch" role="radiogroup" aria-label="Measurement unit">
+        <button class="unit-btn on" data-unit="cm"     type="button" role="radio" aria-checked="true">cm</button>
+        <button class="unit-btn"    data-unit="inches" type="button" role="radio" aria-checked="false">inches</button>
+      </div>
+      <p class="proto-blurb">Standing broad jump — explosive lower-body power. 3 attempts each, best of 3.</p>
+    </section>
+
+    <!-- Guide -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to run the standing broad jump</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps">
+          <li><div class="gs-num">1</div><div><strong>Course</strong><p>Flat non-slip surface. Mark a <b>take-off line</b> with tape. Lay a measuring tape perpendicular for 3m+. Soft mat optional for landing.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Start position</strong><p>Feet shoulder-width, toes just behind line. Arms swing freely. <b>No run-up</b>, no foot lifting before jump.</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Jump</strong><p>Athlete swings arms, bends knees, jumps forward, lands on both feet. Must <b>stick the landing</b> — no falling backward, no extra step.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Measure</strong><p>Measure from take-off line to <b>back of the heel closest to take-off</b>. Tap the athlete tile → number pad → enter distance.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Repeat</strong><p>3 attempts each, 30-60s rest between. Best of 3 scored. If they fall back or step, mark as foul (0) and retry.</p></div></li>
+        </ol>
+        <div class="guide-safety"><strong>Safety</strong><ul>
+          <li>10-min warm-up: jog + dynamic squats + 2 practice half-effort jumps</li>
+          <li>Confirm landing zone is clear and non-slip</li>
+          <li>Stop if knee/ankle pain — refer for assessment</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section class="beep-card check-card">
+      <div class="beep-card-head"><h2>Pre-test checklist</h2></div>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <!-- Roster -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head">
+        <h2>Select athletes</h2>
+        <div class="roster-actions">
+          <span class="roster-count" id="rosterCount">0 / 12 selected</span>
+          <button class="roster-all" id="selectAllBtn" type="button">Select all</button>
+          <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes for broad jump"></div>
+    </section>
+
+    <!-- Start CTA -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">▶</span>
+        <span class="bs-label">Start session</span>
+        <span class="bs-sub" id="startSub">Pick at least one athlete</span>
+      </button>
+      <p class="beep-start-foot">Tap any athlete tile to enter their distance.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — INPUT
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run" hidden>
+
+    <!-- Compact HUD -->
+    <section class="run-ribbon bj-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Athletes</span><span class="rb-v" id="bjAthletes">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Attempts</span><span class="rb-v" id="bjAttempts">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Unit</span><span class="rb-v" id="bjUnit">cm</span></div>
+    </section>
+
+    <!-- Attempts grid: athlete → 3 attempts -->
+    <section class="run-grid-wrap">
+      <div class="run-head"><span>TAP A SLOT TO ENTER DISTANCE</span></div>
+      <div class="bj-list" id="bjList"></div>
+    </section>
+
+    <!-- Controls -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="finishBtn" type="button">✓ View results</button>
+      <button class="ctl ctl-stop"  id="cancelBtn" type="button">⏹ Cancel</button>
+    </nav>
+
+  </main>
+
+  <!-- ========== NUMBER PAD OVERLAY ========== -->
+  <div class="numpad-overlay" id="numpadOverlay" hidden>
+    <div class="numpad-modal" role="dialog" aria-modal="true" aria-labelledby="npTitle">
+      <div class="np-head">
+        <span class="np-title" id="npTitle">— · Attempt 1</span>
+        <button class="np-close" id="npClose" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="np-display">
+        <span class="np-value" id="npValue">0</span>
+        <span class="np-unit" id="npUnit">cm</span>
+      </div>
+      <div class="numpad-grid">
+        <button class="np-key" data-k="1" type="button">1</button>
+        <button class="np-key" data-k="2" type="button">2</button>
+        <button class="np-key" data-k="3" type="button">3</button>
+        <button class="np-key" data-k="4" type="button">4</button>
+        <button class="np-key" data-k="5" type="button">5</button>
+        <button class="np-key" data-k="6" type="button">6</button>
+        <button class="np-key" data-k="7" type="button">7</button>
+        <button class="np-key" data-k="8" type="button">8</button>
+        <button class="np-key" data-k="9" type="button">9</button>
+        <button class="np-key np-foul" data-k="foul" type="button">Foul</button>
+        <button class="np-key" data-k="0" type="button">0</button>
+        <button class="np-key np-back" data-k="back" type="button">⌫</button>
+      </div>
+      <div class="np-actions">
+        <button class="np-save" id="npSave" type="button">Save attempt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Session complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Athletes</span><span class="rs-v" id="rsAthletes">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Best jump</span><span class="rs-v" id="rsBest">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Avg best</span><span class="rs-v" id="rsAvg">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Results</h2></div>
+      <table class="results-table">
+        <thead><tr><th>#</th><th>Athlete</th><th>Best</th><th>Attempts</th><th>Band</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot">Best of 3 scored. Bands reference age-appropriate youth athletic norms. Save to fitness stats so it appears on athlete progress reports.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="broad-jump.js"></script>
+</body>
+</html>
