@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Vertical Jump</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Vertical Jump</span></div>
+    <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Detection mode -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Detection mode</h2></div>
+      <div class="mode-switch" role="radiogroup" aria-label="Detection mode">
+        <button class="mode-btn on" data-mode="audio" type="button" role="radio" aria-checked="true">
+          <span class="mb-glyph">🎙</span>
+          <span class="mb-title">Audio</span>
+          <span class="mb-sub">Phone on floor — listens for take-off + landing</span>
+        </button>
+        <button class="mode-btn" data-mode="manual" type="button" role="radio" aria-checked="false">
+          <span class="mb-glyph">📏</span>
+          <span class="mb-title">Manual</span>
+          <span class="mb-sub">Tape measure + chalk — enter cm directly</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Jump type -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Jump type</h2></div>
+      <div class="proto-switch" role="radiogroup" aria-label="Jump type">
+        <button class="proto-btn on" data-jt="cmj" type="button" role="radio" aria-checked="true">
+          <span class="pb-name">CMJ</span><span class="pb-sub">Counter-movement (default)</span>
+        </button>
+        <button class="proto-btn" data-jt="sj" type="button" role="radio" aria-checked="false">
+          <span class="pb-name">SJ</span><span class="pb-sub">Squat jump · pure concentric</span>
+        </button>
+        <button class="proto-btn" data-jt="approach" type="button" role="radio" aria-checked="false" disabled aria-disabled="true">
+          <span class="pb-name">Approach</span><span class="pb-sub">Run-up · Manual mode only</span>
+        </button>
+      </div>
+      <p class="proto-blurb" id="jtBlurb">Counter-movement jump — squat then jump in one fluid motion. Tests reactive strength.</p>
+    </section>
+
+    <!-- Attempts -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Attempts per athlete</h2></div>
+      <div class="att-switch" role="radiogroup" aria-label="Attempts">
+        <button class="att-btn"    data-att="1" type="button" role="radio" aria-checked="false">1</button>
+        <button class="att-btn"    data-att="2" type="button" role="radio" aria-checked="false">2</button>
+        <button class="att-btn on"  data-att="3" type="button" role="radio" aria-checked="true">3</button>
+      </div>
+      <p class="proto-blurb">Best of 3 is the standard. 30-60s rest between attempts.</p>
+    </section>
+
+    <!-- Guide -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to set up</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps">
+          <li><div class="gs-num">1</div><div><strong>Floor surface</strong><p>Hardwood, concrete or sprung gym floor. <b>Not</b> carpet, rubber mats, or grass — audio detection needs a hard surface to transmit impact sound.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Phone placement</strong><p>Phone <b>flat on the floor</b>, 1-2m from the athlete's jump spot. Not under feet, not propped up. Volume up so cues are audible.</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Calibrate</strong><p>App listens for 2 seconds to learn the room's background noise. You'll see a verdict — quiet, mixed, or too loud.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Verify with one jump</strong><p>Coach does a verification jump first. App detects take-off + landing and shows the waveform. Confirms everything works before any athlete is tested.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Run the class</strong><p>Phone listens continuously. Athlete jumps → result appears. Tap ✓ to accept, ↺ to redo, or ✎ to override. Auto-advances after 4s.</p></div></li>
+        </ol>
+        <div class="guide-safety"><strong>Safety</strong><ul>
+          <li>10-min warm-up: jog + dynamic squats + 2 practice half-effort jumps</li>
+          <li>Stop on knee or ankle pain — refer for assessment</li>
+          <li>Hard landings: cue athletes to bend knees on impact</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Pre-test checklist -->
+    <section class="beep-card check-card" id="checkCard">
+      <div class="beep-card-head"><h2>Pre-test checklist</h2></div>
+      <div class="checklist vj-check" id="checklist">
+        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="floor"><span>Floor is hard (hardwood, concrete, sprung gym)</span></label>
+        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="phone"><span>Phone placed flat on floor near jump spot</span></label>
+        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="quiet"><span>Room is quiet (no music, traffic)</span></label>
+        <label class="cl-row"><input type="checkbox" class="cl-box" data-c="brief"><span>Athletes briefed: land firmly, same spot</span></label>
+      </div>
+    </section>
+
+    <!-- Roster -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head">
+        <h2>Select athletes</h2>
+        <div class="roster-actions">
+          <span class="roster-count" id="rosterCount">0 / 12 selected</span>
+          <button class="roster-all" id="selectAllBtn" type="button">Select all</button>
+          <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes for vertical jump"></div>
+    </section>
+
+    <!-- Start CTA -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">🎙</span>
+        <span class="bs-label" id="startLabel">Calibrate microphone</span>
+        <span class="bs-sub" id="startSub">Pick at least one athlete</span>
+      </button>
+      <p class="beep-start-foot" id="startFoot">Audio mode needs calibration + verification before running the class.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — CALIBRATE (audio mode only)
+  ===================================================================== -->
+  <main id="calibrateScreen" class="beep-screen beep-run vj-cal" hidden>
+
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Step</span><span class="rb-v">1 of 2</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Mode</span><span class="rb-v">Audio</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Athletes</span><span class="rb-v" id="calAthletes">—</span></div>
+    </section>
+
+    <section class="beep-card vj-cal-card">
+      <div class="beep-card-head"><h2 id="calTitle">Calibrate microphone</h2></div>
+      <p class="vj-cal-blurb" id="calBlurb">Place the phone flat on the floor and stay quiet for 2 seconds. The app will measure the room's background noise.</p>
+
+      <!-- VU meter -->
+      <div class="vu-wrap">
+        <div class="vu-track">
+          <div class="vu-fill" id="vuFill"></div>
+          <div class="vu-thresh" id="vuThresh" hidden></div>
+        </div>
+        <div class="vu-labels"><span>quiet</span><span>loud</span></div>
+      </div>
+
+      <!-- Verdict zone (shown after calibration) -->
+      <div class="vj-verdict" id="vjVerdict" hidden>
+        <div class="vv-icon" id="vvIcon">✓</div>
+        <div class="vv-title" id="vvTitle">Room is quiet</div>
+        <div class="vv-detail" id="vvDetail">Noise floor and threshold set. Tap the floor near the phone to confirm impacts are heard.</div>
+      </div>
+
+      <!-- Tap-to-test prompt -->
+      <div class="vj-tap-test" id="vjTapTest" hidden>
+        <div class="vt-title">Test the impact detector</div>
+        <p class="vt-sub">Stomp your foot near the phone — you should see a spike + hear a beep.</p>
+        <div class="vt-status" id="vtStatus">Listening...</div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="vj-cal-actions" id="vjCalActions" hidden>
+        <button class="ctl ctl-pause" id="recalBtn" type="button">↺ Recalibrate</button>
+        <button class="ctl ctl-stop" id="calToManualBtn" type="button">📏 Switch to Manual</button>
+        <button class="results-save" id="calNextBtn" type="button">Continue → Verify</button>
+      </div>
+
+      <!-- Initial start -->
+      <div class="vj-cal-actions" id="vjCalStartActions">
+        <button class="results-save" id="calStartBtn" type="button">▶ Start calibration</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — VERIFY (coach test jump)
+  ===================================================================== -->
+  <main id="verifyScreen" class="beep-screen beep-run vj-verify" hidden>
+
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Step</span><span class="rb-v">2 of 2</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Best</span><span class="rb-v" id="verBest">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Status</span><span class="rb-v" id="verStatus">Ready</span></div>
+    </section>
+
+    <section class="beep-card vj-cal-card">
+      <div class="beep-card-head"><h2>Verification jump</h2></div>
+      <p class="vj-cal-blurb">Coach does one jump near the phone. The app must detect two clean impacts before the class can run.</p>
+
+      <!-- HUD -->
+      <div class="round-hud rh-ready vj-hud" id="verHud">
+        <div class="rh-state" id="verHudState">READY</div>
+        <div class="rh-clock" id="verHudClock">3</div>
+        <div class="rh-sub" id="verHudSub">Tap READY to start countdown</div>
+      </div>
+
+      <!-- VU meter -->
+      <div class="vu-wrap vu-mini">
+        <div class="vu-track">
+          <div class="vu-fill" id="verVuFill"></div>
+          <div class="vu-thresh" id="verVuThresh"></div>
+        </div>
+      </div>
+
+      <!-- Result card -->
+      <div class="vj-result" id="verResult" hidden>
+        <div class="vjr-headline" id="verResultHeadline">—</div>
+        <div class="vjr-meta" id="verResultMeta">—</div>
+        <canvas class="vj-wave" id="verWave" width="600" height="80" aria-label="Audio waveform"></canvas>
+      </div>
+
+      <div class="vj-cal-actions" id="verActions">
+        <button class="ctl ctl-pause" id="verRetryBtn" type="button" hidden>↺ Try again</button>
+        <button class="ctl ctl-stop" id="verToManualBtn" type="button">📏 Switch to Manual</button>
+        <button class="results-save" id="verReadyBtn" type="button">🟢 Ready to jump</button>
+        <button class="results-save" id="verAcceptBtn" type="button" hidden>✓ Start session</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================================================================
+       SCREEN D — RUN
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run vj-run" hidden>
+
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Attempt</span><span class="rb-v" id="vjAttempt">1 / 3</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Best</span><span class="rb-v" id="vjBest">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Left</span><span class="rb-v" id="vjLeft">—</span></div>
+    </section>
+
+    <!-- Athlete card -->
+    <section class="ag-card">
+      <div class="ag-who">
+        <span class="ag-init" id="vjInit">—</span>
+        <span class="ag-name" id="vjName">—</span>
+        <span class="ag-meta" id="vjMeta">—</span>
+      </div>
+    </section>
+
+    <!-- Live listening stage (shown while waiting for jump) -->
+    <section class="vj-stage" id="vjListenStage">
+      <div class="vj-listen-icon" aria-hidden="true">🎙</div>
+      <div class="vj-listen-state" id="vjListenState">Listening for jump...</div>
+      <div class="vj-listen-sub" id="vjListenSub">Athlete jumps when ready</div>
+      <div class="vu-wrap vu-mini">
+        <div class="vu-track">
+          <div class="vu-fill" id="vjVuFill"></div>
+          <div class="vu-thresh" id="vjVuThresh"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result stage (shown after detection) -->
+    <section class="vj-stage vj-result-stage" id="vjResultStage" hidden>
+      <div class="vjr-headline" id="vjResultCm">— cm</div>
+      <div class="vjr-meta" id="vjResultMeta">flight 0.00s</div>
+      <canvas class="vj-wave" id="vjWave" width="600" height="80" aria-label="Audio waveform"></canvas>
+      <div class="vj-auto-accept" id="vjAutoAccept">Auto-accept in <b id="vjAutoCount">4</b>s</div>
+      <div class="vj-result-actions">
+        <button class="ctl ctl-pause" id="vjRedoBtn" type="button">↺ Redo</button>
+        <button class="ctl ctl-pause" id="vjEditBtn" type="button">✎ Edit</button>
+        <button class="results-save" id="vjAcceptBtn" type="button">✓ Accept</button>
+      </div>
+    </section>
+
+    <!-- Run controls -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="vjUndoBtn" type="button">⤺ Undo last</button>
+      <button class="ctl ctl-pause" id="vjSkipBtn" type="button">⏭ Skip athlete</button>
+      <button class="ctl ctl-stop" id="vjStopBtn" type="button">⏹ End session</button>
+    </nav>
+
+    <!-- Undo toast (5s) -->
+    <div class="beep-toast" id="vjUndoToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg" id="vjUndoMsg">Undone</span>
+    </div>
+
+  </main>
+
+  <!-- =====================================================================
+       NUMBER PAD OVERLAY (manual mode + edit)
+  ===================================================================== -->
+  <div class="numpad-overlay" id="numpadOverlay" hidden>
+    <div class="numpad-modal" role="dialog" aria-modal="true" aria-labelledby="npTitle">
+      <div class="np-head">
+        <span class="np-title" id="npTitle">— · Attempt 1</span>
+        <button class="np-close" id="npClose" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="np-display">
+        <span class="np-value" id="npValue">0</span>
+        <span class="np-unit">cm</span>
+      </div>
+      <div class="numpad-grid">
+        <button class="np-key" data-k="1" type="button">1</button>
+        <button class="np-key" data-k="2" type="button">2</button>
+        <button class="np-key" data-k="3" type="button">3</button>
+        <button class="np-key" data-k="4" type="button">4</button>
+        <button class="np-key" data-k="5" type="button">5</button>
+        <button class="np-key" data-k="6" type="button">6</button>
+        <button class="np-key" data-k="7" type="button">7</button>
+        <button class="np-key" data-k="8" type="button">8</button>
+        <button class="np-key" data-k="9" type="button">9</button>
+        <button class="np-key np-foul" data-k="skip" type="button">Skip</button>
+        <button class="np-key" data-k="0" type="button">0</button>
+        <button class="np-key np-back" data-k="back" type="button">⌫</button>
+      </div>
+      <div class="np-actions">
+        <button class="np-save" id="npSave" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       SCREEN E — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Session complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Athletes</span><span class="rs-v" id="rsAthletes">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Best jump</span><span class="rs-v" id="rsBest">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Avg best</span><span class="rs-v" id="rsAvg">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Results</h2></div>
+      <table class="results-table">
+        <thead><tr><th>#</th><th>Athlete</th><th>Best</th><th>Attempts</th><th>Conf</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot">Confidence dots show audio quality. Solid dots = clean two-spike detection; faded = manual entry / edited.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="vertex-audio-detect.js"></script>
+  <script src="vertical-jump.js"></script>
+</body>
+</html>
