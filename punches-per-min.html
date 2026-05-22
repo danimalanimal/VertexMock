@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Punches Per Minute</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Punches / Min</span></div>
+    <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Duration -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Duration</h2></div>
+      <div class="dur-switch" role="radiogroup" aria-label="Duration">
+        <button class="dur-btn"    data-dur="30"  type="button" role="radio" aria-checked="false"><span class="db-name">30s</span><span class="db-sub">sprint</span></button>
+        <button class="dur-btn on"  data-dur="60"  type="button" role="radio" aria-checked="true"><span class="db-name">60s</span><span class="db-sub">standard PPM</span></button>
+        <button class="dur-btn"    data-dur="120" type="button" role="radio" aria-checked="false"><span class="db-name">2 min</span><span class="db-sub">extended</span></button>
+        <button class="dur-btn"    data-dur="180" type="button" role="radio" aria-checked="false"><span class="db-name">3 min</span><span class="db-sub">round</span></button>
+      </div>
+      <p class="proto-blurb" id="durBlurb">60s — standard Punches Per Minute test, used in boxing combine.</p>
+    </section>
+
+    <!-- Guide -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to run</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps">
+          <li><div class="gs-num">1</div><div><strong>Set-up</strong><p>Athlete on the heavy bag or pads. Coach holds the phone facing the athlete. Brief them on the count rule: <b>only clean, full-extension punches count</b>.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Cue + start</strong><p>"Ready, GO." Tap START — 3s countdown then "GO." Audio cue confirms.</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Count</strong><p>Tap the big pad <b>once per punch</b>. The pad covers most of the screen so you can keep your eyes on the athlete and tap with your thumb.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Cues during</strong><p>Audio beeps at the halfway mark + a 10s countdown at the end. Don't pace them — they should go all-out.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Scoring</strong><p>Final count + punches/minute extrapolation + 10s split. Save to fitness stats so they appear on athlete progress reports.</p></div></li>
+        </ol>
+        <div class="guide-safety"><strong>Safety</strong><ul>
+          <li>Wrap hands properly + warm-up shoulders (band pull-aparts, arm circles)</li>
+          <li>Stop on shoulder/wrist pain — don't push through</li>
+          <li>5-min cool-down jog or shadow box after</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Athlete picker (single) -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head"><h2>Select athlete (one at a time)</h2></div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athlete"></div>
+    </section>
+
+    <!-- Start -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">🥊</span>
+        <span class="bs-label">Start round</span>
+        <span class="bs-sub" id="startSub">Pick an athlete</span>
+      </button>
+      <p class="beep-start-foot">3-second countdown plays before the timer starts.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — LIVE
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run ppm-run" hidden>
+
+    <!-- Compact HUD -->
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Time left</span><span class="rb-v ppm-clock" id="ppmClock">1:00</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Punches</span><span class="rb-v ppm-count" id="ppmCount">0</span></div>
+      <div class="ribbon-cell"><span class="rb-k">PPM pace</span><span class="rb-v" id="ppmPace">—</span></div>
+    </section>
+
+    <!-- Huge tap pad -->
+    <section class="tap-zone-wrap">
+      <button class="tap-zone" id="tapZone" type="button" aria-label="Tap to count a punch">
+        <span class="tz-count" id="tzCount">0</span>
+        <span class="tz-hint">TAP EACH PUNCH</span>
+      </button>
+    </section>
+
+    <!-- Controls -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="undoLastBtn" type="button">⤺ Undo last</button>
+      <button class="ctl ctl-stop"  id="stopBtn"     type="button">⏹ End round</button>
+    </nav>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Round complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Athlete</span><span class="rs-v" id="rsAthlete">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Punches</span><span class="rs-v" id="rsTotal">—</span></div>
+        <div class="rs-tile"><span class="rs-k">PPM</span><span class="rs-v" id="rsPpm">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>10-second splits</h2></div>
+      <div class="ppm-splits" id="ppmSplits"></div>
+      <p class="results-foot">Splits show pace decay. Strong athletes stay within ~20% of their fastest split — bigger drops indicate poor anaerobic capacity.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="vertex-timer.js"></script>
+  <script src="punches-per-min.js"></script>
+</body>
+</html>

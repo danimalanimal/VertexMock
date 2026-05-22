@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Agility Tests</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span id="brandSub">Agility Tests</span></div>
+    <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Protocol picker -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Protocol</h2></div>
+      <div class="proto-switch" role="radiogroup" aria-label="Protocol">
+        <button class="proto-btn on" data-proto="ttest" type="button" role="radio" aria-checked="true"><span class="pb-name">T-Test</span><span class="pb-sub">4-cone T</span></button>
+        <button class="proto-btn" data-proto="lane"  type="button" role="radio" aria-checked="false"><span class="pb-name">NBA Lane</span><span class="pb-sub">around the key</span></button>
+      </div>
+      <p class="proto-blurb" id="protoBlurb">T-Test — 4-cone T course. Forward sprint, lateral shuffle, backpedal.</p>
+    </section>
+
+    <!-- Course diagram -->
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Course</h2></div>
+      <div class="agility-diagram" id="diagram"></div>
+      <p class="diagram-cap" id="diagramCap">10 yd forward → 5 yd left shuffle → 10 yd right shuffle → 5 yd left shuffle → 10 yd backpedal.</p>
+    </section>
+
+    <!-- Guide -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to run</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps" id="guideSteps"></ol>
+        <div class="guide-safety"><strong>Safety</strong><ul>
+          <li>10-min warm-up + dynamic drills (lateral lunges, carioca, 2 half-effort walkthroughs)</li>
+          <li>Non-slip surface, all cones secured, lane clear of bags/equipment</li>
+          <li>Refuse re-attempts on tweaks — note + refer for assessment</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section class="beep-card check-card">
+      <div class="beep-card-head"><h2>Pre-test checklist</h2></div>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <!-- Attempts setting -->
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Attempts per athlete</h2></div>
+      <div class="att-switch" role="radiogroup" aria-label="Attempts">
+        <button class="att-btn"    data-att="1" type="button" role="radio" aria-checked="false">1</button>
+        <button class="att-btn on"  data-att="2" type="button" role="radio" aria-checked="true">2</button>
+        <button class="att-btn"    data-att="3" type="button" role="radio" aria-checked="false">3</button>
+      </div>
+      <p class="proto-blurb">Best of attempts scored. 1-2 min rest between attempts.</p>
+    </section>
+
+    <!-- Roster -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head">
+        <h2>Select athletes</h2>
+        <div class="roster-actions">
+          <span class="roster-count" id="rosterCount">0 / 12 selected</span>
+          <button class="roster-all" id="selectAllBtn" type="button">Select all</button>
+          <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes"></div>
+    </section>
+
+    <!-- Start -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">▶</span>
+        <span class="bs-label">Start session</span>
+        <span class="bs-sub" id="startSub">Pick at least one athlete</span>
+      </button>
+      <p class="beep-start-foot">One athlete at a time. Massive START / STOP buttons on the next screen.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — LIVE RUN  (single athlete on the clock)
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run" hidden>
+
+    <!-- Who's up -->
+    <section class="ag-card">
+      <div class="ag-who">
+        <span class="ag-init" id="agInit">—</span>
+        <span class="ag-name" id="agName">—</span>
+        <span class="ag-meta"><span id="agAttempt">A1</span> / <span id="agOfN">2</span></span>
+      </div>
+      <div class="ag-best">Best so far: <b id="agBest">—</b></div>
+    </section>
+
+    <!-- Huge clock -->
+    <section class="big-clock-wrap">
+      <div class="big-clock" id="bigClock">0:00.00</div>
+      <div class="big-clock-sub" id="bigClockSub">tap START when athlete moves</div>
+    </section>
+
+    <!-- Massive action button -->
+    <section class="ag-action-wrap">
+      <button class="ag-action ag-start" id="agActionBtn" type="button">▶ START</button>
+    </section>
+
+    <!-- Attempts strip -->
+    <section class="ag-attempts">
+      <div class="run-head"><span>ATTEMPTS</span><span id="agProgress">0 / 0</span></div>
+      <div class="ag-att-strip" id="agAttStrip"></div>
+    </section>
+
+    <!-- Controls -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="agSkipBtn" type="button">⏭ Skip attempt</button>
+      <button class="ctl ctl-stop"  id="agFinishBtn" type="button">⏹ End session</button>
+    </nav>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Session complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Protocol</span><span class="rs-v" id="rsProto">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Fastest</span><span class="rs-v" id="rsBest">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Avg best</span><span class="rs-v" id="rsAvg">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Results</h2></div>
+      <table class="results-table">
+        <thead><tr><th>#</th><th>Athlete</th><th>Best</th><th>Attempts</th><th>Band</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot">Best of all attempts scored. Bands are age-relative reference ranges for youth athletes.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="vertex-timer.js"></script>
+  <script src="agility-tests.js"></script>
+</body>
+</html>

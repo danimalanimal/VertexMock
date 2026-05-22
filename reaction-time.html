@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Reaction Time</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Reaction Time</span></div>
+    <button class="beep-mute" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute audio">🔊</button>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Trials -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Trials per athlete</h2></div>
+      <div class="set-switch" role="radiogroup" aria-label="Trials">
+        <button class="set-btn"     data-trials="3"  type="button" role="radio" aria-checked="false">3</button>
+        <button class="set-btn on"  data-trials="5"  type="button" role="radio" aria-checked="true">5</button>
+        <button class="set-btn"     data-trials="7"  type="button" role="radio" aria-checked="false">7</button>
+        <button class="set-btn"     data-trials="10" type="button" role="radio" aria-checked="false">10</button>
+      </div>
+      <p class="proto-blurb">5 trials — drops best + worst, averages the middle. Tests neural processing speed.</p>
+    </section>
+
+    <!-- Guide -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to run reaction time</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps">
+          <li><div class="gs-num">1</div><div><strong>Position</strong><p>Athlete seated, phone flat on the table or held in their dominant hand. Quiet environment, no distractions.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Brief them</strong><p>"Wait for the screen to turn GREEN, then tap as fast as you can. <b>Do not anticipate</b> — tapping early voids the trial."</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Start</strong><p>Tap START → screen goes RED. Random delay 2-5s before turning GREEN. Athlete taps anywhere. Repeat across 5 trials.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Early-tap penalty</strong><p>If athlete taps during the RED phase, trial counts as failed and a new random delay starts. No skipping.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Score</strong><p>Reported in milliseconds. <b>Drop best + worst</b>, average middle trials. Typical adult: 200-250ms. Elite athletes: 150-200ms.</p></div></li>
+        </ol>
+        <div class="guide-safety"><strong>Tips</strong><ul>
+          <li>Same hand each trial — alternating dominant/non-dominant skews results</li>
+          <li>30-60s rest between trials prevents anticipation patterns</li>
+          <li>Test at similar time of day for fair longitudinal comparisons</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Start -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button">
+        <span class="bs-glyph">⚡</span>
+        <span class="bs-label">Start trials</span>
+        <span class="bs-sub" id="startSub">5 trials</span>
+      </button>
+      <p class="beep-start-foot">Tap the GO zone the moment it turns green.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — LIVE (full-screen reaction zone)
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run rxn-run" hidden>
+
+    <section class="run-ribbon">
+      <div class="ribbon-cell"><span class="rb-k">Trial</span><span class="rb-v" id="rxnTrial">1 / 5</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Best</span><span class="rb-v" id="rxnBest">—</span></div>
+      <div class="ribbon-cell"><span class="rb-k">Last</span><span class="rb-v" id="rxnLast">—</span></div>
+    </section>
+
+    <button class="rxn-zone rxn-state-idle" id="rxnZone" type="button">
+      <span class="rxn-state" id="rxnState">TAP TO START</span>
+      <span class="rxn-sub" id="rxnSub">Trial 1 of 5</span>
+    </button>
+
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="skipBtn" type="button">⤺ Reset trial</button>
+      <button class="ctl ctl-stop"  id="stopBtn" type="button">⏹ End session</button>
+    </nav>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Session complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Average</span><span class="rs-v" id="rsAvg">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Best</span><span class="rs-v" id="rsBest">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Worst</span><span class="rs-v" id="rsWorst">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Trial breakdown</h2></div>
+      <table class="results-table">
+        <thead><tr><th>#</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot">Best and worst trials are dropped; the average uses the middle scores. Typical adult range is 200-250ms; elite athletes 150-200ms.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved</span>
+    </div>
+  </main>
+
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="reaction-time.js"></script>
+</body>
+</html>

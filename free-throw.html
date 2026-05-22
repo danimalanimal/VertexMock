@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Free Throw %</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="fitness-tests.html" aria-label="Back to tests">&larr; Tests</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Free Throw %</span></div>
+    <span class="hub-spacer" aria-hidden="true"></span>
+  </header>
+
+  <!-- =====================================================================
+       SCREEN A — SETUP
+  ===================================================================== -->
+  <main id="setupScreen" class="beep-screen beep-setup">
+
+    <!-- Set size -->
+    <section class="beep-card protocol-card">
+      <div class="beep-card-head"><h2>Set size</h2></div>
+      <div class="set-switch" role="radiogroup" aria-label="Shots per set">
+        <button class="set-btn"    data-set="10"  type="button" role="radio" aria-checked="false">10</button>
+        <button class="set-btn on"  data-set="25"  type="button" role="radio" aria-checked="true">25</button>
+        <button class="set-btn"    data-set="50"  type="button" role="radio" aria-checked="false">50</button>
+        <button class="set-btn"    data-set="100" type="button" role="radio" aria-checked="false">100</button>
+      </div>
+      <p class="proto-blurb">Shots per athlete. 25 is the standard combine set; 100 for serious shooting workouts.</p>
+    </section>
+
+    <!-- Guide -->
+    <section class="beep-card guide-card">
+      <div class="beep-card-head">
+        <h2>How to run</h2>
+        <button class="guide-toggle" id="guideToggle" type="button" aria-expanded="true" aria-controls="guideBody">Hide</button>
+      </div>
+      <div class="guide-body" id="guideBody">
+        <ol class="guide-steps">
+          <li><div class="gs-num">1</div><div><strong>Set-up</strong><p>Standard NBA/NCAA free throw line, 15 ft (4.57m) from the backboard. Rebounder + passer for fast turnaround.</p></div></li>
+          <li><div class="gs-num">2</div><div><strong>Brief athlete</strong><p>Routine each shot (dribble, breath, set). No coaching during the set. Coach stands beside, phone in hand.</p></div></li>
+          <li><div class="gs-num">3</div><div><strong>Record</strong><p>Tap the big green <b>MAKE</b> button on each made basket, <b>MISS</b> on each miss. Live tally + streak shown above the buttons. Tap <b>UNDO</b> to fix mis-taps.</p></div></li>
+          <li><div class="gs-num">4</div><div><strong>Next athlete</strong><p>When the set completes (auto-detected) you'll see a Next Athlete prompt. Or skip remaining shots to advance.</p></div></li>
+          <li><div class="gs-num">5</div><div><strong>Scoring</strong><p>Final % + longest streak per athlete. Save to fitness stats.</p></div></li>
+        </ol>
+        <div class="guide-safety"><strong>Tips</strong><ul>
+          <li>1 minute rest between athletes</li>
+          <li>Don't let athletes see live count — pressure changes results</li>
+          <li>Same ball, same hoop, ideally same time of day for comparisons</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <!-- Roster -->
+    <section class="beep-card roster-card">
+      <div class="beep-card-head">
+        <h2>Select athletes</h2>
+        <div class="roster-actions">
+          <span class="roster-count" id="rosterCount">0 / 12 selected</span>
+          <button class="roster-all" id="selectAllBtn" type="button">Select all</button>
+          <button class="roster-clear" id="clearAllBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="roster-grid" id="rosterGrid" role="group" aria-label="Athletes"></div>
+    </section>
+
+    <!-- Start -->
+    <section class="beep-start-wrap">
+      <button class="beep-start" id="startBtn" type="button" disabled>
+        <span class="bs-glyph">🏀</span>
+        <span class="bs-label">Start session</span>
+        <span class="bs-sub" id="startSub">Pick at least one athlete</span>
+      </button>
+      <p class="beep-start-foot">Athletes shoot one set each, in order.</p>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN B — LIVE
+  ===================================================================== -->
+  <main id="runScreen" class="beep-screen beep-run" hidden>
+
+    <!-- Who's up -->
+    <section class="ag-card">
+      <div class="ag-who">
+        <span class="ag-init" id="ftInit">—</span>
+        <span class="ag-name" id="ftName">—</span>
+        <span class="ag-meta">Shot <span id="ftShot">1</span> / <span id="ftSet">25</span></span>
+      </div>
+      <div class="ag-best">Streak: <b id="ftStreak">0</b> · Made <b id="ftMade">0</b> / <b id="ftAtt">0</b></div>
+    </section>
+
+    <!-- Live percentage display -->
+    <section class="big-clock-wrap ft-pct-wrap">
+      <div class="big-clock ft-pct" id="ftPct">—</div>
+      <div class="big-clock-sub">live %</div>
+    </section>
+
+    <!-- Big M/Miss buttons -->
+    <section class="ft-pad">
+      <button class="ft-btn ft-make" id="ftMakeBtn" type="button">
+        <span class="ftb-glyph">✓</span><span class="ftb-label">MAKE</span>
+      </button>
+      <button class="ft-btn ft-miss" id="ftMissBtn" type="button">
+        <span class="ftb-glyph">✕</span><span class="ftb-label">MISS</span>
+      </button>
+    </section>
+
+    <!-- Shot grid (visual log) -->
+    <section class="ft-grid-wrap">
+      <div class="run-head"><span>SHOTS</span></div>
+      <div class="ft-grid" id="ftGrid"></div>
+    </section>
+
+    <!-- Controls -->
+    <nav class="run-controls" aria-label="Session controls">
+      <button class="ctl ctl-pause" id="ftUndoBtn" type="button">⤺ Undo</button>
+      <button class="ctl ctl-stop"  id="ftSkipBtn" type="button">⏭ Next athlete</button>
+    </nav>
+
+  </main>
+
+  <!-- =====================================================================
+       SCREEN C — RESULTS
+  ===================================================================== -->
+  <main id="resultsScreen" class="beep-screen beep-results" hidden>
+    <section class="beep-card results-head">
+      <div class="beep-card-head"><h2>Session complete</h2></div>
+      <div class="results-summary">
+        <div class="rs-tile"><span class="rs-k">Athletes</span><span class="rs-v" id="rsAthletes">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Top %</span><span class="rs-v" id="rsTop">—</span></div>
+        <div class="rs-tile"><span class="rs-k">Set size</span><span class="rs-v" id="rsSet">—</span></div>
+      </div>
+    </section>
+
+    <section class="beep-card">
+      <div class="beep-card-head"><h2>Results</h2></div>
+      <table class="results-table">
+        <thead><tr><th>#</th><th>Athlete</th><th>%</th><th>Made/Att</th><th>Best streak</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <p class="results-foot">Best streak is the longest run of consecutive makes within the set.</p>
+    </section>
+
+    <section class="results-cta">
+      <button class="results-save" id="saveBtn" type="button">💾 Save to fitness</button>
+      <button class="results-again" id="againBtn" type="button">↺ Run again</button>
+      <button class="results-export" id="exportBtn" type="button">⤓ Export JSON</button>
+    </section>
+
+    <div class="beep-toast" id="saveToast" role="status" aria-live="polite" hidden>
+      <span class="bt-msg">Results saved to fitness stats</span>
+    </div>
+  </main>
+
+  <script src="boxer-data.js"></script>
+  <script src="vertex-audio.js"></script>
+  <script src="vertex-roster.js"></script>
+  <script src="vertex-results.js"></script>
+  <script src="free-throw.js"></script>
+</body>
+</html>
