@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vertex · Record Clip (Coach Tool)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Page-local styling — keeps recorder tool visually distinct from athlete-facing tests */
+    /* Compact header so brand + Library link fit together on iPhone */
+    .beep-topbar .beep-brand { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; text-align: center; padding: 0 6px; }
+    .beep-topbar .beep-brand span { margin-left: 4px; }
+    .beep-topbar .beep-back { padding: 8px 10px; font-size: 12px; flex-shrink: 0; }
+    .rec-wrap { max-width: 720px; margin: 0 auto; padding: 16px 14px 80px; color: #d6e2f0; }
+    .rec-wrap h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: .02em; }
+    .rec-wrap .lede { opacity:.75; margin: 0 0 16px; line-height: 1.5; }
+    .rec-card {
+      background: linear-gradient(180deg, #0d1420 0%, #0a111c 100%);
+      border: 1px solid rgba(120,160,210,.18);
+      border-radius: 14px;
+      padding: 14px 14px 16px;
+      margin: 12px 0;
+    }
+    .rec-card h2 { font-size: 15px; margin: 0 0 10px; color:#a9c2dd; letter-spacing:.04em; text-transform: uppercase; }
+    .rec-card p { line-height: 1.5; margin: 6px 0; opacity:.85; }
+    .rec-steps { padding-left: 18px; margin: 8px 0; }
+    .rec-steps li { margin: 6px 0; line-height: 1.5; }
+    .rec-steps strong { color: #ffd476; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+    .field label { font-size: 12px; opacity: .65; text-transform: uppercase; letter-spacing: .06em; }
+    .field input[type=text], .field textarea, .field select {
+      background: #060a12; color: #e8efff;
+      border: 1px solid rgba(120,160,210,.22);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: 15px/1.4 'Roboto Mono', monospace;
+      width: 100%;
+      -webkit-appearance: none; appearance: none;
+    }
+    .field textarea { min-height: 60px; resize: vertical; }
+
+    .label-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .label-pill {
+      background: #0a111c;
+      border: 1px solid rgba(120,160,210,.22);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      color: #cfdcec;
+      font-size: 13px;
+      text-align: left;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .08s ease, background .12s ease, border-color .12s ease;
+    }
+    .label-pill:active { transform: scale(.97); }
+    .label-pill.on {
+      background: rgba(89,183,255,.12);
+      border-color: #59b7ff;
+      color: #fff;
+    }
+    .label-pill .lp-key { display:block; font-weight: 700; color: #fff; font-size: 14px; margin-bottom: 2px; }
+    .label-pill .lp-sub { display:block; opacity:.65; font-size: 11px; line-height: 1.3; }
+
+    .rec-button {
+      width: 100%;
+      padding: 22px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(180deg,#ff5050,#c02b2b);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 8px 24px rgba(255,80,80,.18);
+      cursor: pointer;
+    }
+    .rec-button[disabled] { opacity: .4; cursor: not-allowed; }
+    .rec-button.recording { background: linear-gradient(180deg,#444,#222); animation: rec-pulse 1s ease infinite; }
+    @keyframes rec-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,80,80,.4); }
+      50% { box-shadow: 0 0 0 14px rgba(255,80,80,0); }
+    }
+
+    .secondary-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(120,160,210,.28);
+      background: #0a111c;
+      color: #e8efff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .secondary-btn.upload { background: linear-gradient(180deg,#33b765,#218a45); border-color: #1d703a; color: #fff; }
+    .secondary-btn:active { transform: scale(.97); }
+    .secondary-btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+
+    .countdown {
+      font-size: 64px;
+      font-weight: 700;
+      text-align: center;
+      color: #ff7a7a;
+      letter-spacing: .04em;
+      font-variant-numeric: tabular-nums;
+      margin: 8px 0;
+      min-height: 80px;
+    }
+
+    .wave-canvas {
+      width: 100%; height: 90px;
+      background: #050810;
+      border: 1px solid rgba(120,160,210,.18);
+      border-radius: 8px;
+      display: block;
+      margin-top: 8px;
+    }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      background: #0d2a16; border: 1px solid #2c7d4d; color: #cdf2dc;
+      padding: 12px 18px; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      z-index: 100;
+      opacity: 0; transition: opacity .2s ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .toast.err { background: #2a0e0e; border-color: #7d2c2c; color: #f2cdcd; }
+
+    .status-line { font-size: 13px; opacity:.7; margin-top: 8px; font-family: 'Roboto Mono', monospace; }
+    .meta-pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      background: rgba(89,183,255,.12); border: 1px solid rgba(89,183,255,.3);
+      color: #59b7ff; font-size: 11px; margin-right: 6px;
+    }
+    [hidden] { display: none !important; }
+
+    .audit-link {
+      display: inline-block; margin-top: 10px;
+      color: #59b7ff; text-decoration: none; font-size: 13px;
+      border-bottom: 1px solid rgba(89,183,255,.35);
+    }
+  </style>
+</head>
+<body class="beep-body">
+
+  <header class="beep-topbar">
+    <a class="beep-back" href="index.html" aria-label="Back to home">&larr; Home</a>
+    <div class="beep-brand"><strong>VERTEX</strong> <span>Record Clip</span></div>
+    <a class="beep-back" href="clip-library.html" style="text-decoration:none">Library &rarr;</a>
+  </header>
+
+  <main class="rec-wrap">
+
+    <h1>Audio Clip Recorder</h1>
+    <p class="lede">
+      Help us train the rip/thud detector. Capture short labelled clips from real athletes; we'll use them to tune
+      thresholds and (later) train a classifier.
+    </p>
+
+    <!-- ============ INSTRUCTIONS ============ -->
+    <section class="rec-card">
+      <h2>How to record a clip</h2>
+      <ol class="rec-steps">
+        <li>Place the phone on the floor, <strong>1&ndash;2 metres</strong> from where the athlete will land. Floor-coupled mic gives us the cleanest landing thud.</li>
+        <li>For CMJ clips: apply <strong>packing tape</strong> across the ball of each shoe (half on shoe, half on floor) before the rep.</li>
+        <li>Pick the matching <strong>label</strong> below. Be honest &mdash; mis-labelled data is worse than no data.</li>
+        <li>Tap <strong>RECORD</strong>, then perform the action within the 4-second window. The clip auto-stops.</li>
+        <li>Review the waveform, then tap <strong>UPLOAD</strong>. Repeat with a fresh strip of tape.</li>
+      </ol>
+      <p style="opacity:.6;font-size:12px;margin-top:10px">
+        Clips upload anonymously to a shared library. No PII, no identifiers &mdash; just the audio waveform and the label you pick.
+      </p>
+    </section>
+
+    <!-- ============ COACH IDENTITY ============ -->
+    <section class="rec-card">
+      <h2>Your name (optional)</h2>
+      <div class="field">
+        <input type="text" id="coachField" placeholder="e.g. Jamie, AthleticsClubMelb" autocomplete="off" maxlength="60" />
+      </div>
+      <p style="opacity:.6;font-size:12px;margin:4px 0 0">
+        Stored only so we can attribute the dataset and reach out if a clip is unusual. Saved locally on this device.
+      </p>
+    </section>
+
+    <!-- ============ LABEL PICKER ============ -->
+    <section class="rec-card">
+      <h2>Label this clip</h2>
+      <div class="label-grid" id="labelGrid" role="radiogroup" aria-label="Clip label">
+        <!-- Populated from JS to keep VALID_LABELS in sync with api/upload-clip.js -->
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label for="noteField">Notes (optional)</label>
+        <textarea id="noteField" placeholder="e.g. wooden gym floor, athlete wore basketball shoes, tape was 50mm packing" maxlength="500"></textarea>
+      </div>
+    </section>
+
+    <!-- ============ RECORDER ============ -->
+    <section class="rec-card">
+      <h2>Recorder</h2>
+
+      <div class="status-line" id="statusLine">
+        Tap RECORD to enable mic. iPhone Safari needs a tap to unlock audio.
+      </div>
+
+      <div class="countdown" id="countdown" aria-live="polite">&middot; &middot; &middot;</div>
+
+      <button id="recordBtn" class="rec-button" type="button">
+        RECORD (4s)
+      </button>
+
+      <canvas id="waveCanvas" class="wave-canvas" width="640" height="90" hidden></canvas>
+
+      <div class="btn-row" id="reviewRow" hidden>
+        <button id="playBtn" class="secondary-btn" type="button">&#9658; Play</button>
+        <button id="discardBtn" class="secondary-btn" type="button">Discard</button>
+        <button id="uploadBtn" class="secondary-btn upload" type="button">Upload &uarr;</button>
+      </div>
+
+      <div class="status-line" id="uploadStatus" hidden></div>
+    </section>
+
+    <a class="audit-link" href="clip-library.html">View clip library &rarr;</a>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="vertex-audio-detect.js"></script>
+  <script src="record-clip.js"></script>
+</body>
+</html>

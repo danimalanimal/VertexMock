@@ -374,8 +374,10 @@
     //   t2 = rebound landing  (loud)
     state.det.setHandlers({
       onLevel: (rms) => { updateVu('verVuFill', rms); updateVu('vuFill', rms); },
-      onOnset: (t) => {
-        state.verifyOnsets.push(t);
+      onOnset: (t, rms, cls) => {
+        // Reject voice/clap outright (bystanders, coach speech)
+        if (cls && (cls.kind === 'voice' || cls.kind === 'clap')) return;
+        state.verifyOnsets.push({ t, kind: cls?.kind || 'unknown', conf: cls?.conf || 0, rms });
         const n = state.verifyOnsets.length;
         if (n === 1) {
           // Open scuff window after first impact
@@ -409,81 +411,104 @@
       $('verBest').textContent = `${cm.toFixed(1)} cm`;
       $('verStatus').textContent = 'Verified ✓';
       $('verAcceptBtn').removeAttribute('hidden');
-      drawWaveform('verWave', state.det.getRecentSamples(2.5), onsets, state.det.getNowSec());
+      drawWaveform('verWave', state.det.getRecentSamples(2.5), onsetTimes(onsets), state.det.getNowSec());
       beep({ freq: 880, dur: 0.4 });
     } else {
       $('verResultHeadline').textContent = 'Not detected';
       $('verResultMeta').textContent = reason;
       $('verStatus').textContent = 'Retry';
       $('verRetryBtn').removeAttribute('hidden');
-      try { drawWaveform('verWave', state.det.getRecentSamples(2.5), onsets, state.det.getNowSec()); } catch (_) {}
+      try { drawWaveform('verWave', state.det.getRecentSamples(2.5), onsetTimes(onsets), state.det.getNowSec()); } catch (_) {}
       beep({ freq: 220, dur: 0.4 });
     }
   }
 
   /**
-   * Parse a sequence of onset timestamps into a drop-jump result.
-   * Tries 3-impact (drop → scuff → land) first; falls back to 2-impact
-   * (drop → land, RSI unavailable).
+   * Parse a sequence of classified onsets into a drop-jump result.
+   * Pattern: thud (drop) → rip/scuff (take-off) → thud (landing).
+   * 3-impact path = high confidence + RSI. 2-impact fallback = medium, no RSI.
+   * Each onset = { t, kind, conf, rms } or legacy bare number.
    */
   function parseDropJumpOnsets(onsets) {
-    if (!onsets || onsets.length < 1) {
+    const normalized = (onsets || []).map(o => typeof o === 'number' ? { t: o, kind: 'unknown', conf: 0 } : o);
+    if (normalized.length < 1) {
       return { ok: false, reason: 'No impact heard — phone too far, or drop landing too soft' };
     }
-    if (onsets.length === 1) {
+    if (normalized.length === 1) {
       return { ok: false, reason: 'Only heard the drop landing — did the rebound jump miss the spot?' };
     }
-    // Try 3-impact path: pick first + middle + last that satisfies windows
-    if (onsets.length >= 3) {
-      // Pick the triple that gives a valid drop→scuff→land pattern.
-      // Strategy: t0 = onsets[0]; t2 = last onset within plausible total time;
-      // t1 = any middle onset that splits contact + flight plausibly.
-      const t0 = onsets[0];
-      const t2 = onsets[onsets.length - 1];
-      // Find candidate t1 between t0 and t2 — prefer one that makes both windows valid
+
+    // 3-impact path: try every (i, j, k) triple
+    if (normalized.length >= 3) {
       let bestTriple = null;
-      for (let i = 1; i < onsets.length - 1; i++) {
-        const t1 = onsets[i];
-        const contact = t1 - t0;
-        const flight  = t2 - t1;
-        if (contact >= T_CONTACT_MIN && contact <= T_CONTACT_MAX &&
-            flight  >= T_FLIGHT_MIN  && flight  <= T_FLIGHT_MAX) {
-          bestTriple = { t0, t1, t2, contact, flight };
-          break;
+      for (let i = 0; i < normalized.length - 2; i++) {
+        for (let j = i + 1; j < normalized.length - 1; j++) {
+          for (let k = j + 1; k < normalized.length; k++) {
+            const a = normalized[i], b = normalized[j], c = normalized[k];
+            const contact = b.t - a.t;
+            const flight  = c.t - b.t;
+            if (contact < T_CONTACT_MIN || contact > T_CONTACT_MAX) continue;
+            if (flight  < T_FLIGHT_MIN  || flight  > T_FLIGHT_MAX)  continue;
+            // Score: drop=thud, scuff=rip(faint)/unknown, landing=thud
+            let score = 1.0;
+            if (a.kind === 'thud') score += 0.5;
+            if (c.kind === 'thud') score += 0.5;
+            if (b.kind === 'rip' || b.kind === 'unknown') score += 0.3; // scuff is broadband + faint
+            if (b.kind === 'thud') score -= 0.2; // middle being a thud is suspicious (extra footstep?)
+            score += (a.conf + c.conf) * 0.15;
+            // Prefer middle that's actually quieter (real scuff is faint vs landing thuds)
+            if (b.rms != null && a.rms != null && c.rms != null) {
+              const louder = Math.max(a.rms, c.rms);
+              if (b.rms < louder * 0.6) score += 0.2;
+            }
+            if (!bestTriple || score > bestTriple.score) bestTriple = { a, b, c, contact, flight, score };
+          }
         }
       }
-      if (bestTriple) {
+      if (bestTriple && bestTriple.score >= 0.8) {
         const cm = heightCmFromFlight(bestTriple.flight);
         const rsi = rsiFor(cm, bestTriple.contact);
+        const conf = (bestTriple.a.kind === 'thud' && bestTriple.c.kind === 'thud') ? 'high' : 'medium';
         return {
           ok: true, cm, flight: bestTriple.flight, contact: bestTriple.contact,
-          rsi, conf: 'high',
-          reason: 'Drop → scuff → landing detected'
+          rsi, conf,
+          kinds: [bestTriple.a.kind, bestTriple.b.kind, bestTriple.c.kind],
+          reason: `Drop → scuff → landing (${bestTriple.a.kind} → ${bestTriple.b.kind} → ${bestTriple.c.kind})`
         };
       }
-      // Triple didn't fit windows — fall through to two-impact attempt
     }
-    // Two-impact fallback: assume scuff was missed; treat onsets[0]→onsets[last] as drop→land
-    // and split nominal contact (assume 200ms) so we report a flight estimate.
-    const t0 = onsets[0];
-    const tEnd = onsets[onsets.length - 1];
-    const totalGap = tEnd - t0;
-    if (totalGap < T_FLIGHT_MIN + T_CONTACT_MIN) {
-      return { ok: false, reason: `Impacts too close (${(totalGap*1000).toFixed(0)}ms) — likely a stumble` };
+
+    // 2-impact fallback: drop → landing, scuff missed. Pair with the best thud→thud span.
+    let bestPair = null;
+    for (let i = 0; i < normalized.length - 1; i++) {
+      for (let j = i + 1; j < normalized.length; j++) {
+        const a = normalized[i], b = normalized[j];
+        const totalGap = b.t - a.t;
+        if (totalGap < T_FLIGHT_MIN + T_CONTACT_MIN) continue;
+        if (totalGap > T_FLIGHT_MAX + T_CONTACT_MAX) continue;
+        let score = 1.0;
+        if (a.kind === 'thud') score += 0.5;
+        if (b.kind === 'thud') score += 0.5;
+        score += (a.conf + b.conf) * 0.15;
+        if (!bestPair || score > bestPair.score) bestPair = { a, b, totalGap, score };
+      }
     }
-    if (totalGap > T_FLIGHT_MAX + T_CONTACT_MAX) {
-      return { ok: false, reason: `Impacts too far apart (${totalGap.toFixed(2)}s) — retry` };
-    }
-    // Estimate flight by subtracting nominal contact (200ms) from total gap
-    const NOMINAL_CONTACT = 0.20;
-    const flightEst = totalGap - NOMINAL_CONTACT;
-    if (flightEst < T_FLIGHT_MIN || flightEst > T_FLIGHT_MAX) {
+    if (!bestPair) {
+      const totalGap = normalized[normalized.length - 1].t - normalized[0].t;
+      if (totalGap < T_FLIGHT_MIN + T_CONTACT_MIN) return { ok: false, reason: `Impacts too close (${(totalGap*1000).toFixed(0)}ms) — likely a stumble` };
+      if (totalGap > T_FLIGHT_MAX + T_CONTACT_MAX) return { ok: false, reason: `Impacts too far apart (${totalGap.toFixed(2)}s) — retry` };
       return { ok: false, reason: `Couldn\'t resolve clean drop→rebound (gap ${(totalGap*1000).toFixed(0)}ms)` };
+    }
+    const NOMINAL_CONTACT = 0.20;
+    const flightEst = bestPair.totalGap - NOMINAL_CONTACT;
+    if (flightEst < T_FLIGHT_MIN || flightEst > T_FLIGHT_MAX) {
+      return { ok: false, reason: `Couldn\'t resolve clean drop→rebound (gap ${(bestPair.totalGap*1000).toFixed(0)}ms)` };
     }
     const cm = heightCmFromFlight(flightEst);
     return {
       ok: true, cm, flight: flightEst, contact: null, rsi: null,
       conf: 'medium',
+      kinds: [bestPair.a.kind, bestPair.b.kind],
       reason: 'Scuff missed — height estimated, RSI unavailable'
     };
   }
@@ -563,9 +588,10 @@
     state.runListening = false;
     if (state.det) state.det.setHandlers({ onOnset: () => {} });
   }
-  function onRunOnset(t) {
+  function onRunOnset(t, rms, cls) {
     if (!state.runListening || state.pendingResult) return;
-    state.currentOnsets.push(t);
+    if (cls && (cls.kind === 'voice' || cls.kind === 'clap')) return;
+    state.currentOnsets.push({ t, kind: cls?.kind || 'unknown', conf: cls?.conf || 0, rms });
     const n = state.currentOnsets.length;
 
     if (n === 1) {
@@ -602,14 +628,19 @@
       if (reparsed.ok) {
         emitDropJumpResult(reparsed, 'audio');
       } else {
-        const last = state.currentOnsets[state.currentOnsets.length - 1];
-        const first = state.currentOnsets[0];
+        const last = state.currentOnsets[state.currentOnsets.length - 1].t;
+        const first = state.currentOnsets[0].t;
         const total = last - first;
         if (total > T_FLIGHT_MAX + T_CONTACT_MAX) {
           state.currentOnsets = state.currentOnsets.slice(-1);
         }
       }
     }
+  }
+
+  // Helper: extract bare timestamps from onset objects (for waveform marker drawing)
+  function onsetTimes(arr) {
+    return (arr || []).map(o => typeof o === 'number' ? o : o.t);
   }
   function confidenceFor(onsets) {
     // 2 clean onsets = high; 3+ that we picked from = medium
@@ -671,7 +702,7 @@
     const rsiStr = r.rsi != null ? ` · RSI ${r.rsi.toFixed(2)}` : '';
     const srcLabel = r.source === 'audio' ? 'auto' : r.source;
     $('vjResultMeta').textContent = `flight ${r.flightMs}ms${ctStr}${rsiStr} · ${srcLabel}`;
-    if (r.wave) drawWaveform('vjWave', r.wave, r.onsets, r.nowSec);
+    if (r.wave) drawWaveform('vjWave', r.wave, onsetTimes(r.onsets), r.nowSec);
     else { const c = $('vjWave').getContext('2d'); c.clearRect(0,0,$('vjWave').width,$('vjWave').height); }
   }
   function startAutoAcceptCountdown() {

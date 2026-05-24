@@ -342,8 +342,11 @@
     //   t1 = landing thud (loud, low-frequency)
     state.det.setHandlers({
       onLevel: (rms) => { updateVu('verVuFill', rms); updateVu('vuFill', rms); },
-      onOnset: (t) => {
-        state.verifyOnsets.push(t);
+      onOnset: (t, rms, cls) => {
+        // cls = { kind, conf, bands, attack, decay }
+        // Reject voice/clap outright; they're never part of a jump
+        if (cls && (cls.kind === 'voice' || cls.kind === 'clap')) return;
+        state.verifyOnsets.push({ t, kind: cls?.kind || 'unknown', conf: cls?.conf || 0, rms });
         const n = state.verifyOnsets.length;
         if (n === 1) {
           // Tape rip detected — raise threshold so shoe rustle / fabric noise doesn't fragment landing
@@ -373,53 +376,77 @@
       $('verBest').textContent = `${cm.toFixed(1)} cm`;
       $('verStatus').textContent = 'Verified ✓';
       $('verAcceptBtn').removeAttribute('hidden');
-      drawWaveform('verWave', state.det.getRecentSamples(2.5), onsets, state.det.getNowSec());
+      drawWaveform('verWave', state.det.getRecentSamples(2.5), onsetTimes(onsets), state.det.getNowSec());
       beep({ freq: 880, dur: 0.4 });
     } else {
       $('verResultHeadline').textContent = 'Not detected';
       $('verResultMeta').textContent = reason;
       $('verStatus').textContent = 'Retry';
       $('verRetryBtn').removeAttribute('hidden');
-      try { drawWaveform('verWave', state.det.getRecentSamples(2.5), onsets, state.det.getNowSec()); } catch (_) {}
+      try { drawWaveform('verWave', state.det.getRecentSamples(2.5), onsetTimes(onsets), state.det.getNowSec()); } catch (_) {}
       beep({ freq: 220, dur: 0.4 });
     }
   }
 
   /**
-   * Parse a sequence of onset timestamps into a CMJ result.
-   * CMJ: exactly 2 impacts — tape rip (t0) → landing (t1). Flight = t1 - t0.
-   * If more than 2 onsets arrive, take first + last (athletes sometimes shuffle before jumping).
+   * Parse a sequence of classified onsets into a CMJ result.
+   * Each onset = { t, kind, conf, rms }.
+   * Expected pair: first must look like a rip, second must look like a thud.
+   * Tolerates 'unknown' as a fallback when conf is low, but prefers strong rip+thud pairs.
    */
   function parseCmjOnsets(onsets) {
-    if (!onsets || onsets.length < 1) {
+    // Accept legacy callers that pass bare timestamps
+    const normalized = (onsets || []).map(o => typeof o === 'number' ? { t: o, kind: 'unknown', conf: 0 } : o);
+    if (normalized.length < 1) {
       return { ok: false, reason: 'No impact heard — phone too far, tape not ripping, or room too noisy' };
     }
-    if (onsets.length === 1) {
-      return { ok: false, reason: 'Only heard one impact — did the athlete actually land? Or tape didn\'t rip clean' };
+    if (normalized.length === 1) {
+      const k = normalized[0].kind;
+      if (k === 'thud') return { ok: false, reason: 'Heard the landing but missed the tape rip — apply fresh tape, try again' };
+      if (k === 'rip')  return { ok: false, reason: 'Heard the tape rip but missed the landing — land firmer or move phone closer' };
+      return { ok: false, reason: 'Only heard one impact — try again with fresh tape and a firm landing' };
     }
-    // Use first onset (tape rip) and last onset (landing).
-    // If many onsets arrived, pick the pair with the largest within-window gap.
+
+    // Score every candidate (i, j) pair with i < j
     let best = null;
-    for (let i = 0; i < onsets.length - 1; i++) {
-      for (let j = i + 1; j < onsets.length; j++) {
-        const flight = onsets[j] - onsets[i];
-        if (flight >= T_FLIGHT_MIN && flight <= T_FLIGHT_MAX) {
-          if (!best || flight > best.flight) best = { i, j, flight };
-        }
+    for (let i = 0; i < normalized.length - 1; i++) {
+      for (let j = i + 1; j < normalized.length; j++) {
+        const a = normalized[i], b = normalized[j];
+        const flight = b.t - a.t;
+        if (flight < T_FLIGHT_MIN || flight > T_FLIGHT_MAX) continue;
+        // Score: prefer rip-then-thud, penalize reversed order or non-impact kinds
+        let score = 1.0;
+        if (a.kind === 'rip')   score += 0.5;
+        if (b.kind === 'thud')  score += 0.5;
+        if (a.kind === 'thud' && b.kind === 'rip') score -= 0.8;  // reversed = probably a false pair
+        if (a.kind === 'voice' || a.kind === 'clap' || b.kind === 'voice' || b.kind === 'clap') score -= 1.0;
+        // Confidence boost
+        score += (a.conf + b.conf) * 0.2;
+        // Prefer wider gap (real CMJs have longer flight than spurious double-triggers)
+        score += flight * 0.5;
+        if (!best || score > best.score) best = { i, j, flight, score, a, b };
       }
     }
-    if (!best) {
-      // Diagnose
-      const gap = onsets[onsets.length - 1] - onsets[0];
+
+    if (!best || best.score < 0.6) {
+      const gap = normalized[normalized.length - 1].t - normalized[0].t;
       if (gap < T_FLIGHT_MIN) {
-        return { ok: false, reason: `Impacts too close (${(gap*1000).toFixed(0)}ms) — false trigger from shoe rustle` };
+        return { ok: false, reason: `Impacts too close (${(gap*1000).toFixed(0)}ms) — likely a shoe rustle, not a real jump` };
       }
-      return { ok: false, reason: `Couldn't resolve clean rip → landing (gap ${gap.toFixed(2)}s)` };
+      // Diagnose by what we heard
+      const kinds = normalized.map(o => o.kind).join('+');
+      return { ok: false, reason: `Couldn't resolve clean rip → landing pair (heard: ${kinds})` };
     }
+
     const cm = heightCmFromFlight(best.flight);
+    // Confidence reflects the classifier verdict
+    const pairConf = (best.a.kind === 'rip' && best.b.kind === 'thud') ? 'high'
+                   : (best.a.kind === 'rip' || best.b.kind === 'thud') ? 'medium'
+                   : 'low';
     return {
-      ok: true, cm, flight: best.flight, conf: 'high',
-      reason: 'Tape rip → landing detected'
+      ok: true, cm, flight: best.flight, conf: pairConf,
+      kinds: [best.a.kind, best.b.kind],
+      reason: `Tape rip → landing detected (${best.a.kind} → ${best.b.kind})`
     };
   }
 
@@ -495,9 +522,11 @@
     state.runListening = false;
     if (state.det) state.det.setHandlers({ onOnset: () => {} });
   }
-  function onRunOnset(t) {
+  function onRunOnset(t, rms, cls) {
     if (!state.runListening || state.pendingResult) return;
-    state.currentOnsets.push(t);
+    // Filter out non-impact sounds entirely (voices/claps from coach or bystanders)
+    if (cls && (cls.kind === 'voice' || cls.kind === 'clap')) return;
+    state.currentOnsets.push({ t, kind: cls?.kind || 'unknown', conf: cls?.conf || 0, rms });
     const n = state.currentOnsets.length;
 
     if (n === 1) {
@@ -519,6 +548,11 @@
       }
       // n == 2 or 3 but not yet valid: let next onset come in
     }
+  }
+
+  // Helper: extract bare timestamps from onset objects for waveform marker drawing
+  function onsetTimes(arr) {
+    return (arr || []).map(o => typeof o === 'number' ? o : o.t);
   }
   function flashListenWarning(msg) {
     $('vjListenSub').textContent = msg;
@@ -560,7 +594,7 @@
     $('vjResultCm').textContent = `${r.cm.toFixed(1)} cm`;
     const srcLabel = r.source === 'audio' ? 'auto' : r.source;
     $('vjResultMeta').textContent = `flight ${r.flightMs}ms · ${srcLabel}`;
-    if (r.wave) drawWaveform('vjWave', r.wave, r.onsets, r.nowSec);
+    if (r.wave) drawWaveform('vjWave', r.wave, onsetTimes(r.onsets), r.nowSec);
     else { const c = $('vjWave').getContext('2d'); c.clearRect(0,0,$('vjWave').width,$('vjWave').height); }
   }
   function startAutoAcceptCountdown() {
