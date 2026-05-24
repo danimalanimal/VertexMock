@@ -146,8 +146,8 @@
                 <div class="path">${escapeHtml(c.pathname)}</div>
               </div>
               <div class="clip-controls">
-                <audio controls preload="none" src="${escapeAttr(c.url)}"></audio>
-                <a class="dl" href="${escapeAttr(c.downloadUrl || c.url)}" download title="Download">⬇</a>
+                <audio controls preload="none" src="${escapeAttr(c.streamUrl)}"></audio>
+                <a class="dl" href="${escapeAttr(c.downloadUrl)}" download title="Download">⬇</a>
               </div>
             </div>
           `).join('')}

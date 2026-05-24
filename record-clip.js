@@ -334,7 +334,9 @@
       const { upload } = await import('https://esm.sh/@vercel/blob@0.27.0/client');
 
       const result = await upload(pathname, wavBlob, {
-        access: 'public',
+        // Private: clips never go on the public internet directly. Playback in the audit
+        // page goes through /api/stream-clip which signs short-lived URLs server-side.
+        access: 'private',
         contentType: 'audio/wav',
         handleUploadUrl: '/api/upload-clip',
         clientPayload,

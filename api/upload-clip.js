@@ -6,8 +6,10 @@
 // plan. Audio clips can hit 200-800KB, which is within limits, but client-direct is
 // also faster (no double-hop) and the same code path handles big files for free.
 //
-// On Vercel Hobby plan with default Blob settings, uploads are public-read by default
-// (we set access:'public'). That's fine — these are anonymized audio clips, no PII.
+// Clips are stored PRIVATELY. Access happens only through this app's own API endpoints
+// (api/list-clips returns metadata, api/stream-clip proxies the audio bytes for playback).
+// Why private: audio clips can capture bystander voice or gym ambient noise that we don't
+// want sitting on a public URL forever. Defense in depth — server-side allowlist on every read.
 
 import { handleUpload } from '@vercel/blob/client';
 

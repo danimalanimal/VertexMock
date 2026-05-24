@@ -1,5 +1,9 @@
 // Vercel serverless function — list all uploaded audio clips.
 // Used by clip-library.html (your audit page) to render the full library.
+//
+// Clips are private, so the raw `url` returned by list() isn't browser-fetchable.
+// We expose a `streamUrl` that points at /api/stream-clip?path=... — the audit
+// page uses that for playback and downloads.
 
 import { list } from '@vercel/blob';
 
@@ -17,11 +21,12 @@ export default async function handler(request, response) {
     // Newest first
     blobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
 
-    // Light shape — strip large fields, keep what the UI needs
+    // Light shape — strip large fields, keep what the UI needs.
+    // streamUrl is our same-origin proxy that serves private blob bytes.
     const items = blobs.map(b => ({
       pathname: b.pathname,
-      url: b.url,
-      downloadUrl: b.downloadUrl || b.url,
+      streamUrl: `/api/stream-clip?path=${encodeURIComponent(b.pathname)}`,
+      downloadUrl: `/api/stream-clip?path=${encodeURIComponent(b.pathname)}&dl=1`,
       size: b.size,
       uploadedAt: b.uploadedAt,
       contentType: b.contentType,
