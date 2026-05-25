@@ -36,6 +36,8 @@ The shared language for this project. When a term here conflicts with how it get
 | **Session** | An optional grouping that auto-tags entries made while it's active (coach, kind=Training/Game/Review, gym). | *Form*, *Day*. A session is a runtime context bag. |
 | **Day file** | The append-only JSONL file at `results/YYYY-MM-DD.jsonl`. One Entry per line. Routed by `observedAt`, not by arrival time. | A backup. |
 | **Snapshot field** | A denormalised field on an Entry that preserves what a referenced record looked like at entry time (`textSnapshot`, `labelSnapshot`). | The live record (which may have since changed). |
+| **Measurement source** | The capture path that produced a metric reading. Closed enum (`manual`, `video_240fps`, `lidar_arkit`, `audio_impact`, `imu_pocket`, `force_plate`, `computed`, …). Required on every metric entry. See ADR-0002. | The metric itself (the metric is *what* is measured; source is *how*). |
+| **Source metadata** | Optional freeform dict on a metric entry (`device`, `appVersion`, `detectorVersion`). Carries forensic detail the enum can't. | The `source` field (enum value). |
 
 ### Athletes & coaches
 
@@ -94,3 +96,5 @@ If you find yourself wanting to mutate something in the first list, the answer i
 - ❌ "Add `force_kg` as a force metric in kg" — kgf is the force unit; expose it as a display unit on a force metric, don't fake it as kg.
 - ❌ "Just override the RSI value the runtime computed" — computed metrics are read-only. Edit the inputs if the inputs are wrong.
 - ❌ "Sport is just a string" — sports are a closed enum (ADR-0001). Adding "Rugby League 7s" requires a contract bump.
+- ❌ "Source is optional / can be inferred later" — `source` is required on every metric entry (ADR-0002). Default to `"manual"` if no detector ran.
+- ❌ "Compare these CMJ heights across the cohort" without checking sources first — a force-plate reading and a phone-pocket reading aren't directly comparable. Filter by `source` or flag the mismatch.

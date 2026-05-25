@@ -1,8 +1,16 @@
-# Coach Observation Form — Data Contract v1.1
+# Coach Observation Form — Data Contract v1.2
 
 **Status:** Locked · **Owner:** Daniel Gordon · **Date locked:** 2026-05-25
 
-This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.2, v2.0, etc.) and a written migration plan in this folder.
+This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.3, v2.0, etc.) and a written migration plan in this folder.
+
+### v1.2 changelog (2026-05-25)
+
+Additive only — no data migration required (no entries written yet under v1.1):
+
+- §3.1 / §6 — **New required field** `metric.source` on every metric entry, drawn from new `MEASUREMENT_SOURCES` closed enum (ADR-0002).
+- §3.1 — **New optional field** `metric.sourceMeta` (freeform dict) for device/version forensics.
+- §3.2 — New invariant: `source = "computed"` iff `computed: true`.
 
 ### v1.1 changelog (2026-05-25)
 
@@ -366,10 +374,16 @@ One JSON object per line. Each line is a single observation entry. Schema:
   "metric": {
     "key": "cmj_height",
     "valueCanonical": 0.421,               // canonical unit always (m for length)
-    "valueDisplay": 42.1,                  // what coach entered
-    "unitDisplay": "cm",                   // unit coach entered in
+    "valueDisplay": 42.1,                  // what coach entered (or what the detector produced)
+    "unitDisplay": "cm",                   // unit displayed
     "labelSnapshot": "CMJ height",
-    "computed": false                      // true if this entry was derived via formula
+    "computed": false,                     // true if this entry was derived via formula
+    "source": "video_240fps",              // REQUIRED. one of MEASUREMENT_SOURCES (§6). PERMANENT.
+    "sourceMeta": {                        // OPTIONAL. freeform device/version metadata. PERMANENT.
+      "device": "iPhone 17 Pro",
+      "appVersion": "0.4.2",
+      "detectorVersion": "vision_v3"
+    }
   },
 
   "notes": null
@@ -381,7 +395,10 @@ One JSON object per line. Each line is a single observation entry. Schema:
 - **Exactly one of `phrase` or `metric` is non-null.**
 - **`textSnapshot` and `labelSnapshot` are denormalised on purpose** — they preserve what was tagged even after the source registry changes.
 - **`valueCanonical` is always present for metrics**, even when the coach entered in a non-canonical unit (we convert on save).
-- **Computed metric entries** carry `computed: true` and have no separate "coach-entered" provenance — `valueDisplay` is always the runtime-computed result rendered in the metric's canonical unit (no unit picker shown to coach).
+- **Computed metric entries** carry `computed: true`, `source: "computed"`, and have no separate "coach-entered" provenance — `valueDisplay` is always the runtime-computed result rendered in the metric's canonical unit (no unit picker shown to coach).
+- **`metric.source` is REQUIRED and IMMUTABLE.** Must be one of `MEASUREMENT_SOURCES` (§6). Server rejects entries with missing/invalid source. (ADR-0002.)
+- **Source-computed cross-check:** `source = "computed"` iff `computed = true`. Server enforces.
+- **`sourceMeta` is OPTIONAL and IMMUTABLE.** Freeform dict; UI may render values for forensics but does not validate.
 - **Entries are immutable.** v1 ships without void; ship as v1.x amendment if needed.
 - **`observedAt` may not equal write time** — coaches can backfill, so daily-file routing uses `observedAt` not arrival time.
 
@@ -462,6 +479,22 @@ METRIC_KINDS = [
   'force', 'power', 'angle', 'frequency',
   'ratio', 'percentage', 'acceleration'
 ]
+
+// ── Measurement sources (closed enum, ADR-0002) ──
+MEASUREMENT_SOURCES = [
+  // Direct human input
+  'manual',
+  // Phone-native capture
+  'video_240fps', 'video_120fps',
+  'lidar_arkit', 'truedepth_arkit',
+  'audio_impact',
+  'imu_pocket', 'imu_handheld',
+  // External hardware
+  'force_plate', 'timing_gates',
+  'gps_watch', 'hr_strap', 'dynamometer',
+  // Derived
+  'computed',
+]
 ```
 
 ### 6.1 Unit tables per kind
@@ -534,6 +567,6 @@ To keep v1 small, these are explicitly out of scope and will be added as named a
 
 ## 8. Sign-off
 
-This contract is **locked** as v1.1 on 2026-05-25 by Daniel Gordon. After lock, no schema field may change without a contract version bump and a written migration plan.
+This contract is **locked** as v1.2 on 2026-05-25 by Daniel Gordon. After lock, no schema field may change without a contract version bump and a written migration plan.
 
-- [x] **Locked by Daniel Gordon on 2026-05-25**
+- [x] **Locked by Daniel Gordon on 2026-05-25 (v1.0 → v1.1 → v1.2 same day, all additive)**
