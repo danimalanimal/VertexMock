@@ -1074,6 +1074,29 @@ body.bulk-mode .pchip.on .pa{
 .nav-cta > span:first-child{ font-weight:600; font-size:14px; color:#9bd2ff; }
 .nav-cta-sub{ font-size:11px; color: var(--muted); }
 
+/* Hero "Generate report" CTA — desktop-only (mobile uses nav-sheet) */
+.hero-report-cta{
+  position:absolute; top:18px; right:18px;
+  display:inline-flex; align-items:center; gap:12px;
+  padding:12px 16px; border-radius:14px;
+  background: linear-gradient(135deg, rgba(89,183,255,.18), rgba(127,140,255,.18));
+  border:1px solid rgba(89,183,255,.4);
+  color:var(--text); text-decoration:none;
+  font-family: var(--font-mono);
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  transition: transform .15s var(--ease-out), border-color .15s var(--ease-out);
+  z-index:5;
+}
+.hero-report-cta:hover{ transform: translateY(-1px); border-color: rgba(89,183,255,.7); }
+.hero-report-cta__icon{ font-size:20px; line-height:1; }
+.hero-report-cta__text{ display:flex; flex-direction:column; gap:2px; }
+.hero-report-cta__title{ font-weight:600; font-size:14px; color:#9bd2ff; }
+.hero-report-cta__sub{ font-size:11px; color: var(--muted); }
+/* hide on mobile — nav-sheet already carries this CTA */
+@media (max-width: 640px){ .hero-report-cta{ display:none; } }
+/* hero needs positioning context */
+.hero{ position: relative; }
+
 /* ===========================================================
    Home / mockup-index page
    =========================================================== */
