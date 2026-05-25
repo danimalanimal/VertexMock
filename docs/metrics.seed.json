@@ -1,0 +1,3944 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "key": "body_height",
+      "label": "Body height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in",
+        "ft"
+      ],
+      "min": 1,
+      "max": 2.3,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "body_mass",
+      "label": "Body mass",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 30,
+      "max": 200,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wingspan",
+      "label": "Wingspan",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 1,
+      "max": 2.5,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "standing_reach",
+      "label": "Standing reach",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 1.5,
+      "max": 3,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "seated_height",
+      "label": "Seated height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0.6,
+      "max": 1.2,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hand_length",
+      "label": "Hand length",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0.1,
+      "max": 0.3,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hand_span",
+      "label": "Hand span",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0.1,
+      "max": 0.32,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "arm_length",
+      "label": "Arm length",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0.4,
+      "max": 1,
+      "decimals": 1,
+      "category": "anthropometry",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "body_fat_pct",
+      "label": "Body fat %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 2,
+      "max": 45,
+      "decimals": 1,
+      "category": "body-comp",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "lean_mass",
+      "label": "Lean body mass",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 30,
+      "max": 150,
+      "decimals": 1,
+      "category": "body-comp",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "fat_mass",
+      "label": "Fat mass",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 2,
+      "max": 80,
+      "decimals": 1,
+      "category": "body-comp",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "skinfold_sum_7",
+      "label": "Skinfold sum (7-site)",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "mm"
+      ],
+      "min": 0.02,
+      "max": 0.3,
+      "decimals": 1,
+      "category": "body-comp",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "bmi",
+      "label": "BMI",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 10,
+      "max": 50,
+      "decimals": 1,
+      "category": "body-comp",
+      "sports": [
+        "*"
+      ],
+      "formula": "body_mass / (body_height * body_height)",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "cmj_height",
+      "label": "CMJ height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 1.2,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "cmj_contact_time",
+      "label": "CMJ ground contact time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "ms",
+        "s"
+      ],
+      "min": 0,
+      "max": 1.5,
+      "decimals": 3,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "cmj_peak_power",
+      "label": "CMJ peak power",
+      "kind": "power",
+      "canonicalUnit": "W",
+      "displayUnits": [
+        "W",
+        "kW"
+      ],
+      "min": 0,
+      "max": 8000,
+      "decimals": 0,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "cmj_peak_force",
+      "label": "CMJ peak force",
+      "kind": "force",
+      "canonicalUnit": "N",
+      "displayUnits": [
+        "N",
+        "kgf"
+      ],
+      "min": 0,
+      "max": 5000,
+      "decimals": 0,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "squat_jump_height",
+      "label": "Squat jump height (no countermove)",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 1.2,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "drop_jump_height",
+      "label": "Drop jump height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 1.2,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "drop_jump_contact_time",
+      "label": "Drop jump contact time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "ms",
+        "s"
+      ],
+      "min": 0,
+      "max": 1,
+      "decimals": 3,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "broad_jump_distance",
+      "label": "Standing broad jump",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "m",
+        "in",
+        "ft"
+      ],
+      "min": 0,
+      "max": 4,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vertical_jump_run",
+      "label": "Running vertical (max reach jump)",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 1.5,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "approach_jump_height",
+      "label": "Approach jump height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 1.5,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "basketball",
+        "volleyball",
+        "netball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "block_jump_height",
+      "label": "Block jump height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 1.2,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "volleyball",
+        "basketball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "spike_jump_height",
+      "label": "Spike/attack jump height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 1.4,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "single_leg_cmj_left",
+      "label": "Single-leg CMJ (left)",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 0.9,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "single_leg_cmj_right",
+      "label": "Single-leg CMJ (right)",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 0.9,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rsi",
+      "label": "RSI (reactive strength index)",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 5,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": "drop_jump_height / drop_jump_contact_time",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rsi_modified",
+      "label": "RSI-modified (CMJ)",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 1.5,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": "cmj_height / cmj_contact_time",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "jump_asymmetry_pct",
+      "label": "Single-leg CMJ asymmetry %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 1,
+      "category": "jumps",
+      "sports": [
+        "*"
+      ],
+      "formula": "abs(single_leg_cmj_left - single_leg_cmj_right) / max(single_leg_cmj_left, single_leg_cmj_right) * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_5m",
+      "label": "5m sprint",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 0.5,
+      "max": 3,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_10m",
+      "label": "10m sprint",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 1,
+      "max": 4,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_20m",
+      "label": "20m sprint",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 2,
+      "max": 6,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_30m",
+      "label": "30m sprint",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 3,
+      "max": 8,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_40m",
+      "label": "40m sprint",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 4,
+      "max": 9.5,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "athletics_sprints",
+        "soccer",
+        "afl",
+        "rugby_league",
+        "rugby_union"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_40yd",
+      "label": "40-yard dash",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 4,
+      "max": 8,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "rugby_league",
+        "rugby_union",
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_60m",
+      "label": "60m sprint",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 5,
+      "max": 12,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "athletics_sprints"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_100m",
+      "label": "100m",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 9,
+      "max": 20,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "athletics_sprints"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_200m",
+      "label": "200m",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 18,
+      "max": 40,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "athletics_sprints"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sprint_400m",
+      "label": "400m",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 40,
+      "max": 90,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "athletics_sprints",
+        "athletics_distance"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "flying_20m",
+      "label": "Flying 20m (max-velocity phase)",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 1.6,
+      "max": 3.5,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "max_velocity",
+      "label": "Peak running velocity",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "m/s",
+        "km/h",
+        "mph"
+      ],
+      "min": 4,
+      "max": 13,
+      "decimals": 2,
+      "category": "sprints",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "agility_505_left",
+      "label": "505 agility (left turn)",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 1.8,
+      "max": 4,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "agility_505_right",
+      "label": "505 agility (right turn)",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "ms"
+      ],
+      "min": 1.8,
+      "max": 4,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "agility_505_asymmetry_pct",
+      "label": "505 agility asymmetry %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 1,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": "abs(agility_505_left - agility_505_right) / max(agility_505_left, agility_505_right) * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "t_test",
+      "label": "T-test",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 8,
+      "max": 16,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "basketball",
+        "tennis",
+        "soccer",
+        "netball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "illinois_agility",
+      "label": "Illinois agility",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 12,
+      "max": 25,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "three_cone_drill",
+      "label": "3-cone drill (L-drill)",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 6,
+      "max": 10,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "rugby_league",
+        "rugby_union",
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hexagon_agility",
+      "label": "Hexagon agility",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 8,
+      "max": 25,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "reactive_agility_avg",
+      "label": "Reactive agility avg time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 1,
+      "max": 5,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "y_balance_anterior",
+      "label": "Y-balance anterior reach",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm"
+      ],
+      "min": 0.3,
+      "max": 1.2,
+      "decimals": 1,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "shuttle_pro_agility",
+      "label": "5-10-5 pro agility shuttle",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 3,
+      "max": 7,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "beep_test_stage",
+      "label": "Beep test stage reached",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 1,
+      "max": 21,
+      "decimals": 1,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "beep_test_total_shuttles",
+      "label": "Beep test total shuttles",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 250,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "yoyo_ir1_distance",
+      "label": "Yo-Yo IR1 distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m",
+        "km"
+      ],
+      "min": 0,
+      "max": 4000,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "yoyo_ir2_distance",
+      "label": "Yo-Yo IR2 distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m",
+        "km"
+      ],
+      "min": 0,
+      "max": 2500,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ift_30_15_vel",
+      "label": "30-15 IFT final velocity",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "km/h",
+        "m/s"
+      ],
+      "min": 2,
+      "max": 6,
+      "decimals": 2,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "cooper_test_distance",
+      "label": "Cooper test (12 min) distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m",
+        "km",
+        "mi"
+      ],
+      "min": 1000,
+      "max": 5000,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "row_2km_time",
+      "label": "2km rowing time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "min"
+      ],
+      "min": 360,
+      "max": 720,
+      "decimals": 1,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "run_5km_time",
+      "label": "5km run time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "min"
+      ],
+      "min": 720,
+      "max": 2400,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "athletics_distance",
+        "soccer",
+        "rugby_league",
+        "rugby_union",
+        "afl",
+        "hockey"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vo2max",
+      "label": "VO2max",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 20,
+      "max": 90,
+      "decimals": 1,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hr_max",
+      "label": "Max heart rate",
+      "kind": "frequency",
+      "canonicalUnit": "Hz",
+      "displayUnits": [
+        "bpm"
+      ],
+      "min": 0.5,
+      "max": 4,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hr_resting",
+      "label": "Resting heart rate",
+      "kind": "frequency",
+      "canonicalUnit": "Hz",
+      "displayUnits": [
+        "bpm"
+      ],
+      "min": 0.5,
+      "max": 2,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "lactate_threshold_hr",
+      "label": "Lactate threshold HR",
+      "kind": "frequency",
+      "canonicalUnit": "Hz",
+      "displayUnits": [
+        "bpm"
+      ],
+      "min": 1.5,
+      "max": 3.5,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "back_squat_1rm",
+      "label": "Back squat 1RM",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 400,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "front_squat_1rm",
+      "label": "Front squat 1RM",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 350,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "bench_press_1rm",
+      "label": "Bench press 1RM",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 300,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "deadlift_1rm",
+      "label": "Deadlift 1RM",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 450,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "power_clean_1rm",
+      "label": "Power clean 1RM",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 250,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "snatch_1rm",
+      "label": "Snatch 1RM",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "chin_up_max",
+      "label": "Chin-up max reps",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 60,
+      "decimals": 0,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "pull_up_weighted_1rm",
+      "label": "Weighted pull-up 1RM (added load)",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "bench_pull_1rm",
+      "label": "Prone bench pull 1RM",
+      "kind": "weight",
+      "canonicalUnit": "kg",
+      "displayUnits": [
+        "kg",
+        "lb"
+      ],
+      "min": 0,
+      "max": 180,
+      "decimals": 1,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "strength_to_bw_squat",
+      "label": "Squat-to-bodyweight ratio",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 4,
+      "decimals": 2,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": "back_squat_1rm / body_mass",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "strength_to_bw_bench",
+      "label": "Bench-to-bodyweight ratio",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 3,
+      "decimals": 2,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": "bench_press_1rm / body_mass",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "isometric_midthigh_pull_peak",
+      "label": "IMTP peak force",
+      "kind": "force",
+      "canonicalUnit": "N",
+      "displayUnits": [
+        "N",
+        "kgf"
+      ],
+      "min": 0,
+      "max": 6000,
+      "decimals": 0,
+      "category": "lifts",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wingate_peak_power",
+      "label": "Wingate peak power",
+      "kind": "power",
+      "canonicalUnit": "W",
+      "displayUnits": [
+        "W",
+        "kW"
+      ],
+      "min": 0,
+      "max": 2500,
+      "decimals": 0,
+      "category": "power",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wingate_mean_power",
+      "label": "Wingate mean power",
+      "kind": "power",
+      "canonicalUnit": "W",
+      "displayUnits": [
+        "W",
+        "kW"
+      ],
+      "min": 0,
+      "max": 1500,
+      "decimals": 0,
+      "category": "power",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wingate_fatigue_pct",
+      "label": "Wingate fatigue index %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 80,
+      "decimals": 1,
+      "category": "power",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "peak_power_to_bw",
+      "label": "Peak power-to-bodyweight",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 2,
+      "category": "power",
+      "sports": [
+        "*"
+      ],
+      "formula": "wingate_peak_power / body_mass",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "bar_velocity_mean",
+      "label": "Mean bar velocity (load)",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "m/s"
+      ],
+      "min": 0,
+      "max": 2.5,
+      "decimals": 2,
+      "category": "power",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "bar_velocity_peak",
+      "label": "Peak bar velocity (load)",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "m/s"
+      ],
+      "min": 0,
+      "max": 3.5,
+      "decimals": 2,
+      "category": "power",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "grip_strength_left",
+      "label": "Grip strength (left)",
+      "kind": "force",
+      "canonicalUnit": "N",
+      "displayUnits": [
+        "kgf",
+        "N",
+        "lbf"
+      ],
+      "min": 0,
+      "max": 1000,
+      "decimals": 0,
+      "category": "grip-strength",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "grip_strength_right",
+      "label": "Grip strength (right)",
+      "kind": "force",
+      "canonicalUnit": "N",
+      "displayUnits": [
+        "kgf",
+        "N",
+        "lbf"
+      ],
+      "min": 0,
+      "max": 1000,
+      "decimals": 0,
+      "category": "grip-strength",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "grip_asymmetry_pct",
+      "label": "Grip strength asymmetry %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 1,
+      "category": "grip-strength",
+      "sports": [
+        "*"
+      ],
+      "formula": "abs(grip_strength_left - grip_strength_right) / max(grip_strength_left, grip_strength_right) * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "sit_and_reach",
+      "label": "Sit-and-reach",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": -0.3,
+      "max": 0.5,
+      "decimals": 1,
+      "category": "flexibility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ankle_dorsiflexion_left",
+      "label": "Ankle dorsiflexion (left)",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 0.2,
+      "decimals": 1,
+      "category": "flexibility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ankle_dorsiflexion_right",
+      "label": "Ankle dorsiflexion (right)",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "cm",
+        "in"
+      ],
+      "min": 0,
+      "max": 0.2,
+      "decimals": 1,
+      "category": "flexibility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "shoulder_flexion_left",
+      "label": "Shoulder flexion ROM (left)",
+      "kind": "angle",
+      "canonicalUnit": "deg",
+      "displayUnits": [
+        "deg"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "flexibility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "shoulder_flexion_right",
+      "label": "Shoulder flexion ROM (right)",
+      "kind": "angle",
+      "canonicalUnit": "deg",
+      "displayUnits": [
+        "deg"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "flexibility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hamstring_passive_sl",
+      "label": "Active SL hamstring (deg)",
+      "kind": "angle",
+      "canonicalUnit": "deg",
+      "displayUnits": [
+        "deg"
+      ],
+      "min": 0,
+      "max": 130,
+      "decimals": 0,
+      "category": "flexibility",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rpe_session",
+      "label": "sRPE (session)",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 10,
+      "decimals": 0,
+      "category": "perceptual",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rpe_set",
+      "label": "RPE (set)",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 10,
+      "decimals": 0,
+      "category": "perceptual",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wellness_sleep",
+      "label": "Sleep quality (1-5)",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 1,
+      "max": 5,
+      "decimals": 0,
+      "category": "wellness",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wellness_soreness",
+      "label": "Soreness (1-5)",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 1,
+      "max": 5,
+      "decimals": 0,
+      "category": "wellness",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wellness_mood",
+      "label": "Mood (1-5)",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 1,
+      "max": 5,
+      "decimals": 0,
+      "category": "wellness",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wellness_stress",
+      "label": "Stress (1-5)",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 1,
+      "max": 5,
+      "decimals": 0,
+      "category": "wellness",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "wellness_fatigue",
+      "label": "Fatigue (1-5)",
+      "kind": "rating",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 1,
+      "max": 5,
+      "decimals": 0,
+      "category": "wellness",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "reaction_time_simple",
+      "label": "Simple reaction time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "ms",
+        "s"
+      ],
+      "min": 0.1,
+      "max": 1,
+      "decimals": 3,
+      "category": "perceptual",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "reaction_time_choice",
+      "label": "Choice reaction time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "ms",
+        "s"
+      ],
+      "min": 0.2,
+      "max": 2,
+      "decimals": 3,
+      "category": "perceptual",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "attendance",
+      "label": "Attended session",
+      "kind": "boolean",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 1,
+      "decimals": 0,
+      "category": "wellness",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ft_attempts",
+      "label": "Free throws attempted",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "basketball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ft_makes",
+      "label": "Free throws made",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "basketball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ft_pct",
+      "label": "Free throw %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "basketball"
+      ],
+      "formula": "ft_makes / ft_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "three_point_attempts",
+      "label": "Three-point attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "basketball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "three_point_makes",
+      "label": "Three-point makes",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "basketball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "three_point_pct",
+      "label": "Three-point %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "basketball"
+      ],
+      "formula": "three_point_makes / three_point_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "lane_agility",
+      "label": "Lane agility drill (NBA)",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s"
+      ],
+      "min": 9,
+      "max": 16,
+      "decimals": 2,
+      "category": "agility",
+      "sports": [
+        "basketball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "soccer_pass_attempts",
+      "label": "Passes attempted",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "soccer"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "soccer_pass_completed",
+      "label": "Passes completed",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "soccer"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "soccer_pass_pct",
+      "label": "Pass completion %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "soccer"
+      ],
+      "formula": "soccer_pass_completed / soccer_pass_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "soccer_shot_attempts",
+      "label": "Shots attempted",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "soccer"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "soccer_shot_on_target",
+      "label": "Shots on target",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "soccer"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "soccer_juggle_max",
+      "label": "Juggling max reps",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 1000,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "soccer"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "netball_shot_attempts",
+      "label": "Shot attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "netball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "netball_shot_makes",
+      "label": "Shots made",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "netball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "netball_shot_pct",
+      "label": "Shooting %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "netball"
+      ],
+      "formula": "netball_shot_makes / netball_shot_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "netball_intercepts",
+      "label": "Intercepts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "netball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "netball_centre_pass_wins",
+      "label": "Centre pass wins",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 60,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "netball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hockey_pass_attempts",
+      "label": "Hit pass attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "hockey"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hockey_pass_completed",
+      "label": "Hit passes completed",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "hockey"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hockey_pass_pct",
+      "label": "Hit pass %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "hockey"
+      ],
+      "formula": "hockey_pass_completed / hockey_pass_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hockey_circle_entries",
+      "label": "Circle entries",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "hockey"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hockey_short_corners_won",
+      "label": "Short corners won",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 20,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "hockey"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_tackle_attempts",
+      "label": "Tackle attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 60,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_tackle_completed",
+      "label": "Tackles completed",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 60,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_tackle_pct",
+      "label": "Tackle completion %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": "rl_tackle_completed / rl_tackle_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_metres_run",
+      "label": "Metres run",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m"
+      ],
+      "min": 0,
+      "max": 400,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_line_breaks",
+      "label": "Line breaks",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 10,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_offloads",
+      "label": "Offloads",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 15,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_goal_kick_attempts",
+      "label": "Goal kick attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 15,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_goal_kick_makes",
+      "label": "Goal kicks made",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 15,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "rl_goal_kick_pct",
+      "label": "Goal kick %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "rugby_league"
+      ],
+      "formula": "rl_goal_kick_makes / rl_goal_kick_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_tackle_attempts",
+      "label": "Tackle attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 60,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_tackle_completed",
+      "label": "Tackles completed",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 60,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_tackle_pct",
+      "label": "Tackle completion %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": "ru_tackle_completed / ru_tackle_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_lineout_wins",
+      "label": "Lineouts won",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_scrum_wins",
+      "label": "Scrums won",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 25,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_goal_kick_attempts",
+      "label": "Goal kick attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 15,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_goal_kick_makes",
+      "label": "Goal kicks made",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 15,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "ru_goal_kick_pct",
+      "label": "Goal kick %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "rugby_union"
+      ],
+      "formula": "ru_goal_kick_makes / ru_goal_kick_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_disposals",
+      "label": "Disposals",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_kicks",
+      "label": "Kicks",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_handballs",
+      "label": "Handballs",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_marks",
+      "label": "Marks",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 20,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_tackles",
+      "label": "Tackles",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 20,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_goal_attempts",
+      "label": "Set-shot goal attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 15,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_goal_makes",
+      "label": "Set-shot goals made",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 15,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "afl_goal_pct",
+      "label": "Set-shot goal %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "afl"
+      ],
+      "formula": "afl_goal_makes / afl_goal_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_serve_speed",
+      "label": "Serve speed",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "km/h",
+        "mph",
+        "m/s"
+      ],
+      "min": 20,
+      "max": 80,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_first_serve_in",
+      "label": "First serves in",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_first_serve_attempts",
+      "label": "First serve attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 200,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_first_serve_pct",
+      "label": "First serve %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": "tennis_first_serve_in / tennis_first_serve_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_aces",
+      "label": "Aces",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_double_faults",
+      "label": "Double faults",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_winners",
+      "label": "Winners",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "tennis_unforced_errors",
+      "label": "Unforced errors",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "tennis"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vb_serve_speed",
+      "label": "Serve speed",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "km/h",
+        "mph",
+        "m/s"
+      ],
+      "min": 10,
+      "max": 50,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vb_attack_attempts",
+      "label": "Attack attempts",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vb_attack_kills",
+      "label": "Kills",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vb_attack_pct",
+      "label": "Attack efficiency %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": -100,
+      "max": 100,
+      "decimals": 1,
+      "category": "skill",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": "vb_attack_kills / vb_attack_attempts * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vb_blocks",
+      "label": "Blocks",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 20,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vb_digs",
+      "label": "Digs",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 50,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "vb_aces",
+      "label": "Service aces",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 20,
+      "decimals": 0,
+      "category": "skill",
+      "sports": [
+        "volleyball"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_punches_thrown",
+      "label": "Punches thrown",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 1000,
+      "decimals": 0,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_punches_landed",
+      "label": "Punches landed",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 1000,
+      "decimals": 0,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_punch_accuracy_pct",
+      "label": "Punch accuracy %",
+      "kind": "percentage",
+      "canonicalUnit": "%",
+      "displayUnits": [
+        "%"
+      ],
+      "min": 0,
+      "max": 100,
+      "decimals": 1,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": "boxing_punches_landed / boxing_punches_thrown * 100",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_punches_per_min",
+      "label": "Punches per minute",
+      "kind": "frequency",
+      "canonicalUnit": "Hz",
+      "displayUnits": [
+        "bpm"
+      ],
+      "min": 0,
+      "max": 5,
+      "decimals": 0,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_sparring_rounds",
+      "label": "Sparring rounds completed",
+      "kind": "count",
+      "canonicalUnit": "unit",
+      "displayUnits": [
+        "unit"
+      ],
+      "min": 0,
+      "max": 30,
+      "decimals": 0,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_reaction_time",
+      "label": "Pad reaction time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "ms",
+        "s"
+      ],
+      "min": 0.1,
+      "max": 1,
+      "decimals": 3,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_jab_speed",
+      "label": "Jab speed",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "m/s"
+      ],
+      "min": 2,
+      "max": 12,
+      "decimals": 1,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_cross_speed",
+      "label": "Cross speed",
+      "kind": "speed",
+      "canonicalUnit": "m/s",
+      "displayUnits": [
+        "m/s"
+      ],
+      "min": 2,
+      "max": 13,
+      "decimals": 1,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "boxing_round_time",
+      "label": "Round time",
+      "kind": "time",
+      "canonicalUnit": "s",
+      "displayUnits": [
+        "s",
+        "min"
+      ],
+      "min": 60,
+      "max": 240,
+      "decimals": 0,
+      "category": "combat",
+      "sports": [
+        "boxing"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "high_jump_height",
+      "label": "High jump height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m",
+        "cm"
+      ],
+      "min": 1,
+      "max": 2.5,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": [
+        "athletics_jumps"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "long_jump_distance",
+      "label": "Long jump distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m",
+        "cm"
+      ],
+      "min": 3,
+      "max": 9,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": [
+        "athletics_jumps"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "triple_jump_distance",
+      "label": "Triple jump distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m",
+        "cm"
+      ],
+      "min": 6,
+      "max": 19,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": [
+        "athletics_jumps"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "pole_vault_height",
+      "label": "Pole vault height",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m",
+        "cm"
+      ],
+      "min": 1,
+      "max": 6.5,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": [
+        "athletics_jumps"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "shot_put_distance",
+      "label": "Shot put distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m"
+      ],
+      "min": 4,
+      "max": 25,
+      "decimals": 2,
+      "category": "skill",
+      "sports": [
+        "athletics_throws"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "discus_distance",
+      "label": "Discus throw distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m"
+      ],
+      "min": 10,
+      "max": 75,
+      "decimals": 2,
+      "category": "skill",
+      "sports": [
+        "athletics_throws"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "javelin_distance",
+      "label": "Javelin distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m"
+      ],
+      "min": 10,
+      "max": 100,
+      "decimals": 2,
+      "category": "skill",
+      "sports": [
+        "athletics_throws"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hammer_distance",
+      "label": "Hammer throw distance",
+      "kind": "length",
+      "canonicalUnit": "m",
+      "displayUnits": [
+        "m"
+      ],
+      "min": 10,
+      "max": 90,
+      "decimals": 2,
+      "category": "skill",
+      "sports": [
+        "athletics_throws"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "cmj_force_to_bw",
+      "label": "CMJ peak force-to-bodyweight",
+      "kind": "ratio",
+      "canonicalUnit": "",
+      "displayUnits": [
+        ""
+      ],
+      "min": 0,
+      "max": 6,
+      "decimals": 2,
+      "category": "derived",
+      "sports": [
+        "*"
+      ],
+      "formula": "cmj_peak_force / (body_mass * 9.80665)",
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    },
+    {
+      "key": "hr_recovery_60s",
+      "label": "HR recovery (60s post-effort)",
+      "kind": "frequency",
+      "canonicalUnit": "Hz",
+      "displayUnits": [
+        "bpm"
+      ],
+      "min": 0.1,
+      "max": 2,
+      "decimals": 0,
+      "category": "endurance",
+      "sports": [
+        "*"
+      ],
+      "formula": null,
+      "status": "active",
+      "source": "seed",
+      "createdAt": "2026-05-25T12:00:00Z",
+      "updatedAt": "2026-05-25T12:00:00Z"
+    }
+  ]
+}

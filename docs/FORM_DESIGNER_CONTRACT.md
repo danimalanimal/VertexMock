@@ -1,8 +1,22 @@
-# Coach Observation Form — Data Contract v1.0
+# Coach Observation Form — Data Contract v1.1
 
-**Status:** Draft pending sign-off · **Owner:** Daniel Gordon · **Date locked:** 2026-05-25
+**Status:** Locked · **Owner:** Daniel Gordon · **Date locked:** 2026-05-25
 
-This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.1, v2.0, etc.) and a written migration plan in this folder.
+This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.2, v2.0, etc.) and a written migration plan in this folder.
+
+### v1.1 changelog (2026-05-25)
+
+Additive only — no migration required:
+
+- §2.2 — Expanded `METRIC_KINDS` from 8 to 15 kinds (added `force`, `power`, `angle`, `frequency`, `ratio`, `percentage`, `acceleration`).
+- §2.2 — Expanded permitted unit sets per kind (incl. open extensibility rule).
+- §2.2 — **New:** optional `formula` field on metric registry entries (computed metrics).
+- §2.2 — **New:** optional `sports[]` filter on metric registry entries (picker UX only — not enforced).
+- §2.2 — **New:** weight-vs-force coach guidance.
+- §3.4 — **Locked:** Phrase id width = 6 digits (`p_<YYYY>_<6 digits>` → 1M/year ceiling).
+- §6 — Added `SPORTS` closed enum.
+- §6 — Added unit tables for the 7 new kinds.
+- §6 — Documented the kinds-closed / units-open extensibility asymmetry.
 
 ---
 
@@ -16,7 +30,9 @@ This document is the **frozen** schema that every part of the form designer, run
 | **Attribute** | A category in the form's tile grid (Technical, Tactical, …). Belongs to a shared registry. |
 | **Sentiment** | One of `+`, `=`, `-`. Fixed set, not configurable per form (forms may only restrict which subset is enabled). |
 | **Phrase** | A reusable text snippet keyed by (attribute, sentiment). Belongs to a shared library. |
-| **Metric** | A typed numeric measurement (jump_height, lift_weight, contact_time). Belongs to a shared registry. |
+| **Metric** | A typed numeric measurement (jump_height, lift_weight, contact_time). Belongs to a shared registry. May be **direct** (coach enters) or **computed** (formula on other metrics). |
+| **Kind** | The dimension of a metric (length, weight, time, …). Closed enum, see §6. |
+| **Canonical Unit** | The single storage unit for a metric's kind (e.g. `m` for length). Display units convert in/out of this. |
 | **Entry** | A single observation logged at runtime — either a phrase tag OR a metric reading. One row in the day's results file. |
 | **Session** | Optional context wrapper that auto-tags every entry made while it's active (coach, kind, gym, etc.). |
 | **Athlete** | Person being observed. References an existing roster record. |
@@ -32,18 +48,19 @@ This document is the **frozen** schema that every part of the form designer, run
 forms/
   registry/
     attributes.json         ← all attributes (small, ~30 entries)
-    metrics.json            ← all metrics (small)
+    metrics.json            ← all metrics (medium, ~200 entries seeded)
     phrases.json            ← all phrases (medium, ~1000s over time)
     forms.json              ← all form definitions, all versions
     rosters.json            ← all rosters
     coaches.json            ← all coaches (mirrors squad/staff)
+    sports.json             ← closed enum, mirrored from §6 SPORTS for runtime
   results/
     2026-05-25.jsonl        ← append-only daily entries (one JSON object per line)
     2026-05-24.jsonl
     ...
 ```
 
-- **Why JSON for registries, JSONL for results:** registries are read whole on form load (small, hot, cached). Results are appended to one row at a time and read by date range; JSONL avoids ever rewriting a multi-MB file.
+- **Why JSON for registries, JSONL for results:** registries are read whole on form load (small, hot, cached). Results are appended one row at a time and read by date range; JSONL avoids ever rewriting a multi-MB file.
 - **Why no SQL:** internal tool, <10k entries/day expected, Blob is already wired. SQL migration path exists when needed.
 - **Why daily files:** natural rollover, easy to back up, bounded read cost, easy to delete a bad day.
 
@@ -60,7 +77,7 @@ forms/
 
 ```jsonc
 {
-  "version": 1,                            // bump on schema change to this file
+  "version": 1,
   "items": [
     {
       "key": "technical",                  // SLUG. snake_case. permanent. unique.
@@ -69,7 +86,7 @@ forms/
       "glyph": "◆",                        // single char/emoji for the tile. editable.
       "topic": "Technical skill",          // descriptive subtitle. editable.
       "sports": ["basketball","boxing"],   // applicability tags. editable.
-      "status": "active",                  // "active" | "archived". archived = hidden from new forms.
+      "status": "active",                  // "active" | "archived"
       "createdAt": "2026-05-25T09:00:00Z",
       "updatedAt": "2026-05-25T09:00:00Z"
     }
@@ -88,41 +105,112 @@ forms/
 {
   "version": 1,
   "items": [
+
+    // ── Direct metric (coach enters a value) ──
     {
-      "key": "jump_height",                // SLUG. snake_case. permanent. unique.
-      "label": "Vertical Jump Height",     // display name. editable.
-      "kind": "length",                    // ONE OF: length | weight | time | count | speed | rating | boolean | text. PERMANENT.
-      "canonicalUnit": "cm",               // PERMANENT once any result is captured.
-      "displayUnits": ["cm","in"],         // units coaches may enter in. editable (additive only).
+      "key": "cmj_height",                 // SLUG. snake_case. PERMANENT. unique.
+      "label": "CMJ height",               // display name. editable.
+      "kind": "length",                    // one of METRIC_KINDS (§6). PERMANENT once referenced.
+      "canonicalUnit": "m",                // PERMANENT once any entry references this metric.
+      "displayUnits": ["cm","in"],         // units coach may enter in. APPEND-ONLY.
       "min": 0,                            // sanity floor (canonical). editable.
-      "max": 120,                          // sanity ceiling (canonical). editable.
-      "decimals": 1,                       // display precision. editable.
-      "status": "active",                  // "active" | "archived"
+      "max": 1.5,                          // sanity ceiling (canonical). editable.
+      "decimals": 2,                       // display precision. editable.
+      "category": "jumps",                 // picker grouping (see §2.2.5). editable.
+      "sports": ["*"],                     // picker filter only. "*" = all sports. editable.
+      "formula": null,                     // null = direct metric (coach enters value)
+      "status": "active",
+      "source": "seed",
       "createdAt": "2026-05-25T09:00:00Z",
       "updatedAt": "2026-05-25T09:00:00Z"
+    },
+
+    // ── Computed metric (derived from other metrics) ──
+    {
+      "key": "rsi",
+      "label": "RSI (reactive strength index)",
+      "kind": "ratio",
+      "canonicalUnit": "",                 // ratio kind = unitless ("" or "x")
+      "displayUnits": [""],
+      "min": 0,
+      "max": 5,
+      "decimals": 2,
+      "category": "jumps",
+      "sports": ["*"],
+      "formula": "cmj_height / cmj_contact_time", // see §2.2.3 formula language
+      "status": "active",
+      "source": "seed",
+      "createdAt": "...", "updatedAt": "..."
     }
   ]
 }
 ```
 
-**Rules:**
-- `key` is permanent. `kind` and `canonicalUnit` are permanent once any entry references this metric.
-- `displayUnits` can only be added to, never removed (would break historical entry display).
+#### 2.2.1 Hard rules on metric records
+
+- `key` is **PERMANENT**.
+- `kind` and `canonicalUnit` are **PERMANENT** once any entry references this metric (locked the moment the first entry is logged).
+- `displayUnits` is **APPEND-ONLY** — units may be added but never removed (would break historical entry display).
+- `formula` is **APPEND-ONLY in concept**: once a computed metric has any entries, the formula may not change (would silently break aggregation). Add a new computed metric (e.g. `rsi_v2`) with a new key.
 - `min`/`max` changes don't rewrite history — they only validate future entries.
-- Allowed `kind` values are fixed (closed enum, contract-level constant). Adding a new kind = new contract version.
+- Allowed `kind` values are fixed by §6. Adding a new kind = contract version bump (no data migration needed; existing entries don't reference new kinds).
+- Allowed display units per kind are listed in §6 but are **append-only** (new units may be added in any contract version without bumping major version).
 
-#### Permitted unit sets per kind
+#### 2.2.2 Direct vs computed metrics
 
-| kind | canonical | allowed display units |
+| Field | Direct | Computed |
 |---|---|---|
-| length | cm | mm, cm, m, in, ft |
-| weight | kg | g, kg, lb |
-| time | ms | ms, s, min, h:m:s.ms (composite) |
-| count | unit | unit (no conversion) |
-| speed | m/s | m/s, km/h, mph |
-| rating | n/a | n/a (just integer 1–N where N is a registry-level scale) |
-| boolean | n/a | true/false |
-| text | n/a | freeform |
+| `formula` | `null` | non-empty string |
+| Runtime behaviour | Coach types value | Runtime auto-evaluates from referenced metrics |
+| Override | Coach value is the truth | **Read-only** — value re-derives from inputs; coaches cannot override (would corrupt downstream aggregations) |
+| Form-save validation | — | **Hard error** if form does not also include all metrics referenced in the formula |
+| Entry shape | Same `valueCanonical` / `valueDisplay` fields | Same — runtime stores the computed result like any other entry |
+
+#### 2.2.3 Formula language (minimal)
+
+Formulas operate on `valueCanonical` of referenced metrics. The runtime evaluator supports:
+
+- Numeric literals: `100`, `9.81`, `0.5`
+- Metric key references: any other metric's `key` resolves to its current entry's `valueCanonical` on the same form submission
+- Operators: `+ - * / ( )`
+- Functions: `min(a,b)`, `max(a,b)`, `abs(x)`
+
+No conditionals, no string ops, no aggregation across other entries. If a coach needs more, they enter the value manually.
+
+**Foreign-key semantics:** a `formula` references other metrics by `key`. Archiving (or renaming-by-archival) any referenced metric makes the computed metric uncomputable. The designer must warn loudly before archiving any metric that is referenced by an active computed metric.
+
+**Unit semantics:** the formula consumes canonical units of its inputs and produces a value declared to be in `canonicalUnit` of the computed metric. The author of a computed metric is responsible for unit-correctness (the language does no unit math). Example: `rsi = cmj_height (m) / cmj_contact_time (s)` has implicit units m/s but is declared `kind: "ratio"`, `canonicalUnit: ""` — sports-science convention treats RSI as unitless.
+
+#### 2.2.4 Sports filter
+
+`sports[]` is **picker UX only** — it controls what metrics surface when a coach builds a form for a given sport. It is **not enforced**: a coach can still pick any metric for any form. This avoids over-constraining genuine cross-sport use.
+
+- `["*"]` means "show for all sports"
+- `["basketball","netball"]` means "show in basketball or netball forms, hide elsewhere"
+- Empty array `[]` means "hidden from picker by sport filter, only findable via search"
+
+#### 2.2.5 Categories (picker UX grouping)
+
+Picker groups metrics by **physical/skill domain** (not by sport). The category set is open — coaches can add new ones via the designer. Seeded values:
+
+```
+anthropometry · jumps · sprints · agility · lifts · endurance ·
+power · grip-strength · flexibility · skill · combat · perceptual ·
+body-comp · wellness · derived
+```
+
+#### 2.2.6 Weight vs Force — coach-friendly naming convention
+
+Sports-science strictly: **weight = force = mass × g (N)**. Coach-vernacular: "weight" means **mass (kg/lb)**. The contract sides with coaches:
+
+| Kind | Canonical | Typical coach use | Examples |
+|---|---|---|---|
+| `weight` | kg | Body mass and lifted mass | Bodyweight, 1RM lifts |
+| `force` | N | Force as measured by force plates / dynamometry | Force plate peak GRF, grip strength dynamometer reading |
+
+**Foot-gun warning baked into the designer:** when a coach creates a new metric with a label containing "force", "grip", "pull", "press" (force-y words) and picks `kind: "weight"`, the designer surfaces a non-blocking warning: *"This sounds like a force measurement. Consider `kind: force` (Newtons) instead. Hand-grip dynamometers labelled in kg are reporting kgf (kilogram-force) — that's a force unit, not mass."*
+
+Grip dynamometers using kgf scale: store using `kind: force`, `displayUnits: ["kgf","N"]`.
 
 ### 2.3 `phrases.json`
 
@@ -131,13 +219,13 @@ forms/
   "version": 1,
   "items": [
     {
-      "id": "p_2026_0001",                 // PERMANENT. minted on creation. opaque.
+      "id": "p_2026_000001",                // PERMANENT. 6-digit counter per year. opaque.
       "text": "Clean catch-and-shoot footwork on the move",
-      "attribute": "technical",            // FK to attributes[].key
-      "sentiment": "+",                    // one of "+" | "=" | "-"
-      "sports": ["basketball"],            // tags for filtering in designer
-      "status": "active",                  // "active" | "archived"
-      "source": "seed",                    // "seed" | "custom" | "imported"
+      "attribute": "technical",             // FK to attributes[].key
+      "sentiment": "+",                     // one of "+" | "=" | "-"
+      "sports": ["basketball"],             // tags for filtering in designer
+      "status": "active",
+      "source": "seed",                     // "seed" | "custom" | "imported"
       "createdAt": "2026-05-25T09:00:00Z",
       "createdBy": "dan",
       "updatedAt": "2026-05-25T09:00:00Z"
@@ -148,7 +236,7 @@ forms/
 
 **Rules (OPTION 1 IMMUTABILITY — LOCKED):**
 - `text`, `attribute`, `sentiment` are **PERMANENT** once any entry references this phrase.
-- To "edit" a phrase: archive the old one (status → "archived"), create a new phrase with a new id, copy across to any form that referenced the old one.
+- To "edit" a phrase: archive the old one (status → "archived"), create a new phrase with a new id, re-point any draft form that referenced the old one.
 - Designer surfaces this clearly: editing a used phrase replaces it; editing an unused phrase rewrites it in place.
 - `status: "archived"` hides from new-form pickers; old entries keep their `textSnapshot`.
 - Adding a phrase via a form's inline custom composer writes a new record with `source: "custom"`.
@@ -162,10 +250,10 @@ forms/
     {
       "slug": "basketball-coach",          // PERMANENT. URL-safe. unique.
       "name": "Basketball Coach Input",    // display name. editable.
-      "sport": "basketball",               // free string; used for filtering. editable.
-      "rosterId": "south-metro-u16",       // FK to rosters[].id, or null = union of all rosters (see §3.5)
+      "sport": "basketball",               // one of SPORTS (§6). editable.
+      "rosterId": "south-metro-u16",       // FK to rosters[].id, or null = union of all rosters (§3.5)
       "status": "live",                    // "draft" | "live" | "archived"
-      "currentVersion": 3,                 // points into versions[]
+      "currentVersion": 3,
       "createdAt": "2026-05-25T09:00:00Z",
       "createdBy": "dan",
       "versions": [
@@ -175,25 +263,24 @@ forms/
           "publishedBy": "dan",
           "attributes": ["technical","tactical","physical","mental","consistency","leadership"],
           "sentiments": ["+","=","-"],
-          "phraseSets": {                  // attribute → sentiment → ordered phrase id list
+          "phraseSets": {
             "technical": {
-              "+": ["p_2026_0001","p_2026_0004","p_2026_0007"],
-              "=": ["p_2026_0042","p_2026_0043"],
-              "-": ["p_2026_0099"]
-            },
-            "tactical": { "+":[...], "=":[...], "-":[...] }
+              "+": ["p_2026_000001","p_2026_000004","p_2026_000007"],
+              "=": ["p_2026_000042","p_2026_000043"],
+              "-": ["p_2026_000099"]
+            }
           },
-          "metricInputs": [                // optional. empty array = pure qualitative form.
-            { "metric": "punches_landed", "label": "Punches landed", "required": false, "perEntryDefault": null }
+          "metricInputs": [
+            { "metric": "cmj_height", "label": "CMJ height", "required": false, "perEntryDefault": null },
+            { "metric": "cmj_contact_time", "label": "Contact time", "required": false, "perEntryDefault": null },
+            { "metric": "rsi", "label": "RSI", "required": false, "perEntryDefault": null, "computed": true }
           ],
-          "sessionFields": {               // optional session-bar configuration
+          "sessionFields": {
             "showSessionToggle": true,
             "sessionKinds": ["Training","Game","Review"],
             "showBulkMode": true
           }
-        },
-        { "version": 2, ... },             // older versions preserved verbatim
-        { "version": 1, ... }
+        }
       ]
     }
   ]
@@ -204,7 +291,8 @@ forms/
 - `slug` is permanent. `currentVersion` advances on Publish.
 - Each entry in `versions[]` is immutable once published.
 - Draft edits live on a `draft` field outside `versions[]` until Publish promotes them.
-- Archiving sets `status: "archived"` — form disappears from index but old entries still resolve correctly.
+- Archiving sets `status: "archived"`.
+- **Computed-metric input dependency check (HARD ERROR at publish):** for every metric in `metricInputs[]` with `formula != null`, every referenced metric must also be in `metricInputs[]` of the same version. Publish refuses otherwise with: *"Form includes computed metric `rsi` which references `cmj_contact_time`. Add `cmj_contact_time` to this form's metric inputs, or remove `rsi`."*
 
 ### 2.5 `rosters.json`
 
@@ -241,6 +329,10 @@ Athlete `id` permanent. Squad order is preserved for the player rail.
 }
 ```
 
+### 2.7 `sports.json`
+
+Mirror of §6 `SPORTS`. Runtime reads this file rather than hard-coding the enum — makes it possible to add a new sport via a registry update + contract bump without a code deploy. Permitted values come from the contract; the file does not invent new sports.
+
 ---
 
 ## 3. Entries (the results layer)
@@ -253,55 +345,55 @@ One JSON object per line. Each line is a single observation entry. Schema:
 {
   "id": "e_2026_05_25_a3f9c2",             // PERMANENT. UUID-like, sortable by time.
   "type": "phrase",                        // "phrase" | "metric"
-  "formSlug": "basketball-coach",          // FK to forms[].slug
-  "formVersion": 3,                        // version number captured at entry time
-  "athleteId": "ava",                      // FK to roster athlete
-  "rosterId": "south-metro-u16",           // FK denormalised for fast filter
-  "coachId": "lin",                        // FK to coaches[].id, or null
-  "sessionId": "s_2026_05_25_evening",     // optional session grouping
-  "sessionKind": "Training",               // optional, mirrors session if set
-  "observedAt": "2026-05-25T18:42:00+10:00", // ISO with timezone
+  "formSlug": "basketball-coach",
+  "formVersion": 3,
+  "athleteId": "ava",
+  "rosterId": "south-metro-u16",
+  "coachId": "lin",
+  "sessionId": "s_2026_05_25_evening",
+  "sessionKind": "Training",
+  "observedAt": "2026-05-25T18:42:00+10:00",
 
   // ── If type === "phrase" ──
   "phrase": {
-    "id": "p_2026_0001",                   // FK to phrases[].id
+    "id": "p_2026_000001",
     "textSnapshot": "Clean catch-and-shoot footwork on the move",
-    "attribute": "technical",              // denormalised for query without join
-    "sentiment": "+"                       // denormalised
+    "attribute": "technical",
+    "sentiment": "+"
   },
 
   // ── If type === "metric" ──
   "metric": {
-    "key": "jump_height",                  // FK to metrics[].key
-    "valueCanonical": 42.1,                // stored in canonical unit always
-    "valueDisplay": 42.1,                  // what coach actually entered
-    "unitDisplay": "cm",                   // the unit coach entered in
-    "labelSnapshot": "Vertical Jump Height" // captured at entry time
+    "key": "cmj_height",
+    "valueCanonical": 0.421,               // canonical unit always (m for length)
+    "valueDisplay": 42.1,                  // what coach entered
+    "unitDisplay": "cm",                   // unit coach entered in
+    "labelSnapshot": "CMJ height",
+    "computed": false                      // true if this entry was derived via formula
   },
 
-  "notes": null                            // optional free-form, max 500 chars
+  "notes": null
 }
 ```
 
 ### 3.2 Hard invariants on entries
 
-- **Exactly one of `phrase` or `metric` is non-null.** Type field disambiguates.
+- **Exactly one of `phrase` or `metric` is non-null.**
 - **`textSnapshot` and `labelSnapshot` are denormalised on purpose** — they preserve what was tagged even after the source registry changes.
 - **`valueCanonical` is always present for metrics**, even when the coach entered in a non-canonical unit (we convert on save).
-- **Entries are immutable.** Corrections happen via a "void" entry (a new entry with `type: "void"` referencing the original id). v1 ships without void; ship as v1.1 amendment if needed.
+- **Computed metric entries** carry `computed: true` and have no separate "coach-entered" provenance — `valueDisplay` is always the runtime-computed result rendered in the metric's canonical unit (no unit picker shown to coach).
+- **Entries are immutable.** v1 ships without void; ship as v1.x amendment if needed.
 - **`observedAt` may not equal write time** — coaches can backfill, so daily-file routing uses `observedAt` not arrival time.
 
 ### 3.3 Entry id format
 
 `e_<YYYY>_<MM>_<DD>_<6 hex chars>` — sortable lexically, debuggable on sight.
 
-### 3.4 Phrase id format
+### 3.4 Phrase id format — **LOCKED**
 
-**PENDING DECISION** — either:
-- `p_<YYYY>_<4-digit counter>` (10k/year ceiling), or
-- `p_<YYYY>_<5-digit counter>` (100k/year ceiling, recommended for Option 1 churn + future bulk imports)
+`p_<YYYY>_<6-digit zero-padded counter>` — 1,000,000 phrases per year ceiling. Counter resets per year. Designer fetches the current year's max counter on load.
 
-Counter resets per year. Designer fetches the current year's max counter on load.
+Example: `p_2026_000001`, `p_2026_000042`, `p_2026_999999`.
 
 ### 3.5 `rosterId: null` semantics (runtime behaviour)
 
@@ -311,17 +403,17 @@ When a form's `rosterId` is null, the runtime athlete picker shows the **union o
 
 ## 4. The Migration Path for Existing Pages
 
-`coach.html` and `boxing.html` will be migrated to load via `/run-form.html?slug=basketball-coach` and `/run-form.html?slug=boxing-workshop`. The seed data for the registries is **lifted directly from `coach-data.js` and `boxing-data.js`** — no schema changes, just relocation. Specifically:
+`coach.html` and `boxing.html` will be migrated to load via `/run-form.html?slug=basketball-coach` and `/run-form.html?slug=boxing-workshop`. The seed data for the registries is **lifted directly from `coach-data.js` and `boxing-data.js`** — no schema changes, just relocation:
 
 | Existing artefact | Target registry |
 |---|---|
 | `coach-data.js` `squad[]` | `rosters.json` → one roster `south-metro-u16` |
 | `coach-data.js` `attributes[]` | `attributes.json` items, sports = `["basketball"]` |
-| `coach-data.js` `phrases.technical['+'][n]` | one `phrases.json` item per entry, attribute = `technical`, sentiment = `+`, sports = `["basketball"]`, id = `p_2026_NNNN` |
+| `coach-data.js` `phrases.technical['+'][n]` | one `phrases.json` item per entry, id = `p_2026_000NNN` |
 | `coach-data.js` `coaches[]` | `coaches.json` |
 | `boxing-data.js` equivalents | merged into the same registries with `sports: ["boxing"]` (or both if reusable) |
 
-A one-shot migration script (`scripts/seed-registries.js`) reads the existing JS files, emits the four registry JSON files, uploads them to Blob. Idempotent — running it twice is a no-op given the same input.
+A one-shot migration script (`scripts/seed-registries.js`) reads the existing JS files, emits the registry JSON files, uploads them to Blob. Idempotent — running it twice is a no-op given the same input. The script also writes the seeded `metrics.json` (the ~150-metric catalogue from this contract bump).
 
 **Existing tally storage (localStorage on coach.html) is not migrated.** Old tallies stay where they are; new tallies through the runtime engine write to `results/YYYY-MM-DD.jsonl`.
 
@@ -333,31 +425,96 @@ The Blob storage is fronted by these endpoints. All under `/api/`.
 
 | Endpoint | Method | Purpose |
 |---|---|---|
-| `/api/registry?name=attributes\|metrics\|phrases\|forms\|rosters\|coaches` | GET | Read a registry file. Returns its full JSON. Cached 60s. |
-| `/api/registry` | PUT | Write a registry file. Body: `{name, data}`. Full overwrite (Blob is single-writer here). |
-| `/api/append-entry` | POST | Append one entry to today's (or `observedAt`'s) JSONL. Returns the entry with its minted id. |
-| `/api/entries?from=YYYY-MM-DD&to=YYYY-MM-DD&athleteId=&formSlug=` | GET | Read entries across a date range, optional filters. Loads each daily file in range. |
+| `/api/registry?name=attributes\|metrics\|phrases\|forms\|rosters\|coaches\|sports` | GET | Read a registry file. Cached 60s. |
+| `/api/registry` | PUT | Write a registry. Body: `{name, data}`. Full overwrite. |
+| `/api/append-entry` | POST | Append one entry to today's (or `observedAt`'s) JSONL. Returns the entry with its minted id. For computed metrics on the same form submission, runtime evaluates and submits a separate entry per computed metric. |
+| `/api/entries?from=YYYY-MM-DD&to=YYYY-MM-DD&athleteId=&formSlug=` | GET | Read entries across a date range, optional filters. |
 
-**Internal-tool simplification:** no auth on these endpoints in v1 — the deploy URL is private knowledge. If we open to real coaches we add a shared bearer token first.
+**Internal-tool simplification:** no auth on these endpoints in v1 — the deploy URL is private knowledge. Open access = shared bearer token before any external coach is given the URL.
 
 ---
 
 ## 6. The Frozen Closed Enums
 
-These values are **part of the contract** — adding a new value requires a contract version bump.
+These values are **part of the contract** — adding a new value requires a contract version bump. Removing one is forbidden (would orphan data).
 
 ```js
-SENTIMENTS = ['+', '=', '-']
-METRIC_KINDS = ['length','weight','time','count','speed','rating','boolean','text']
-ENTRY_TYPES = ['phrase','metric']
-FORM_STATUSES = ['draft','live','archived']
-REGISTRY_STATUSES = ['active','archived']
-PHRASE_SOURCES = ['seed','custom','imported']
-LENGTH_UNITS = ['mm','cm','m','in','ft']
-WEIGHT_UNITS = ['g','kg','lb']
-TIME_UNITS = ['ms','s','min']                 // composite "h:m:s.ms" is a UI render mode, not a unit
-SPEED_UNITS = ['m/s','km/h','mph']
+// ── Domain enums ──
+SENTIMENTS       = ['+', '=', '-']
+ENTRY_TYPES      = ['phrase', 'metric']
+FORM_STATUSES    = ['draft', 'live', 'archived']
+REGISTRY_STATUSES = ['active', 'archived']
+PHRASE_SOURCES   = ['seed', 'custom', 'imported']
+
+// ── Sports (closed enum, ADR-0001) ──
+SPORTS = [
+  'basketball', 'soccer', 'netball', 'hockey',
+  'rugby_league', 'rugby_union', 'afl',
+  'tennis', 'volleyball', 'boxing',
+  'athletics_sprints', 'athletics_distance',
+  'athletics_throws', 'athletics_jumps'
+]
+
+// ── Metric kinds (closed enum, ADR-0001) ──
+METRIC_KINDS = [
+  'length', 'weight', 'time', 'count', 'speed',
+  'rating', 'boolean', 'text',
+  'force', 'power', 'angle', 'frequency',
+  'ratio', 'percentage', 'acceleration'
+]
 ```
+
+### 6.1 Unit tables per kind
+
+Display units are **append-only** within a contract version (new units don't need a version bump — they don't break anything). Canonical units never change.
+
+| kind | canonical | allowed display units | notes |
+|---|---|---|---|
+| `length` | m | `mm, cm, m, in, ft, yd, km, mi` | distance, height, reach, sprint splits |
+| `weight` | kg | `g, kg, lb` | mass — bodyweight, 1RM. Coach vernacular. |
+| `time` | s | `ms, s, min, h` | UI may render h:m:s.ms but stored as seconds |
+| `count` | unit | `unit` | integer reps, makes, attempts |
+| `speed` | m/s | `m/s, km/h, mph, ft/s, kn` | |
+| `rating` | (int 1..N) | scale-specific | RPE, Borg, coach 1–10 |
+| `boolean` | bool | `true/false` | |
+| `text` | string | freeform | |
+| `force` | N | `N, kgf, lbf` | force plates, dynamometers. kgf ≈ 9.81 N |
+| `power` | W | `W, kW, hp` | Wingate, FTP, bar-velocity × load |
+| `angle` | deg | `deg, rad` | joint ROM, launch angle |
+| `frequency` | Hz | `Hz, rpm, spm, bpm` | HR (bpm), cadence (spm/rpm) |
+| `ratio` | (unitless float) | `""` or `x` or `:1` | RSI, asymmetry, work:rest |
+| `percentage` | % | `%` | %1RM, %HRmax, body fat |
+| `acceleration` | m/s² | `m/s², g` | g = 9.80665 m/s² |
+
+### 6.2 Conversion factors (canonical)
+
+Stored in code, not registry. All conversions are linear (factor × value):
+
+```js
+const CONVERSIONS = {
+  length:  { mm: 0.001, cm: 0.01, m: 1, in: 0.0254, ft: 0.3048, yd: 0.9144, km: 1000, mi: 1609.344 },
+  weight:  { g: 0.001, kg: 1, lb: 0.45359237 },
+  time:    { ms: 0.001, s: 1, min: 60, h: 3600 },
+  speed:   { 'm/s': 1, 'km/h': 1/3.6, mph: 0.44704, 'ft/s': 0.3048, kn: 0.514444 },
+  force:   { N: 1, kgf: 9.80665, lbf: 4.4482216152605 },
+  power:   { W: 1, kW: 1000, hp: 745.6998715822702 },
+  angle:   { deg: 1, rad: 57.29577951308232 },
+  frequency:{ Hz: 1, rpm: 1/60, spm: 1/60, bpm: 1/60 },
+  acceleration:{ 'm/s²': 1, g: 9.80665 }
+}
+// canonical_value = display_value * CONVERSIONS[kind][display_unit]
+```
+
+### 6.3 Extensibility rule (ADR-0001 summary)
+
+| Change | Cost | Action |
+|---|---|---|
+| Add a new UNIT to existing kind | Trivial. No contract bump. | Append to §6.1 table + add conversion constant. |
+| Add a new KIND | Minor. Contract minor-version bump. No data migration. | Old entries don't reference new kinds. |
+| Add a new SPORT | Minor. Contract minor-version bump. No data migration. | |
+| Change a metric's `kind` or `canonicalUnit` after first entry | **FORBIDDEN** — archive old metric + create new key. | Old `valueCanonical` would silently re-interpret. |
+| Remove a unit from `displayUnits` of a metric | **FORBIDDEN** — append-only. | Historical entries' `unitDisplay` would become orphaned. |
+| Change a computed metric's `formula` after first entry | **FORBIDDEN** — archive + new key. | Old computed entries would no longer reproduce. |
 
 ---
 
@@ -371,11 +528,12 @@ To keep v1 small, these are explicitly out of scope and will be added as named a
 - **Cross-form derived metrics ("training load index").** Aggregation is a read-time concern, separate doc.
 - **Backups beyond Blob's built-in.** Manual export until volume justifies more.
 - **Schema migration of past entries when a metric's canonical unit changes.** Lock prevents this from happening; if we ever need to, write a one-off migration with a contract bump.
+- **Composite-unit metrics (e.g. `ml/kg/min` for VO2max).** Stored as `kind: ratio` with display-string convention; not first-class.
 
 ---
 
 ## 8. Sign-off
 
-This contract is locked when Daniel ticks the line below. After lock, no schema field may change without a contract version bump and a written migration plan.
+This contract is **locked** as v1.1 on 2026-05-25 by Daniel Gordon. After lock, no schema field may change without a contract version bump and a written migration plan.
 
-- [ ] **Locked by Daniel Gordon on …**
+- [x] **Locked by Daniel Gordon on 2026-05-25**
