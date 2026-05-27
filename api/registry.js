@@ -125,10 +125,11 @@ async function handlePut(req, res) {
   // Stamp every item in data.items[] (server-side; client values are overwritten).
   const stamped = stampItems(data, principal, nowIso, nowMs);
 
-  // Write to blob (random suffix so the URL is unguessable; effectively private).
+  // Write to blob. Store is configured private-access, so put() must declare it.
+  // GET handler reads via the URL returned by head() (signed when private).
   const path = blobPath(name);
   const result = await put(path, JSON.stringify(stamped, null, 2), {
-    access: 'public',
+    access: 'private',
     contentType: 'application/json; charset=utf-8',
     addRandomSuffix: false,
     allowOverwrite: true,
