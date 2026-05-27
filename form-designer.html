@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Vertex · Form Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="form-designer.css" />
+</head>
+<body class="designer">
+
+  <header class="designer-topbar">
+    <a class="brand" href="/index.html">
+      <span class="brand-mark">VERTEX</span>
+      <span class="brand-sub">FORM DESIGNER</span>
+    </a>
+    <div class="topbar-spacer"></div>
+    <div class="save-indicator" data-state="idle">
+      <span class="save-dot"></span>
+      <span class="save-text">Ready</span>
+    </div>
+    <nav class="topbar-tabs" aria-label="Designer panes (mobile)">
+      <button class="tab-btn" data-tab="list" aria-pressed="true">List</button>
+      <button class="tab-btn" data-tab="editor" aria-pressed="false">Editor</button>
+      <button class="tab-btn" data-tab="preview" aria-pressed="false">Preview</button>
+    </nav>
+  </header>
+
+  <main class="designer-shell">
+
+    <!-- ============= LEFT PANE: form list ============= -->
+    <aside class="pane pane-list" data-pane="list" aria-label="Forms">
+      <div class="pane-head">
+        <h2 class="pane-title">Forms</h2>
+        <button class="btn btn-primary btn-new-form" type="button" title="New form">
+          + New
+        </button>
+      </div>
+
+      <div class="list-search">
+        <input type="search" id="list-search" placeholder="Search forms…" autocomplete="off" />
+      </div>
+
+      <section class="list-group" data-group="draft">
+        <header class="list-group-head">
+          <span class="list-group-label">Drafts</span>
+          <span class="list-group-count" data-count="draft">0</span>
+        </header>
+        <ul class="list-items" data-list="draft" aria-label="Draft forms"></ul>
+      </section>
+
+      <section class="list-group" data-group="live">
+        <header class="list-group-head">
+          <span class="list-group-label">Live</span>
+          <span class="list-group-count" data-count="live">0</span>
+        </header>
+        <ul class="list-items" data-list="live" aria-label="Live forms"></ul>
+      </section>
+
+      <section class="list-group" data-group="archived">
+        <header class="list-group-head">
+          <span class="list-group-label">Archived</span>
+          <span class="list-group-count" data-count="archived">0</span>
+        </header>
+        <ul class="list-items" data-list="archived" aria-label="Archived forms"></ul>
+      </section>
+
+      <p class="list-empty" hidden>No forms yet. Click <strong>+ New</strong> to create one.</p>
+    </aside>
+
+    <!-- ============= MIDDLE PANE: editor ============= -->
+    <section class="pane pane-editor" data-pane="editor" aria-label="Editor">
+      <div class="editor-empty">
+        <h2>Pick a form, or create one</h2>
+        <p class="muted">The editor will appear here once you select a form on the left.</p>
+      </div>
+
+      <article class="editor-body" hidden>
+
+        <header class="editor-header">
+          <div class="editor-status-strip">
+            <span class="status-pill" data-pill="status">DRAFT</span>
+            <span class="status-pill status-pill-ghost" data-pill="sport"></span>
+            <span class="status-pill status-pill-ghost" data-pill="roster"></span>
+          </div>
+          <div class="editor-actions">
+            <button class="btn btn-ghost" type="button" data-action="clone" hidden>Clone as draft</button>
+            <button class="btn btn-ghost btn-danger" type="button" data-action="delete-draft" hidden>Delete draft</button>
+            <button class="btn btn-ghost" type="button" data-action="archive" hidden>Archive</button>
+            <button class="btn btn-primary" type="button" data-action="publish" hidden>Publish</button>
+          </div>
+        </header>
+
+        <!-- 1. Identity -->
+        <section class="editor-section" data-section="identity">
+          <h3 class="editor-section-title">Identity</h3>
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input id="f-name" data-field="name" type="text" maxlength="80" placeholder="Basketball Coach Input" />
+          </div>
+          <div class="field">
+            <label for="f-slug">Slug <span class="muted">(permanent · URL-safe)</span></label>
+            <input id="f-slug" data-field="slug" type="text" pattern="[a-z0-9-]+" maxlength="60" placeholder="basketball-coach" />
+            <p class="field-hint" data-hint="slug">Lowercase letters, digits, hyphens. Cannot change after creation.</p>
+          </div>
+          <div class="field">
+            <label for="f-description">Description <span class="muted">(optional · markdown · ≤500 chars)</span></label>
+            <textarea id="f-description" data-field="description" rows="2" maxlength="500" placeholder="Use after every training session. ~3 minutes."></textarea>
+          </div>
+          <div class="field field-row">
+            <div class="field-half">
+              <label for="f-sport">Sport</label>
+              <select id="f-sport" data-field="sport"></select>
+            </div>
+            <div class="field-half">
+              <label for="f-roster">Roster</label>
+              <select id="f-roster" data-field="rosterId">
+                <option value="">(all rosters — union)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Attributes -->
+        <section class="editor-section" data-section="attributes">
+          <h3 class="editor-section-title">Attributes</h3>
+          <p class="editor-section-hint">
+            The categories in the coach's tile grid. Drag to reorder. Phase 2 will let you author these in-place;
+            for now they're read from the global <code>attributes</code> registry.
+          </p>
+          <ul class="chip-list" data-field="attributes" aria-label="Attributes on this form"></ul>
+          <button class="btn btn-ghost btn-small" type="button" data-action="pick-attributes">+ Add attribute</button>
+        </section>
+
+        <!-- 3. Sentiments -->
+        <section class="editor-section" data-section="sentiments">
+          <h3 class="editor-section-title">Sentiments</h3>
+          <p class="editor-section-hint">
+            Which sentiment tabs the coach sees. You can restrict to a subset of the closed set <code>{+, =, –}</code>,
+            but you can't add new ones.
+          </p>
+          <div class="sentiment-toggle-row" data-field="sentiments">
+            <label class="sentiment-toggle"><input type="checkbox" value="+" /><span>+</span></label>
+            <label class="sentiment-toggle"><input type="checkbox" value="=" /><span>=</span></label>
+            <label class="sentiment-toggle"><input type="checkbox" value="-" /><span>–</span></label>
+          </div>
+        </section>
+
+        <!-- 4. Metric inputs (Phase 1: read-only placeholder) -->
+        <section class="editor-section" data-section="metric-inputs">
+          <h3 class="editor-section-title">Metric inputs <span class="phase-tag">Phase 2</span></h3>
+          <p class="editor-section-hint">
+            Coach-entered numeric measurements (CMJ height, RSI, …) will be configurable here.
+            Phase 1 ships the form skeleton; metric authoring lands in Phase 2.
+          </p>
+        </section>
+
+        <!-- 5. Version controls (Phase 1: read-only placeholder) -->
+        <section class="editor-section" data-section="versions">
+          <h3 class="editor-section-title">Versions <span class="phase-tag">Phase 4</span></h3>
+          <p class="editor-section-hint">
+            Forms will carry an immutable version history. Phase 1 supports first-publish only;
+            subsequent edits require Clone-as-draft.
+          </p>
+        </section>
+
+        <!-- Provenance footer -->
+        <footer class="editor-footer">
+          <dl class="provenance">
+            <div><dt>Created</dt><dd data-meta="createdAt">—</dd><dt>by</dt><dd data-meta="createdBy">—</dd></div>
+            <div><dt>Updated</dt><dd data-meta="updatedAt">—</dd><dt>by</dt><dd data-meta="updatedBy">—</dd></div>
+            <div data-meta-row="publishedAt"><dt>Published</dt><dd data-meta="publishedAt">—</dd></div>
+            <div data-meta-row="archivedAt" hidden><dt>Archived</dt><dd data-meta="archivedAt">—</dd></div>
+          </dl>
+        </footer>
+
+      </article>
+    </section>
+
+    <!-- ============= RIGHT PANE: preview ============= -->
+    <aside class="pane pane-preview" data-pane="preview" aria-label="Preview">
+      <div class="pane-head">
+        <h2 class="pane-title">Coach preview</h2>
+        <span class="preview-hint muted">Renders what coaches see at runtime.</span>
+      </div>
+      <div class="preview-stage" id="preview-stage">
+        <div class="preview-empty">
+          <p class="muted">Live preview appears here once a form is selected.</p>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ============= "Pick attributes" modal ============= -->
+  <dialog class="modal" id="pick-attributes-modal">
+    <form method="dialog" class="modal-card">
+      <header class="modal-head">
+        <h3>Pick attributes</h3>
+        <button class="btn btn-ghost btn-small" value="cancel" type="submit">Cancel</button>
+      </header>
+      <ul class="pick-list" id="pick-attributes-list"></ul>
+      <footer class="modal-foot">
+        <button class="btn btn-primary" value="ok" type="submit">Add selected</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============= "New form" modal ============= -->
+  <dialog class="modal" id="new-form-modal">
+    <form method="dialog" class="modal-card">
+      <header class="modal-head"><h3>New form</h3></header>
+      <div class="field">
+        <label for="new-name">Name</label>
+        <input id="new-name" type="text" required maxlength="80" placeholder="Basketball Coach Input" />
+      </div>
+      <div class="field">
+        <label for="new-slug">Slug <span class="muted">(permanent)</span></label>
+        <input id="new-slug" type="text" required pattern="[a-z0-9-]+" maxlength="60" placeholder="basketball-coach" />
+      </div>
+      <div class="field">
+        <label for="new-sport">Sport</label>
+        <select id="new-sport" required></select>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn btn-ghost" value="cancel" type="submit">Cancel</button>
+        <button class="btn btn-primary" value="ok" type="submit">Create draft</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============= Delete-draft confirm modal ============= -->
+  <dialog class="modal" id="confirm-delete-modal">
+    <form method="dialog" class="modal-card">
+      <header class="modal-head"><h3>Delete this draft?</h3></header>
+      <p>The draft <code data-slot="slug">…</code> will be permanently removed. This cannot be undone.</p>
+      <footer class="modal-foot">
+        <button class="btn btn-ghost" value="cancel" type="submit">Cancel</button>
+        <button class="btn btn-primary btn-danger" value="ok" type="submit">Delete</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script type="module" src="form-designer.js"></script>
+</body>
+</html>
