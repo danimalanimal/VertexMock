@@ -69,8 +69,13 @@ async function handleGet(req, res) {
   let meta;
   try {
     meta = await head(path);
-    const fetched = await get(path, { access: 'private' });
-    body = JSON.parse(await fetched.text());
+    const result = await get(path, { access: 'private' });
+    if (!result || result.statusCode === 404) {
+      return res.status(404).json({ error: 'Registry not found', name });
+    }
+    // result.stream is a web ReadableStream; convert to text via a Response wrapper.
+    const text = await new Response(result.stream).text();
+    body = JSON.parse(text);
   } catch (e) {
     // Vercel Blob signals a missing object via 'does not exist' / 'not found' / BlobNotFoundError
     const msg = e?.message || '';
