@@ -13,7 +13,7 @@
 // Auth: none in v1 (internal tool, single writer). Owner is hard-coded.
 // When real auth lands, replace resolvePrincipal() — no data migration needed.
 
-import { put, head } from '@vercel/blob';
+import { put, head, get } from '@vercel/blob';
 
 // ─── Owner stamping (ADR-0003) ───────────────────────────────────────────────
 // TODO: replace with session.user.email when real auth lands.
@@ -63,13 +63,14 @@ async function handleGet(req, res) {
 
   const path = blobPath(name);
 
-  // head() returns metadata if it exists; we then fetch the body via its URL.
-  // Note: registries are stored as PUBLIC blobs (random suffix, unguessable URL)
-  // because Vercel Blob private access requires signed URLs per read which is
-  // overkill for these small JSON files. The blob's URL is returned only here.
+  // Private blob: use get() (returns the body bytes) rather than fetching the URL.
+  // Private blob URLs require a signed token per read; get() handles that internally.
+  let body;
   let meta;
   try {
     meta = await head(path);
+    const fetched = await get(path);
+    body = JSON.parse(await fetched.text());
   } catch (e) {
     // Vercel Blob signals a missing object via 'does not exist' / 'not found' / BlobNotFoundError
     const msg = e?.message || '';
@@ -85,17 +86,10 @@ async function handleGet(req, res) {
     throw e;
   }
 
-  // Fetch the body
-  const r = await fetch(meta.url, { cache: 'no-store' });
-  if (!r.ok) {
-    return res.status(502).json({ error: `Failed to fetch registry blob: ${r.status}` });
-  }
-  const body = await r.json();
-
   return res.status(200).json({
     name,
     data: body,
-    meta: { updatedAt: meta.uploadedAt, size: meta.size },
+    meta: { updatedAt: meta?.uploadedAt, size: meta?.size },
   });
 }
 
