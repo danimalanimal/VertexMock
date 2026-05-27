@@ -38,6 +38,8 @@ The shared language for this project. When a term here conflicts with how it get
 | **Snapshot field** | A denormalised field on an Entry that preserves what a referenced record looked like at entry time (`textSnapshot`, `labelSnapshot`). | The live record (which may have since changed). |
 | **Measurement source** | The capture path that produced a metric reading. Closed enum (`manual`, `video_240fps`, `lidar_arkit`, `audio_impact`, `imu_pocket`, `force_plate`, `computed`, …). Required on every metric entry. See ADR-0002. | The metric itself (the metric is *what* is measured; source is *how*). |
 | **Source metadata** | Optional freeform dict on a metric entry (`device`, `appVersion`, `detectorVersion`). Carries forensic detail the enum can't. | The `source` field (enum value). |
+| **Owner stamping** | Server-side stamping of `createdBy` / `updatedBy` / `updatedAt` on every writable record, even before real authentication exists. Today the principal is a hard-coded constant; later it's the session email. See ADR-0003. | Authentication — owner stamping is data-shape discipline, not access control. |
+| **Principal** | The identity the server attributes a write to. Today: the constant `OWNER`. Later: `session.user.email`. The single function `resolvePrincipal(req)` is the only thing that changes when real auth lands. | Coach (a domain role) — a principal is a security identity, a coach is a domain actor; they often coincide but conceptually differ. |
 
 ### Athletes & coaches
 
@@ -83,7 +85,7 @@ If you find yourself wanting to mutate something in the first list, the answer i
 ## Cross-cutting decisions
 
 - **Storage:** Vercel Blob, private. Registries are JSON (overwrite). Results are JSONL (append daily).
-- **Auth:** None in v1. Internal tool, single writer.
+- **Auth:** None in v1. Internal tool, single writer. Despite no auth, every writable record carries server-stamped `createdBy` / `updatedBy` / `updatedAt` (ADR-0003) so the eventual auth migration is a one-line change with zero data back-fill.
 - **Voiding entries:** Not supported in v1. Will be added as a `type: void` Entry pointing to an original `id` if needed.
 - **Sports:** Closed enum. See contract §6 `SPORTS` and ADR-0001.
 - **Computed metrics:** Read-only at runtime, formula references metrics by key, hard error at form-publish if any referenced metric is missing.
@@ -98,3 +100,5 @@ If you find yourself wanting to mutate something in the first list, the answer i
 - ❌ "Sport is just a string" — sports are a closed enum (ADR-0001). Adding "Rugby League 7s" requires a contract bump.
 - ❌ "Source is optional / can be inferred later" — `source` is required on every metric entry (ADR-0002). Default to `"manual"` if no detector ran.
 - ❌ "Compare these CMJ heights across the cohort" without checking sources first — a force-plate reading and a phone-pocket reading aren't directly comparable. Filter by `source` or flag the mismatch.
+- ❌ "We'll add `createdBy` once auth lands" — every writable record must be owner-stamped from day one (ADR-0003). Adding it later means back-filling guessed values.
+- ❌ "Client sends `createdBy` in the request body" — owner fields are server-stamped only. Anything the client supplies is silently overwritten.

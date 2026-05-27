@@ -1,8 +1,18 @@
-# Coach Observation Form — Data Contract v1.2
+# Coach Observation Form — Data Contract v1.3
 
-**Status:** Locked · **Owner:** Daniel Gordon · **Date locked:** 2026-05-25
+**Status:** Locked · **Owner:** Daniel Gordon · **Date locked:** 2026-05-26
 
-This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.3, v2.0, etc.) and a written migration plan in this folder.
+This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.4, v2.0, etc.) and a written migration plan in this folder.
+
+### v1.3 changelog (2026-05-26)
+
+Additive only — no entries written under v1.2 yet:
+
+- §3.1 / §3.2 — **New required fields** `createdBy` and `updatedBy` (email, lowercase) on every writable record: form definitions, registry items, entries. Stamped server-side from the session principal (currently the hard-coded owner — see ADR-0003).
+- §3.1 — **New required field** `updatedAt` (epoch ms) on every writable record. Server-stamped.
+- §3.2 — New invariant: `createdBy` is PERMANENT after first write; `updatedBy` and `updatedAt` are refreshed on every write.
+- §5 — All write endpoints (`PUT /api/registry`, `POST /api/append-entry`) stamp `createdBy`/`updatedBy`/`updatedAt` server-side; client-supplied values for these fields are ignored.
+- §6 — New term: **Owner stamping** = the practice of recording who wrote a record, even before real authentication exists.
 
 ### v1.2 changelog (2026-05-25)
 
@@ -361,6 +371,10 @@ One JSON object per line. Each line is a single observation entry. Schema:
   "sessionId": "s_2026_05_25_evening",
   "sessionKind": "Training",
   "observedAt": "2026-05-25T18:42:00+10:00",
+  "createdBy": "dan@superepic.com.au",     // REQUIRED. PERMANENT. Server-stamped from session principal. (ADR-0003.)
+  "updatedBy": "dan@superepic.com.au",     // REQUIRED. Server-stamped. Equals createdBy on first write.
+  "updatedAt": 1748263320000,              // REQUIRED. Epoch ms. Server-stamped.
+
 
   // ── If type === "phrase" ──
   "phrase": {
@@ -399,7 +413,9 @@ One JSON object per line. Each line is a single observation entry. Schema:
 - **`metric.source` is REQUIRED and IMMUTABLE.** Must be one of `MEASUREMENT_SOURCES` (§6). Server rejects entries with missing/invalid source. (ADR-0002.)
 - **Source-computed cross-check:** `source = "computed"` iff `computed = true`. Server enforces.
 - **`sourceMeta` is OPTIONAL and IMMUTABLE.** Freeform dict; UI may render values for forensics but does not validate.
-- **Entries are immutable.** v1 ships without void; ship as v1.x amendment if needed.
+- **`createdBy` is REQUIRED and PERMANENT.** Lowercase email. Server-stamped from session principal; client-supplied values are ignored. (ADR-0003.)
+- **`updatedBy` and `updatedAt` are REQUIRED.** Server-stamped on every write. On first write, `updatedBy === createdBy` and `updatedAt === createdAt`.
+- **Entries are immutable.** v1 ships without void; ship as v1.x amendment if needed. (Despite immutability, the `updatedBy`/`updatedAt` fields are mandated for schema symmetry with mutable records like form definitions and registry items.)
 - **`observedAt` may not equal write time** — coaches can backfill, so daily-file routing uses `observedAt` not arrival time.
 
 ### 3.3 Entry id format
@@ -443,9 +459,11 @@ The Blob storage is fronted by these endpoints. All under `/api/`.
 | Endpoint | Method | Purpose |
 |---|---|---|
 | `/api/registry?name=attributes\|metrics\|phrases\|forms\|rosters\|coaches\|sports` | GET | Read a registry file. Cached 60s. |
-| `/api/registry` | PUT | Write a registry. Body: `{name, data}`. Full overwrite. |
-| `/api/append-entry` | POST | Append one entry to today's (or `observedAt`'s) JSONL. Returns the entry with its minted id. For computed metrics on the same form submission, runtime evaluates and submits a separate entry per computed metric. |
+| `/api/registry` | PUT | Write a registry. Body: `{name, data}`. Full overwrite. Server stamps `createdBy`/`updatedBy`/`updatedAt` on every contained record. |
+| `/api/append-entry` | POST | Append one entry to today's (or `observedAt`'s) JSONL. Returns the entry with its minted id and stamped owner fields. For computed metrics on the same form submission, runtime evaluates and submits a separate entry per computed metric. |
 | `/api/entries?from=YYYY-MM-DD&to=YYYY-MM-DD&athleteId=&formSlug=` | GET | Read entries across a date range, optional filters. |
+
+**Owner stamping (ADR-0003):** every write endpoint resolves a `principal` (currently the hard-coded constant `OWNER`; later, the session email) and stamps `createdBy`/`updatedBy`/`updatedAt` server-side. Client-supplied values for these fields are silently overwritten. This shapes data for the eventual auth migration so no back-fill is required.
 
 **Internal-tool simplification:** no auth on these endpoints in v1 — the deploy URL is private knowledge. Open access = shared bearer token before any external coach is given the URL.
 
@@ -567,6 +585,7 @@ To keep v1 small, these are explicitly out of scope and will be added as named a
 
 ## 8. Sign-off
 
-This contract is **locked** as v1.2 on 2026-05-25 by Daniel Gordon. After lock, no schema field may change without a contract version bump and a written migration plan.
+This contract is **locked** as v1.3 on 2026-05-26 by Daniel Gordon. After lock, no schema field may change without a contract version bump and a written migration plan.
 
 - [x] **Locked by Daniel Gordon on 2026-05-25 (v1.0 → v1.1 → v1.2 same day, all additive)**
+- [x] **v1.3 locked by Daniel Gordon on 2026-05-26 (owner stamping before auth, additive)**
