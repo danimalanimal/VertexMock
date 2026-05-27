@@ -71,8 +71,15 @@ async function handleGet(req, res) {
   try {
     meta = await head(path);
   } catch (e) {
-    // Vercel Blob throws BlobNotFoundError if missing
-    if (e?.name === 'BlobNotFoundError' || /not.?found/i.test(e?.message || '')) {
+    // Vercel Blob signals a missing object via 'does not exist' / 'not found' / BlobNotFoundError
+    const msg = e?.message || '';
+    const cls = e?.constructor?.name || e?.name || '';
+    if (
+      /BlobNotFoundError/.test(cls) ||
+      /does not exist/i.test(msg) ||
+      /not.?found/i.test(msg) ||
+      e?.status === 404
+    ) {
       return res.status(404).json({ error: 'Registry not found', name });
     }
     throw e;
