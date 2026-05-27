@@ -69,7 +69,7 @@ async function handleGet(req, res) {
   let meta;
   try {
     meta = await head(path);
-    const fetched = await get(path);
+    const fetched = await get(path, { access: 'private' });
     body = JSON.parse(await fetched.text());
   } catch (e) {
     // Vercel Blob signals a missing object via 'does not exist' / 'not found' / BlobNotFoundError
