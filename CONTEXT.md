@@ -11,7 +11,9 @@ The shared language for this project. When a term here conflicts with how it get
 | **Form** | A coach-facing input page rendered at `/run-form.html?slug=…`. Replaces the old `coach.html` and `boxing.html`. | *Form Definition* (the record), *Form Version* (the snapshot). |
 | **Form Definition** | The data record describing a Form — its attributes, phrases, optional metric inputs. | The rendered HTML page (that's the *Form*). |
 | **Form Version** | An immutable snapshot of a Form Definition. Forms have an N-of-versions history; the active one is `currentVersion`. | A draft (drafts live on `forms.json` outside `versions[]` until Publish). |
-| **Designer** | The internal-only GUI for creating, editing, drafting, and archiving Forms. Three-pane layout: list / editor / preview. | *Runtime* — the page coaches actually use to log observations. |
+| **Designer** | The internal-only GUI for creating, editing, drafting, and archiving Forms. Three-pane layout: list / editor / preview. URL grammar: `form-designer.html#draft/<slug>`, `#live/<slug>`, `#archived/<slug>`, `#new`. | *Runtime* — the page coaches actually use to log observations. |
+| **Clone as draft** | The only legitimate way to "edit" a Live or Archived form: produces a new form with a new slug, leaving the original untouched. Forced by the one-way lifecycle (ADR-0004). | Versioning — cloning creates a sibling form, not a new version of the same form. (Phase 4 versioning is a separate concept.) |
+| **Autosave (drafts)** | Designer behaviour: draft field changes debounce 800ms then full-collection PUT to `/api/registry`. State transitions (publish, archive, delete, clone) are NEVER autosaved — they're explicit user actions. (ADR-0004.) | Manual save — there is no Save button in the Phase 1 designer; the status indicator (Saved ✓ / Saving… / Unsaved …) is the only feedback. |
 | **Runtime** | The page that renders a published Form Version and accepts coach entries. URL: `/run-form.html?slug=…`. | *Designer*. |
 
 ### Observation content
@@ -102,3 +104,5 @@ If you find yourself wanting to mutate something in the first list, the answer i
 - ❌ "Compare these CMJ heights across the cohort" without checking sources first — a force-plate reading and a phone-pocket reading aren't directly comparable. Filter by `source` or flag the mismatch.
 - ❌ "We'll add `createdBy` once auth lands" — every writable record must be owner-stamped from day one (ADR-0003). Adding it later means back-filling guessed values.
 - ❌ "Client sends `createdBy` in the request body" — owner fields are server-stamped only. Anything the client supplies is silently overwritten.
+- ❌ "Unpublish this form back to draft" — lifecycle is one-way (ADR-0004). Clone as draft instead.
+- ❌ "Delete this Live form" — Live and Archived forms cannot be deleted, only state-transitioned. Drafts can be deleted (zero entries by definition).

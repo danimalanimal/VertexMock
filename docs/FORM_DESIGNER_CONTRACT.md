@@ -1,8 +1,19 @@
-# Coach Observation Form — Data Contract v1.3
+# Coach Observation Form — Data Contract v1.4
 
-**Status:** Locked · **Owner:** Daniel Gordon · **Date locked:** 2026-05-26
+**Status:** Locked · **Owner:** Daniel Gordon · **Date locked:** 2026-05-27
 
-This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.4, v2.0, etc.) and a written migration plan in this folder.
+This document is the **frozen** schema that every part of the form designer, runtime, storage layer, and dashboard must obey. Code changes that break this contract require a new contract version (v1.5, v2.0, etc.) and a written migration plan in this folder.
+
+### v1.4 changelog (2026-05-27)
+
+Additive only — no entries written yet:
+
+- §2.4 — **Form record refinements** for Phase 1 designer: new optional `description` field (markdown, ≤500 chars); new permanent timestamps `publishedAt` and `archivedAt` (server-stamped on state transition).
+- §2.4 — **Lifecycle states LOCKED as one-way** Draft → Live → Archived. Unpublish and restore are forbidden; the escape hatch is **Clone as draft** (creates a new form with a new slug, preserving the original). Drafts (with zero entries by definition) MAY be deleted with confirmation. Live and Archived forms MAY NOT be deleted. (ADR-0004.)
+- §2.4 — **Phrase library scoping for the picker**: when the form designer or runtime renders the phrase picker, phrases are filtered to those where `phrase.sports` includes the form's `sport` OR `phrase.sports` is empty (universal). This is a UX filter, not enforced server-side — a phrase whose `sports` list excludes the form's sport can still be tagged on an entry if added through another path.
+- §2.4 — **Sentiment subsetting**: a form MAY restrict its `sentiments` array to a subset of the closed `{+, =, -}`; default is all three. Forms MAY NOT extend the enum.
+- §5 — **Save model LOCKED for Phase 1**: drafts autosave on field-change with an 800ms debounce (full-collection PUT to `/api/registry`). State transitions (publish, archive, clone-as-draft, delete-draft) are explicit user actions, not autosaved. (ADR-0004.)
+- §5 — **Designer URL grammar**: `form-designer.html#draft/<slug>`, `#live/<slug>`, `#archived/<slug>`, `#new`. The status segment is a hint; the form's own `status` field is the source of truth. Mismatched URLs auto-rewrite on resolve.
 
 ### v1.3 changelog (2026-05-26)
 
@@ -268,12 +279,17 @@ Grip dynamometers using kgf scale: store using `kind: force`, `displayUnits: ["k
     {
       "slug": "basketball-coach",          // PERMANENT. URL-safe. unique.
       "name": "Basketball Coach Input",    // display name. editable.
+      "description": "Use after every training session. ~3 min.",  // OPTIONAL. v1.4. markdown, ≤500 chars. editable.
       "sport": "basketball",               // one of SPORTS (§6). editable.
       "rosterId": "south-metro-u16",       // FK to rosters[].id, or null = union of all rosters (§3.5)
-      "status": "live",                    // "draft" | "live" | "archived"
+      "status": "live",                    // "draft" | "live" | "archived" — one-way Draft→Live→Archived (v1.4, ADR-0004)
       "currentVersion": 3,
+      "publishedAt": "2026-05-25T09:00:00Z",  // v1.4. PERMANENT once set (Draft→Live). null while draft.
+      "archivedAt": null,                  // v1.4. PERMANENT once set (Live→Archived). null otherwise.
       "createdAt": "2026-05-25T09:00:00Z",
-      "createdBy": "dan",
+      "createdBy": "dan@superepic.com.au",  // v1.3 owner stamping. PERMANENT. lowercase email.
+      "updatedAt": "2026-05-27T04:15:00Z",  // v1.3. server-stamped on every write.
+      "updatedBy": "dan@superepic.com.au",  // v1.3. server-stamped on every write.
       "versions": [
         {
           "version": 3,
@@ -309,7 +325,11 @@ Grip dynamometers using kgf scale: store using `kind: force`, `displayUnits: ["k
 - `slug` is permanent. `currentVersion` advances on Publish.
 - Each entry in `versions[]` is immutable once published.
 - Draft edits live on a `draft` field outside `versions[]` until Publish promotes them.
-- Archiving sets `status: "archived"`.
+- **Lifecycle is one-way** (v1.4, ADR-0004): Draft → Live → Archived. No unpublish, no restore. To edit a Live form, **Clone as draft** — creates a new form with a new slug, original is untouched. Live and Archived forms cannot be deleted; drafts can.
+- `publishedAt` is set server-side on the Draft→Live transition and is **permanent**. `archivedAt` is set server-side on Live→Archived and is **permanent**.
+- `currentVersion` is `null` while the form is in draft (no versions published yet); becomes `1` on first publish, advances on each subsequent publish (Phase 4+).
+- **Phrase picker scoping** (v1.4): the designer and runtime filter the phrase library by `phrase.sports ∋ form.sport` OR `phrase.sports == []`. UX filter only, not server-enforced.
+- **Sentiments subset** (v1.4): a form's `sentiments` array MAY restrict to a subset of `{+, =, -}`; MAY NOT extend the enum.
 - **Computed-metric input dependency check (HARD ERROR at publish):** for every metric in `metricInputs[]` with `formula != null`, every referenced metric must also be in `metricInputs[]` of the same version. Publish refuses otherwise with: *"Form includes computed metric `rsi` which references `cmj_contact_time`. Add `cmj_contact_time` to this form's metric inputs, or remove `rsi`."*
 
 ### 2.5 `rosters.json`
@@ -465,6 +485,8 @@ The Blob storage is fronted by these endpoints. All under `/api/`.
 
 **Owner stamping (ADR-0003):** every write endpoint resolves a `principal` (currently the hard-coded constant `OWNER`; later, the session email) and stamps `createdBy`/`updatedBy`/`updatedAt` server-side. Client-supplied values for these fields are silently overwritten. This shapes data for the eventual auth migration so no back-fill is required.
 
+**Save model (ADR-0004):** the Phase 1 designer autosaves draft edits with an 800ms debounce. Every debounce fire issues a full-collection `PUT /api/registry` for `name=forms`. State transitions (publish, archive, clone-as-draft, delete-draft) are explicit user actions — separate endpoints in Phase 2+, or separate `action` payloads on `PUT /api/registry` in Phase 1. Designer URL grammar: `form-designer.html#draft/<slug>`, `#live/<slug>`, `#archived/<slug>`, `#new`.
+
 **Internal-tool simplification:** no auth on these endpoints in v1 — the deploy URL is private knowledge. Open access = shared bearer token before any external coach is given the URL.
 
 ---
@@ -585,7 +607,8 @@ To keep v1 small, these are explicitly out of scope and will be added as named a
 
 ## 8. Sign-off
 
-This contract is **locked** as v1.3 on 2026-05-26 by Daniel Gordon. After lock, no schema field may change without a contract version bump and a written migration plan.
+This contract is **locked** as v1.4 on 2026-05-27 by Daniel Gordon. After lock, no schema field may change without a contract version bump and a written migration plan.
 
 - [x] **Locked by Daniel Gordon on 2026-05-25 (v1.0 → v1.1 → v1.2 same day, all additive)**
 - [x] **v1.3 locked by Daniel Gordon on 2026-05-26 (owner stamping before auth, additive)**
+- [x] **v1.4 locked by Daniel Gordon on 2026-05-27 (form lifecycle states, save model, designer URL grammar, additive)**
