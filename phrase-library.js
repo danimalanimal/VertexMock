@@ -719,6 +719,7 @@ function runDupCheck() {
   const norm = normalizeText(item.text);
   const matches = state.phrases.filter((p) => {
     if (p.id === item.id) return false; // never self-match
+    if (p.status === 'archived') return false; // archived phrases are out of rotation
     if (p.attribute !== item.attribute) return false;
     if (p.sentiment !== item.sentiment) return false;
     return normalizeText(p.text) === norm;
