@@ -295,7 +295,9 @@ body.phrase-lib .pane-list .list-search input {
 /* ===== Honour the [hidden] attribute over display:flex base rules ===== */
 .editor-empty[hidden],
 .editor-body[hidden],
-.dup-warn[hidden] {
+.dup-warn[hidden],
+.editor-actions .btn[hidden],
+.preview-content[hidden] {
   display: none !important;
 }
 
