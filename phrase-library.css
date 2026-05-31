@@ -10,6 +10,18 @@
    list region scrolling internally (so filters + search + bulk bar stay
    pinned at the top). Override here.
 */
+body.phrase-lib .designer-shell {
+  /* Pin every grid row to the viewport-derived shell height so children
+     can't push it taller. Without this, the 990-row <ul> expands the
+     row and the whole shell grows with it. */
+  grid-template-rows: 100%;
+  max-height: calc(100vh - 56px);
+  overflow: hidden;
+}
+body.phrase-lib .pane {
+  max-height: calc(100vh - 56px);
+  min-height: 0;
+}
 body.phrase-lib .pane-list {
   display: flex;
   flex-direction: column;
