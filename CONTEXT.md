@@ -22,7 +22,7 @@ The shared language for this project. When a term here conflicts with how it get
 |---|---|---|
 | **Attribute** | A category in the form's tile grid (Technical, Tactical, Physical, …). Belongs to the shared `attributes.json` registry. | *Metric*. Attributes are qualitative; metrics are numeric. |
 | **Sentiment** | One of `+`, `=`, `-`. The closed set; a Form may opt out of some but not extend. | Coach rating (that's a `rating` *Metric kind*). |
-| **Phrase** | A reusable text snippet keyed by (attribute, sentiment). Tagged on entries. Belongs to `phrases.json`. | *Note* — phrases are pre-baked library items; notes are freeform per-entry. |
+| **Phrase** | A reusable text snippet keyed by (attribute, sentiment). Tagged on entries. Belongs to `phrases.json`. Carries `sports[]`: an empty array means *applies to all sports* (parallels `rosterId: null` on a Form). | *Note* — phrases are pre-baked library items; notes are freeform per-entry. |
 | **Metric** | A typed numeric measurement (`cmj_height`, `back_squat_1rm`). Belongs to `metrics.json`. | *Attribute*. |
 | **Direct metric** | A Metric where the coach enters the value at runtime. `formula: null`. | *Computed metric*. |
 | **Computed metric** | A Metric whose value is derived at runtime from other metrics on the same form via `formula`. Read-only — coaches can't override. | *Direct metric*. |
@@ -86,6 +86,7 @@ If you find yourself wanting to mutate something in the first list, the answer i
 
 ## Cross-cutting decisions
 
+- **Lifecycle scope:** Forms have a one-way lifecycle (Draft → Live → Archived, see ADR-0004) because publication is a commitment — entries get logged against Live forms. **All other registries** (attributes, phrases, metrics, rosters, coaches) use a reversible `status: "active" | "archived"` toggle. Archive there just hides from designer/runtime pickers; entries that already reference the item retain their snapshot. Do not generalise the form lifecycle to other registries.
 - **Storage:** Vercel Blob, private. Registries are JSON (overwrite). Results are JSONL (append daily).
 - **Auth:** None in v1. Internal tool, single writer. Despite no auth, every writable record carries server-stamped `createdBy` / `updatedBy` / `updatedAt` (ADR-0003) so the eventual auth migration is a one-line change with zero data back-fill.
 - **Voiding entries:** Not supported in v1. Will be added as a `type: void` Entry pointing to an original `id` if needed.
@@ -104,5 +105,6 @@ If you find yourself wanting to mutate something in the first list, the answer i
 - ❌ "Compare these CMJ heights across the cohort" without checking sources first — a force-plate reading and a phone-pocket reading aren't directly comparable. Filter by `source` or flag the mismatch.
 - ❌ "We'll add `createdBy` once auth lands" — every writable record must be owner-stamped from day one (ADR-0003). Adding it later means back-filling guessed values.
 - ❌ "Client sends `createdBy` in the request body" — owner fields are server-stamped only. Anything the client supplies is silently overwritten.
+- ❌ "Client mints the phrase id locally before save" — ids are server-stamped on PUT for items where `id == null` (ADR-0005). Client-supplied ids for new items are silently overwritten. The client adopts the canonical `data.items[]` from the PUT response.
 - ❌ "Unpublish this form back to draft" — lifecycle is one-way (ADR-0004). Clone as draft instead.
 - ❌ "Delete this Live form" — Live and Archived forms cannot be deleted, only state-transitioned. Drafts can be deleted (zero entries by definition).

@@ -1,14 +1,19 @@
 // Vercel serverless function — registry read/write.
 //
 // Contract: FORM_DESIGNER_CONTRACT.md v1.4 §5
+// Related ADRs: ADR-0003 (owner stamping), ADR-0005 (server-side id minting)
 //
 // GET  /api/registry?name=forms|attributes|phrases|metrics|rosters|coaches|sports
 //      Returns the registry's full JSON. 404 if not yet created; the client
 //      treats 404 as "empty registry, will be created on first PUT."
 //
 // PUT  /api/registry  body: { name, data }
-//      Full-overwrite write. Server stamps createdBy/updatedBy/updatedAt on
-//      every item in data.items (ADR-0003 owner stamping).
+//      Full-overwrite write. Server stamps:
+//        - id            for items with id == null/missing (ADR-0005)
+//        - createdBy/At  only if missing (ADR-0003)
+//        - updatedBy/At  always overwritten
+//      Response includes the canonical data.items[] so the client can adopt
+//      newly minted ids.
 //
 // Auth: none in v1 (internal tool, single writer). Owner is hard-coded.
 // When real auth lands, replace resolvePrincipal() — no data migration needed.
@@ -36,6 +41,15 @@ const REGISTRIES = new Set([
 function blobPath(name) {
   return `registries/${name}.json`;
 }
+
+// ─── Id-mint prefixes (ADR-0005) ─────────────────────────────────────────────
+// Registries whose items get server-minted ids in the format <prefix>_<YYYY>_<6 digits>.
+// Registries absent from this map have author-chosen ids (forms = slug, attributes = key,
+// metrics = key, rosters = id, coaches = id, sports = enum value).
+const ID_PREFIXES = {
+  phrases: 'p',
+  // Future: athletes: 'a', entries: 'e' (entries mint server-side at runtime, different path).
+};
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
@@ -119,10 +133,12 @@ async function handlePut(req, res) {
 
   const principal = resolvePrincipal(req);
   const nowIso = new Date().toISOString();
-  const nowMs = Date.now();
+  const currentYear = new Date().getUTCFullYear();
+  const idPrefix = ID_PREFIXES[name] || null;
 
   // Stamp every item in data.items[] (server-side; client values are overwritten).
-  const stamped = stampItems(data, principal, nowIso, nowMs);
+  // Mints ids for items with id == null/missing when the registry has an id prefix.
+  const stamped = stampItems(data, principal, nowIso, idPrefix, currentYear);
 
   // Write to blob. Store is configured private-access, so put() must declare it.
   // GET handler reads via the URL returned by head() (signed when private).
@@ -135,6 +151,7 @@ async function handlePut(req, res) {
     cacheControlMaxAge: 0,
   });
 
+  // Response includes the canonical data so the client can adopt minted ids (ADR-0005 §3).
   return res.status(200).json({
     name,
     ok: true,
@@ -144,6 +161,7 @@ async function handlePut(req, res) {
       url: result.url,
       size: result.size,
     },
+    data: stamped,
   });
 }
 
@@ -154,8 +172,10 @@ async function handlePut(req, res) {
 // - updatedBy is always set (overwrites client value).
 // - updatedAt is always set (overwrites client value).
 // - createdAt is set only if missing (PERMANENT).
+// - id is minted only if missing AND the registry has an idPrefix (ADR-0005).
+//   Items with an existing id keep it (id is permanent).
 // Non-item containers (registries that aren't arrays) just get top-level stamps.
-function stampItems(data, principal, nowIso, _nowMs) {
+function stampItems(data, principal, nowIso, idPrefix, currentYear) {
   const out = { ...data };
 
   // Top-level stamps for the registry as a whole
@@ -163,9 +183,20 @@ function stampItems(data, principal, nowIso, _nowMs) {
   out.updatedBy = principal;
 
   if (Array.isArray(out.items)) {
+    // First pass: compute the current max suffix for this year, so multiple new
+    // items in the same PUT mint sequentially without collision.
+    let counter = idPrefix ? maxSuffixForYear(out.items, idPrefix, currentYear) : 0;
+
     out.items = out.items.map((item) => {
       if (!item || typeof item !== 'object') return item;
       const next = { ...item };
+
+      // Mint id if missing (only for registries with an id prefix).
+      if (idPrefix && (next.id == null || next.id === '')) {
+        counter += 1;
+        next.id = formatId(idPrefix, currentYear, counter);
+      }
+
       if (!next.createdAt) next.createdAt = nowIso;
       if (!next.createdBy) next.createdBy = principal;
       next.updatedAt = nowIso;
@@ -175,6 +206,27 @@ function stampItems(data, principal, nowIso, _nowMs) {
   }
 
   return out;
+}
+
+// ─── Id minting (ADR-0005) ───────────────────────────────────────────────────
+// Scans items[] for ids matching `<prefix>_<year>_NNNNNN`, returns the max
+// numeric suffix found (0 if none).
+function maxSuffixForYear(items, prefix, year) {
+  const re = new RegExp('^' + prefix + '_' + year + '_(\\d{6})$');
+  let max = 0;
+  for (const item of items) {
+    if (!item || typeof item.id !== 'string') continue;
+    const m = item.id.match(re);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (n > max) max = n;
+    }
+  }
+  return max;
+}
+
+function formatId(prefix, year, counter) {
+  return `${prefix}_${year}_${String(counter).padStart(6, '0')}`;
 }
 
 // Manual JSON body reader (fallback when Vercel didn't auto-parse).
