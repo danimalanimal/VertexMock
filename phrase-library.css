@@ -4,6 +4,30 @@
    Only contains rules unique to the library.
    ============================================================ */
 
+/* ===== Phrase-library pane-list overrides =====
+   The base .pane has padding + overflow-y:auto so the whole pane scrolls
+   as one. For the library's list we want a fixed pane height with the
+   list region scrolling internally (so filters + search + bulk bar stay
+   pinned at the top). Override here.
+*/
+body.phrase-lib .pane-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+body.phrase-lib .pane-list .pane-head { padding: 18px 16px 8px; }
+body.phrase-lib .pane-list .list-search { padding: 0 16px 8px; }
+body.phrase-lib .pane-list .list-search input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font: 500 12px var(--font-mono);
+  padding: 6px 10px;
+}
+
 /* ===== Filter row ===== */
 .filter-row {
   display: flex;
@@ -89,18 +113,22 @@
   border-bottom: 1px solid var(--blue);
   font: 500 12px var(--font-mono);
 }
+.bulk-toolbar[hidden] { display: none; }
 .bulk-count {
   color: var(--blue);
   margin-right: 6px;
 }
 
-/* ===== Phrase list items ===== */
+/* ===== Phrase list items =====
+   Scrolls inside the list pane while filters + search + bulk bar stay pinned.
+*/
 .phrase-list-items {
   list-style: none;
   padding: 0;
   margin: 0;
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .phrase-list-items li {
   display: flex;
