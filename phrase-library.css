@@ -1,0 +1,261 @@
+/* ============================================================
+   phrase-library.css — Phase 2 phrase library styling.
+   Inherits the designer's three-pane layout via form-designer.css.
+   Only contains rules unique to the library.
+   ============================================================ */
+
+/* ===== Filter row ===== */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  font: 500 12px var(--font-mono);
+}
+.filter-group {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  position: relative;
+}
+.filter-group > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+.filter-group > summary::-webkit-details-marker { display: none; }
+.filter-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+}
+.filter-current {
+  color: var(--text);
+}
+.filter-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #0a0e15;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 4px;
+  z-index: 5;
+  min-width: 240px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.filter-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.filter-options label:hover { background: rgba(255, 255, 255, 0.04); }
+.filter-options input[type="checkbox"] { accent-color: var(--blue); }
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+  font: 500 12px var(--font-mono);
+  color: var(--muted);
+}
+.filter-toggle input { accent-color: var(--blue); }
+
+/* ===== Bulk toolbar ===== */
+.bulk-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(89, 183, 255, 0.06);
+  border-bottom: 1px solid var(--blue);
+  font: 500 12px var(--font-mono);
+}
+.bulk-count {
+  color: var(--blue);
+  margin-right: 6px;
+}
+
+/* ===== Phrase list items ===== */
+.phrase-list-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+.phrase-list-items li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: background 120ms var(--ease-out);
+}
+.phrase-list-items li:hover { background: rgba(255, 255, 255, 0.03); }
+.phrase-list-items li.is-selected {
+  background: rgba(89, 183, 255, 0.08);
+  border-left: 2px solid var(--blue);
+  padding-left: 14px;
+}
+.phrase-list-items li.is-archived .phrase-text {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 255, 255, 0.2);
+}
+.phrase-list-items input.row-check {
+  margin-top: 3px;
+  accent-color: var(--blue);
+  flex: 0 0 auto;
+}
+.phrase-text {
+  font: 500 13px/1.4 var(--font-mono);
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+.phrase-meta {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.phrase-meta .meta-chip {
+  display: inline-block;
+  padding: 1px 6px;
+  font: 500 10px var(--font-mono);
+  letter-spacing: 0.06em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.02);
+}
+.phrase-meta .meta-chip.sent-pos { color: var(--green); border-color: var(--green); }
+.phrase-meta .meta-chip.sent-neu { color: var(--amber); border-color: var(--amber); }
+.phrase-meta .meta-chip.sent-neg { color: var(--red); border-color: var(--red); }
+.phrase-meta .meta-chip.attr { color: var(--violet); border-color: var(--violet); }
+.phrase-meta .meta-chip.sport { color: var(--blue); border-color: var(--blue); }
+.phrase-meta .meta-chip.universal { color: var(--text); border-color: var(--text); }
+
+/* ===== List foot ===== */
+.list-foot {
+  padding: 8px 16px;
+  border-top: 1px solid var(--line);
+  font: 500 11px var(--font-mono);
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ===== Editor — sports chip list ===== */
+.chip-list[data-field="sports"] {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+}
+.chip-list[data-field="sports"] li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font: 500 12px var(--font-mono);
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: rgba(89, 183, 255, 0.08);
+  color: var(--blue);
+}
+.chip-list[data-field="sports"] li button {
+  background: transparent;
+  border: none;
+  color: var(--blue);
+  cursor: pointer;
+  font: 700 14px var(--font-mono);
+  line-height: 1;
+  padding: 0 0 0 2px;
+}
+.chip-list[data-field="sports"] li button:hover { color: var(--red); }
+.chip-list[data-field="sports"]:empty::before {
+  content: "(empty — appears in all sports)";
+  color: var(--muted);
+  font: 500 12px var(--font-mono);
+  font-style: italic;
+}
+.sport-picker select { max-width: 240px; }
+
+/* ===== Dup-text warning ===== */
+.dup-warn {
+  color: var(--amber);
+  background: rgba(255, 191, 102, 0.05);
+  border: 1px solid var(--amber);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+.dup-warn ul.dup-list {
+  list-style: none;
+  padding: 6px 0 6px 0;
+  margin: 0;
+}
+.dup-warn ul.dup-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+.dup-warn ul.dup-list li button {
+  background: transparent;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font: 500 11px var(--font-mono);
+  cursor: pointer;
+}
+.dup-warn ul.dup-list li button:hover {
+  background: var(--amber);
+  color: #000;
+}
+
+/* ===== Editor status pills ===== */
+.status-pill[data-pill="status"] {
+  background: var(--green);
+  color: #000;
+}
+.status-pill[data-pill="status"].is-archived {
+  background: var(--muted);
+  color: #000;
+}
+.status-pill[data-pill="id"] {
+  font: 500 10px var(--font-mono);
+}
+
+/* ===== Disabled (immutable) fields ===== */
+.editor-body input:disabled,
+.editor-body textarea:disabled,
+.editor-body select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

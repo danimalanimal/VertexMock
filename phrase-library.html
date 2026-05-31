@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Vertex · Phrase Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="form-designer.css" />
+  <link rel="stylesheet" href="phrase-library.css" />
+</head>
+<body class="designer phrase-lib">
+
+  <header class="designer-topbar">
+    <a class="brand" href="/index.html">
+      <span class="brand-mark">VERTEX</span>
+      <span class="brand-sub">PHRASE LIBRARY</span>
+    </a>
+    <div class="topbar-spacer"></div>
+    <div class="save-indicator" data-state="idle">
+      <span class="save-dot"></span>
+      <span class="save-text">Ready</span>
+    </div>
+    <nav class="topbar-tabs" aria-label="Library panes (mobile)">
+      <button class="tab-btn" data-tab="list" aria-pressed="true">List</button>
+      <button class="tab-btn" data-tab="editor" aria-pressed="false">Editor</button>
+      <button class="tab-btn" data-tab="preview" aria-pressed="false">Where used</button>
+    </nav>
+  </header>
+
+  <main class="designer-shell">
+
+    <!-- ============= LEFT PANE: phrase list ============= -->
+    <aside class="pane pane-list" data-pane="list" aria-label="Phrases">
+      <div class="pane-head">
+        <h2 class="pane-title">Phrases</h2>
+        <button class="btn btn-primary btn-new" type="button" data-action="new-phrase" title="New phrase">
+          + New
+        </button>
+      </div>
+
+      <div class="list-search">
+        <input type="search" id="list-search" placeholder="Search text…" autocomplete="off" />
+      </div>
+
+      <!-- Filter chips -->
+      <div class="filter-row" aria-label="Filters">
+        <details class="filter-group">
+          <summary><span class="filter-label">Attribute</span><span class="filter-current" data-filter-summary="attribute">All</span></summary>
+          <div class="filter-options" data-filter="attribute"></div>
+        </details>
+        <details class="filter-group">
+          <summary><span class="filter-label">Sentiment</span><span class="filter-current" data-filter-summary="sentiment">All</span></summary>
+          <div class="filter-options" data-filter="sentiment">
+            <label><input type="checkbox" value="+" /><span>+</span></label>
+            <label><input type="checkbox" value="=" /><span>=</span></label>
+            <label><input type="checkbox" value="-" /><span>–</span></label>
+          </div>
+        </details>
+        <details class="filter-group">
+          <summary><span class="filter-label">Sport</span><span class="filter-current" data-filter-summary="sport">All</span></summary>
+          <div class="filter-options" data-filter="sport"></div>
+        </details>
+        <label class="filter-toggle">
+          <input type="checkbox" id="show-archived" />
+          <span>Show archived <span class="muted" data-count="archived">(0)</span></span>
+        </label>
+      </div>
+
+      <!-- Bulk action toolbar (appears when ≥2 selected) -->
+      <div class="bulk-toolbar" hidden>
+        <span class="bulk-count"><span data-bulk-count>0</span> selected</span>
+        <button class="btn btn-ghost btn-small" type="button" data-action="bulk-archive">Archive</button>
+        <button class="btn btn-ghost btn-small" type="button" data-action="bulk-unarchive">Unarchive</button>
+        <button class="btn btn-ghost btn-small" type="button" data-action="bulk-tag-sport">+ Tag sport…</button>
+        <button class="btn btn-ghost btn-small" type="button" data-action="bulk-untag-sport">– Untag sport…</button>
+        <button class="btn btn-ghost btn-small" type="button" data-action="bulk-clear">Clear</button>
+      </div>
+
+      <ul class="list-items phrase-list-items" data-list="phrases" aria-label="Phrase list"></ul>
+      <p class="list-empty" hidden>No phrases match the current filters.</p>
+
+      <div class="list-foot">
+        <span class="list-count"><span data-count="visible">0</span> visible · <span data-count="total">0</span> total</span>
+      </div>
+    </aside>
+
+    <!-- ============= MIDDLE PANE: editor ============= -->
+    <section class="pane pane-editor" data-pane="editor" aria-label="Editor">
+      <div class="editor-empty">
+        <h2>Pick a phrase, or create one</h2>
+        <p class="muted">The editor will appear here once you select a phrase on the left.</p>
+      </div>
+
+      <article class="editor-body" hidden>
+
+        <header class="editor-header">
+          <div class="editor-status-strip">
+            <span class="status-pill" data-pill="status">ACTIVE</span>
+            <span class="status-pill status-pill-ghost" data-pill="id">—</span>
+          </div>
+          <div class="editor-actions">
+            <button class="btn btn-ghost" type="button" data-action="archive" hidden>Archive</button>
+            <button class="btn btn-ghost" type="button" data-action="unarchive" hidden>Unarchive</button>
+          </div>
+        </header>
+
+        <!-- 1. Text (permanent post-create) -->
+        <section class="editor-section" data-section="text">
+          <h3 class="editor-section-title">Text</h3>
+          <div class="field">
+            <label for="p-text">Phrase text <span class="muted" data-text-hint>(permanent once saved · Option 1 immutability)</span></label>
+            <textarea id="p-text" data-field="text" rows="2" maxlength="240" placeholder="Clean catch-and-shoot footwork on the move"></textarea>
+            <p class="field-hint dup-warn" hidden>
+              <strong>⚠ Similar existing phrases</strong> in this attribute + sentiment:
+              <ul class="dup-list"></ul>
+              <span class="muted">You can save anyway — this is just a check.</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- 2. Attribute + Sentiment (permanent post-create) -->
+        <section class="editor-section" data-section="classification">
+          <h3 class="editor-section-title">Classification <span class="muted">(permanent)</span></h3>
+          <div class="field field-row">
+            <div class="field-half">
+              <label for="p-attribute">Attribute</label>
+              <select id="p-attribute" data-field="attribute"></select>
+            </div>
+            <div class="field-half">
+              <label for="p-sentiment">Sentiment</label>
+              <select id="p-sentiment" data-field="sentiment">
+                <option value="+">+</option>
+                <option value="=">=</option>
+                <option value="-">–</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Sports (editable) -->
+        <section class="editor-section" data-section="sports">
+          <h3 class="editor-section-title">Sports</h3>
+          <p class="editor-section-hint">
+            Which sports' pickers this phrase appears in. <strong>Leave empty</strong> to surface in every sport.
+          </p>
+          <ul class="chip-list" data-field="sports" aria-label="Sport tags"></ul>
+          <div class="sport-picker">
+            <select data-action="add-sport">
+              <option value="">+ Add sport…</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Provenance footer -->
+        <footer class="editor-footer">
+          <dl class="provenance">
+            <div><dt>Created</dt><dd data-meta="createdAt">—</dd><dt>by</dt><dd data-meta="createdBy">—</dd></div>
+            <div><dt>Updated</dt><dd data-meta="updatedAt">—</dd><dt>by</dt><dd data-meta="updatedBy">—</dd></div>
+          </dl>
+        </footer>
+
+      </article>
+    </section>
+
+    <!-- ============= RIGHT PANE: preview / where used ============= -->
+    <aside class="pane pane-preview" data-pane="preview" aria-label="Where used">
+      <div class="pane-head">
+        <h2 class="pane-title">Where used</h2>
+        <span class="preview-hint muted">Forms whose attribute + sport surface this phrase.</span>
+      </div>
+      <div class="preview-stage" id="preview-stage">
+        <div class="preview-empty">
+          <p class="muted">Select a phrase to see which forms surface it.</p>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ============= Bulk sport-tag modal ============= -->
+  <dialog class="modal" id="bulk-sport-modal">
+    <form method="dialog" class="modal-card">
+      <header class="modal-head"><h3 data-slot="title">Tag selected phrases with sport</h3></header>
+      <div class="field">
+        <label for="bulk-sport-select">Sport</label>
+        <select id="bulk-sport-select" required></select>
+      </div>
+      <p class="muted" data-slot="hint">Applies to all selected phrases. Sports already present are unchanged.</p>
+      <footer class="modal-foot">
+        <button class="btn btn-ghost" value="cancel" type="submit">Cancel</button>
+        <button class="btn btn-primary" value="ok" type="submit">Apply</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============= Archive confirm modal ============= -->
+  <dialog class="modal" id="confirm-archive-modal">
+    <form method="dialog" class="modal-card">
+      <header class="modal-head"><h3>Archive this phrase?</h3></header>
+      <p>
+        <code data-slot="id">…</code> will stop appearing in coach pickers.
+        You can unarchive it at any time.
+      </p>
+      <footer class="modal-foot">
+        <button class="btn btn-ghost" value="cancel" type="submit">Cancel</button>
+        <button class="btn btn-primary" value="ok" type="submit">Archive</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script type="module" src="phrase-library.js"></script>
+</body>
+</html>
