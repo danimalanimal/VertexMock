@@ -88,24 +88,35 @@
   /* ====================================================================
      SALES & MARKETING STRATEGY
      ==================================================================== */
-  const salesState = { scenario: 'mid', tier: M.defaultTier, inputs: JSON.parse(JSON.stringify(M.pricing)) };
+  const srcIds = Object.keys(M.sources);
+  const srcNo = (id) => srcIds.indexOf(id) + 1;
+  // Citation markers: numbered links into the Sources list, plus the short
+  // source name so the number never has to be looked up during a demo.
+  const cite = (ids, withShort = false) => (ids || []).map((id) => {
+    const s = M.sources[id]; if (!s) return '';
+    return `<a class="org-cite ${s.verified ? 'org-cite-ok' : ''}" href="#src-${esc(id)}" title="${esc(s.label)}" data-src="${esc(id)}">[${srcNo(id)}]${withShort ? ' ' + esc(s.short) : ''}</a>`;
+  }).join(' ');
+  const srcLinks = (ids) => (ids || []).map((id) => { const s = M.sources[id]; return s ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.short)}</a>` : ''; }).filter(Boolean).join(' · ');
 
-  function tierSizes(scenario) {
-    return M.tiers.map((t, i) => {
-      const reach = t.reach[scenario];
-      const prev = i > 0 ? M.tiers[i - 1].reach[scenario] : 0;
-      const value = Math.max(0, reach - prev);
-      const a = Math.round(value * t.male);
-      return { label: t.label, value, a, b: value - a, info: `${t.status} · reach ${fmtInt(reach)}`, key: t.key, reach };
-    });
-  }
+  const salesState = {
+    scenario: 'mid',
+    tier: M.defaultTier,
+    adoption: Object.fromEntries(M.tiers.map((t) => [t.key, t.adoption])),
+    inputs: Object.fromEntries(M.models.map((m) => [m.type, { ...m.defaults }])),
+  };
+
+  const tierVal = (t, scenario = salesState.scenario) => t.value[scenario];
+  const tierSizes = (scenario) => M.tiers.map((t) => ({ label: t.label, value: tierVal(t, scenario), info: `${t.status} · ${t.coaching}` }));
+  const marketTotal = (scenario = salesState.scenario) => M.tiers.reduce((s, t) => s + tierVal(t, scenario), 0);
+  const vertexAthletes = (scenario = salesState.scenario) => M.tiers.reduce((s, t) => s + tierVal(t, scenario) * (salesState.adoption[t.key] / 100), 0);
 
   function renderSales(view) {
     const head = el('header', 'org-head', `
       <div>
-        <p class="kicker">Sales &amp; Marketing Strategy · ${esc(M.label)}</p>
-        <h1>Addressable market</h1>
+        <p class="kicker">Sales &amp; Marketing Strategy · ${esc(M.label)} · ${esc(M.region)}</p>
+        <h1>${esc(M.title)}</h1>
         <p>${esc(M.summary)}</p>
+        ${M.positioning ? `<ul class="org-positioning">${M.positioning.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
       </div>
       <div class="org-head-aside">
         <span class="label">Estimate position</span>
@@ -114,42 +125,50 @@
           <button type="button" role="radio" data-s="mid" aria-checked="${salesState.scenario === 'mid'}">Mid</button>
           <button type="button" role="radio" data-s="high" aria-checked="${salesState.scenario === 'high'}">High</button>
         </div>
+        <p class="org-note" style="margin:8px 0 0;max-width:260px">Verified figures are AusPlay 2025 counts; Low / High move the derived and estimated tiers and give verified tiers a ±25% sampling band.</p>
       </div>`);
     view.append(head);
 
-    view.append(el('div', 'org-stats', M.facts.map((f) => stat(f.label, esc(f.value), esc(f.hint))).join('')));
+    // --- headline facts, each with its citation ---
+    view.append(el('div', 'org-stats org-facts', M.facts.map((f) => stat(f.label, esc(f.value), `${esc(f.hint)}<span class="org-fact-cite">${f.tone === 'ok' ? pill('Verified', 'ok') : ''} ${cite(f.cite, true)}</span>`, f.tone || '')).join('')));
 
     // --- pyramid + tier list ---
     const grid = el('div', 'org-grid org-section');
     const pyCard = el('article', 'card span-8 org-pyramid-wrap');
-    pyCard.innerHTML = cardHead('Participation pyramid', 'VERTEBRA · data-x-pyramid');
+    pyCard.innerHTML = cardHead(`${esc(M.region)} participation — real numbers`, 'VERTEBRA · data-x-pyramid · data-labels="count"');
     const host = el('div');
-    host.setAttribute('data-x-pyramid', JSON.stringify({ series: M.series, tiers: tierSizes(salesState.scenario) }));
+    host.setAttribute('data-x-pyramid', JSON.stringify({ tiers: tierSizes(salesState.scenario) }));
     host.setAttribute('data-mode', 'ziggurat');
-    pyCard.append(host, el('p', 'org-note', 'Footprint area is the share of people at or above each tier. Click a tier (or use the list) to make it the target segment for the financial models; drag the ziggurat to turn it; keys 1 2 3 switch views.'));
+    host.setAttribute('data-labels', 'count');
+    pyCard.append(host, el('p', 'org-note', 'Every tier is an exclusive group of people — no double counting — so the labels are headcounts, not percentages. Ziggurat: footprint area is the running total to that rung. Pyramid: each band\u2019s area is its own headcount. Click a tier (or the list) to pin it; drag the ziggurat to turn it; keys 1 and 3 switch views.'));
     grid.append(pyCard);
 
     const tierCard = el('article', 'card span-4 org-card-pad');
-    tierCard.innerHTML = cardHead('Tiers', 'apex → base') + '<div class="org-tiers" id="tierList"></div><div class="org-tier-detail" id="tierDetail"></div>';
+    tierCard.innerHTML = cardHead('Tiers', 'apex → base · exclusive counts') + '<div class="org-tiers" id="tierList"></div><div class="org-tier-detail" id="tierDetail"></div>';
     grid.append(tierCard);
     view.append(grid);
 
     const api = window.vertebraX.pyramid(host);
+    api.mode('ziggurat');
+    // The kit's own toggle says "terrace" for its area-true silhouette; this
+    // audience knows it as the pyramid. Rename the button text only (no class
+    // changes — see vendor/vertebra/AGENTS.md).
+    host.querySelectorAll('.xpy-modes button, .xpy-mode button, button').forEach((b) => { if (/^terrace$/i.test(b.textContent.trim())) b.textContent = 'pyramid'; });
 
     function paintTiers() {
-      const sizes = tierSizes(salesState.scenario);
-      $('#tierList').innerHTML = sizes.map((t, i) => {
-        const def = M.tiers[i];
+      const total = marketTotal();
+      $('#tierList').innerHTML = M.tiers.map((def, i) => {
+        const v = tierVal(def);
         return `<button type="button" class="org-tier" data-key="${def.key}" aria-pressed="${def.key === salesState.tier}">
           <span class="org-tier-idx">${String(i + 1).padStart(2, '0')}</span>
-          <span><span class="org-tier-name">${esc(def.label)}</span><span class="org-tier-sub">${pill(def.status, def.statusTone)} ${esc(def.short)}</span></span>
-          <span class="org-tier-val">${fmtInt(t.reach)}<small>reach · ${fmtInt(t.value)} in tier</small></span></button>`;
+          <span><span class="org-tier-name">${esc(def.label)}</span><span class="org-tier-sub">${pill(def.status, def.statusTone)} ${cite(def.cite)} · ${esc(def.coaching)}</span></span>
+          <span class="org-tier-val">${fmtInt(v)}<small>${fmtPct(v / total)} of ${fmtInt(total)}</small></span></button>`;
       }).join('');
-      const i = M.tiers.findIndex((t) => t.key === salesState.tier);
-      const def = M.tiers[i], sz = sizes[i];
-      $('#tierDetail').innerHTML = `<h4>Target segment · ${esc(def.label)}</h4><p>${esc(def.basis)}</p>
-        <dl class="org-kv" style="margin-top:8px"><dt>Reach</dt><dd>${fmtInt(sz.reach)} people (${fmtInt(def.reach.low)}–${fmtInt(def.reach.high)})</dd>
-        <dt>${esc(M.series[0])}</dt><dd>${fmtPct(def.male)}</dd><dt>Confidence</dt><dd>${esc(def.status)}</dd></dl>`;
+      const def = M.tiers.find((t) => t.key === salesState.tier);
+      $('#tierDetail').innerHTML = `<h4>${esc(def.label)}</h4><p>${esc(def.basis)}</p>
+        <dl class="org-kv" style="margin-top:8px"><dt>People</dt><dd><strong>${fmtInt(tierVal(def))}</strong> (${fmtInt(def.value.low)} low · ${fmtInt(def.value.high)} high)</dd>
+        <dt>Women</dt><dd>≈ ${fmtPct(def.female)}</dd><dt>Coaching</dt><dd>${esc(def.coaching)}</dd><dt>Status</dt><dd>${pill(def.status, def.statusTone)}</dd>
+        <dt>Source</dt><dd>${srcLinks(def.cite)}</dd></dl>`;
       $('#tierList').querySelectorAll('.org-tier').forEach((b) => b.addEventListener('click', () => {
         const idx = M.tiers.findIndex((t) => t.key === b.dataset.key);
         api.select(idx); // observer below routes it back into the model
@@ -169,62 +188,89 @@
       if (idx < 0 || M.tiers[idx].key === lastPinned) return;
       lastPinned = M.tiers[idx].key;
       salesState.tier = lastPinned;
-      paintTiers(); paintFinancials();
+      paintTiers();
+      const row = document.querySelector(`#adoptionPanel [data-tier="${lastPinned}"]`);
+      document.querySelectorAll('#adoptionPanel .org-adopt-row').forEach((r) => r.classList.toggle('is-pinned', r === row));
     }).observe(read, { childList: true, characterData: true, subtree: true });
 
     $('#scenario').addEventListener('click', (e) => {
       const b = e.target.closest('button[data-s]'); if (!b) return;
       salesState.scenario = b.dataset.s;
       $('#scenario').querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
-      api.set({ series: M.series, tiers: tierSizes(salesState.scenario) });
+      api.set({ tiers: tierSizes(salesState.scenario) });
       lastPinned = null;
       api.select(M.tiers.findIndex((t) => t.key === salesState.tier));
       paintTiers(); paintFinancials();
     });
 
-    // --- financials ---
+    // --- financials: control panel (adoption by tier) + three models ---
     const fin = el('section', 'org-section');
     fin.innerHTML = cardHead('Notional financials — three pricing models', 'AUD · ex-GST · illustrative only') +
       '<div class="alert alert-warn" style="margin-bottom:12px"><strong>Notional.</strong> <span id="finLead"></span></div>' +
+      '<div class="org-grid" style="margin-bottom:14px"><article class="card span-12 org-card-pad org-adopt" id="adoptionPanel">' +
+        cardHead('Control panel — Vertex athletes by tier', 'share of each tier on Vertex by year 3') +
+        '<div class="org-adopt-presets" id="adoptPresets"><span class="label">Presets</span>' +
+          '<button type="button" class="btn btn-sm" data-preset="default">Base-first (default)</button>' +
+          '<button type="button" class="btn btn-sm" data-preset="even">Even 5% everywhere</button>' +
+          '<button type="button" class="btn btn-sm" data-preset="coached">Coached tiers only</button>' +
+          '<button type="button" class="btn btn-sm" data-preset="zero">Clear</button></div>' +
+        '<div class="org-adopt-grid" id="adoptRows"></div>' +
+        '<div class="org-adopt-total"><span class="label">Vertex athletes · year 3</span><strong id="adoptTotal"></strong><span class="small muted" id="adoptTotalHint"></span></div>' +
+      '</article></div>' +
       '<div class="org-models" id="models"></div>' +
-      '<div class="org-grid" style="margin-top:14px"><article class="card span-7 org-card-pad">' + cardHead('Revenue by year', 'ramp 35% · 70% · 100% of year-3 adoption') + '<div id="finChart"></div></article>' +
-      '<article class="card span-5 org-card-pad">' + cardHead('Side by side', 'year 3') + '<div class="table-wrap"><table class="table" id="finTable"></table></div><p class="org-note">Gross margin excludes sales, product and overheads; it is cost-to-serve only. Churn is applied as an average half-year effect on subscription revenue.</p></article></div>';
+      '<div class="org-grid" style="margin-top:14px"><article class="card span-7 org-card-pad">' + cardHead('Revenue by year', 'ramp 35% · 70% · 100% of the year-3 athlete count') + '<div id="finChart"></div></article>' +
+      '<article class="card span-5 org-card-pad">' + cardHead('Side by side', 'year 3') + '<div class="table-wrap"><table class="table" id="finTable"></table></div><p class="org-note">All three models are driven by the same athlete count from the control panel, so they compare like for like. Gross margin is cost-to-serve only — no sales, product or overheads. Churn is applied as an average half-year effect on subscription revenue.</p></article></div>';
     view.append(fin);
 
-    function model(key) {
-      const inp = salesState.inputs[key];
-      const tier = M.tiers.find((t) => t.key === salesState.tier);
-      const reach = tier.reach[salesState.scenario];
-      const years = D.ramp.map((r) => {
-        if (key === 'athlete') {
-          const athletes = reach * (inp.adoption / 100) * r;
-          const rev = athletes * inp.price * 12 * (1 - inp.churn / 200);
-          const cost = athletes * inp.costPerAthlete * 12;
-          return { athletes, rev, cost, units: athletes, unitLabel: 'athletes' };
-        }
-        if (key === 'club') {
-          const clubs = (reach / inp.perClub) * (inp.adoption / 100) * r;
-          const rev = clubs * (inp.licence + inp.coachSeats * inp.seatPrice);
-          const cost = clubs * inp.costPerClub;
-          return { athletes: clubs * inp.perClub, rev, cost, units: clubs, unitLabel: 'clubs' };
-        }
-        const assessed = reach * (inp.adoption / 100) * r;
-        const rev = assessed * inp.fee * inp.perYear;
-        const cost = assessed * inp.deliveryCost * inp.perYear;
-        return { athletes: assessed, rev, cost, units: assessed * inp.perYear, unitLabel: 'assessments' };
+    function paintAdoption() {
+      const rows = $('#adoptRows');
+      if (!rows.children.length) {
+        rows.innerHTML = M.tiers.map((t) => `<div class="org-adopt-row ${t.key === salesState.tier ? 'is-pinned' : ''}" data-tier="${t.key}">
+            <label for="adopt-${t.key}"><span class="org-adopt-name">${esc(t.short)}</span><span class="small muted org-adopt-size" data-out="size"></span></label>
+            <input id="adopt-${t.key}" type="range" min="0" max="40" step="0.5" value="${salesState.adoption[t.key]}" data-tier="${t.key}" aria-label="${esc(t.label)} share on Vertex" />
+            <output for="adopt-${t.key}" data-out="pct"></output><output data-out="people"></output>
+          </div>`).join('');
+        rows.querySelectorAll('input[type="range"]').forEach((r) => r.addEventListener('input', () => { salesState.adoption[r.dataset.tier] = parseFloat(r.value); paintFinancials(); }));
+        $('#adoptPresets').addEventListener('click', (e) => {
+          const b = e.target.closest('button[data-preset]'); if (!b) return;
+          const coached = new Set(['juniors', 'club', 'pt', 'commercial', 'gym', 'pro', 'nbl1', 'elite', 'rep']);
+          M.tiers.forEach((t) => {
+            salesState.adoption[t.key] = b.dataset.preset === 'default' ? t.adoption : b.dataset.preset === 'even' ? 5 : b.dataset.preset === 'coached' ? (coached.has(t.key) ? Math.max(t.adoption, 5) : 0) : 0;
+            rows.querySelector(`input[data-tier="${t.key}"]`).value = salesState.adoption[t.key];
+          });
+          paintFinancials();
+        });
+      }
+      M.tiers.forEach((t) => {
+        const row = rows.querySelector(`[data-tier="${t.key}"]`);
+        const v = tierVal(t), p = salesState.adoption[t.key];
+        row.querySelector('[data-out="size"]').textContent = `${fmtInt(v)} people`;
+        row.querySelector('[data-out="pct"]').textContent = p.toFixed(1).replace(/\.0$/, '') + '%';
+        row.querySelector('[data-out="people"]').textContent = fmtInt(v * p / 100);
       });
+      const n = vertexAthletes();
+      $('#adoptTotal').textContent = fmtInt(n);
+      $('#adoptTotalHint').textContent = `${fmtPct(n / marketTotal(), 1)} of ${fmtInt(marketTotal())} ${M.region} participants at the ${salesState.scenario} estimate`;
+    }
+
+    function model(m) {
+      const type = D.pricingModelTypes[m.type];
+      const inp = salesState.inputs[m.type];
+      const n3 = vertexAthletes();
+      const years = D.ramp.map((r) => { const n = n3 * r; const out = type.compute(n, inp); return { athletes: n, rev: out.rev, cost: out.cost, units: out.units, unitLabel: type.unitLabel }; });
       const y3 = years[2];
-      return { years, y3, cum: years.reduce((s, y) => s + y.rev, 0), margin: y3.rev ? (y3.rev - y3.cost) / y3.rev : 0, reach };
+      return { years, y3, cum: years.reduce((s, y) => s + y.rev, 0), margin: y3.rev ? (y3.rev - y3.cost) / y3.rev : 0 };
     }
 
     let finChart = null;
     function paintFinancials() {
-      const tier = M.tiers.find((t) => t.key === salesState.tier);
-      const reach = tier.reach[salesState.scenario];
-      $('#finLead').textContent = `Target segment: ${tier.label} — ${fmtInt(reach)} people at the ${salesState.scenario} estimate. Adoption, price and cost sliders are assumptions to be tested with the first clubs, not forecasts.`;
+      paintAdoption();
+      const n = vertexAthletes();
+      const top = [...M.tiers].sort((a, b) => tierVal(b) * salesState.adoption[b.key] - tierVal(a) * salesState.adoption[a.key])[0];
+      $('#finLead').textContent = `${fmtInt(n)} ${M.label.toLowerCase()} athletes on Vertex by year 3 at the ${salesState.scenario} estimate, most of them from "${top.label}". Adoption, price and cost sliders are assumptions to test with the first venues, not forecasts.`;
       const wrap = $('#models');
       if (!wrap.children.length) {
-        wrap.innerHTML = D.pricingModels.map((pm) => `<article class="card org-model" data-model="${pm.key}">
+        wrap.innerHTML = M.models.map((pm) => { const type = D.pricingModelTypes[pm.type]; return `<article class="card org-model" data-model="${pm.type}">
           <header><h3>${esc(pm.name)}</h3>${pill(pm.tag)}</header>
           <p class="org-model-blurb">${esc(pm.blurb)}</p>
           <div class="org-model-out">
@@ -233,38 +279,37 @@
             <div class="stat"><span class="stat-label" data-out="unitLabel">Units</span><span class="stat-value" data-out="units"></span></div>
             <div class="stat"><span class="stat-label">Gross margin</span><span class="stat-value" data-out="margin"></span></div>
           </div>
-          ${pm.inputs.map((inp) => `<div class="org-ctl"><label for="ctl-${pm.key}-${inp.key}"><span>${esc(inp.label)}</span><output id="out-${pm.key}-${inp.key}"></output></label>
-            <input id="ctl-${pm.key}-${inp.key}" type="range" min="${inp.min}" max="${inp.max}" step="${inp.step}" value="${salesState.inputs[pm.key][inp.key]}" data-model="${pm.key}" data-key="${inp.key}" data-unit="${inp.unit}" /></div>`).join('')}
+          ${type.inputs.map((inp) => `<div class="org-ctl"><label for="ctl-${pm.type}-${inp.key}"><span>${esc(inp.label)}</span><output id="out-${pm.type}-${inp.key}"></output></label>
+            <input id="ctl-${pm.type}-${inp.key}" type="range" min="${inp.min}" max="${inp.max}" step="${inp.step}" value="${salesState.inputs[pm.type][inp.key]}" data-model="${pm.type}" data-key="${inp.key}" data-unit="${inp.unit}" /></div>`).join('')}
           <p class="org-model-foot" data-out="foot"></p>
-        </article>`).join('');
+        </article>`; }).join('');
         wrap.querySelectorAll('input[type="range"]').forEach((r) => r.addEventListener('input', () => {
           salesState.inputs[r.dataset.model][r.dataset.key] = parseFloat(r.value);
           paintFinancials();
         }));
       }
       const results = {};
-      D.pricingModels.forEach((pm) => {
-        const res = results[pm.key] = model(pm.key);
-        const card = wrap.querySelector(`[data-model="${pm.key}"]`);
+      M.models.forEach((pm) => {
+        const type = D.pricingModelTypes[pm.type];
+        const res = results[pm.type] = model(pm);
+        const card = wrap.querySelector(`[data-model="${pm.type}"]`);
         card.querySelector('[data-out="y3"]').textContent = fmtMoney(res.y3.rev);
         card.querySelector('[data-out="cum"]').textContent = fmtMoney(res.cum);
         card.querySelector('[data-out="units"]').textContent = fmtInt(res.y3.units);
         card.querySelector('[data-out="unitLabel"]').textContent = 'Year-3 ' + res.y3.unitLabel;
         card.querySelector('[data-out="margin"]').textContent = fmtPct(res.margin);
-        card.querySelector('[data-out="foot"]').textContent = `${fmtInt(res.y3.athletes)} athletes on Vertex by year 3 (${fmtPct(res.y3.athletes / res.reach, 1)} of the segment).`;
-        pm.inputs.forEach((inp) => {
-          const v = salesState.inputs[pm.key][inp.key];
-          card.querySelector(`#out-${pm.key}-${inp.key}`).textContent = inp.unit === '$' ? 'A$' + v.toLocaleString('en-AU') : inp.unit === '%' ? v + '%' : String(v);
+        card.querySelector('[data-out="foot"]').textContent = `${fmtInt(res.y3.athletes)} athletes by year 3 · ${fmtMoney(res.y3.athletes ? res.y3.rev / res.y3.athletes : 0)} revenue per athlete per year.`;
+        type.inputs.forEach((inp) => {
+          const v = salesState.inputs[pm.type][inp.key];
+          card.querySelector(`#out-${pm.type}-${inp.key}`).textContent = inp.unit === '$' ? 'A$' + v.toLocaleString('en-AU') : inp.unit === '%' ? v + '%' : String(v);
         });
       });
-      // table
-      $('#finTable').innerHTML = `<thead><tr><th>Model</th><th class="num">Y1</th><th class="num">Y2</th><th class="num">Y3</th><th class="num">Margin</th><th class="num">Athletes Y3</th></tr></thead><tbody>` +
-        D.pricingModels.map((pm) => { const r = results[pm.key]; return `<tr><td>${esc(pm.name)}</td>${r.years.map((y) => `<td class="num">${fmtMoney(y.rev)}</td>`).join('')}<td class="num">${fmtPct(r.margin)}</td><td class="num">${fmtInt(r.y3.athletes)}</td></tr>`; }).join('') + '</tbody>';
-      // chart
+      $('#finTable').innerHTML = `<thead><tr><th>Model</th><th class="num">Y1</th><th class="num">Y2</th><th class="num">Y3</th><th class="num">Margin</th></tr></thead><tbody>` +
+        M.models.map((pm) => { const r = results[pm.type]; return `<tr><td>${esc(pm.name)}</td>${r.years.map((y) => `<td class="num">${fmtMoney(y.rev)}</td>`).join('')}<td class="num">${fmtPct(r.margin)}</td></tr>`; }).join('') + '</tbody>';
       const pal = palette();
       const data = {
         labels: ['Year 1', 'Year 2', 'Year 3'],
-        datasets: D.pricingModels.map((pm, i) => ({ label: pm.name, data: results[pm.key].years.map((y) => Math.round(y.rev)), backgroundColor: alpha(pal[i], 0.75), borderColor: pal[i], borderWidth: 1 })),
+        datasets: M.models.map((pm, i) => ({ label: pm.name, data: results[pm.type].years.map((y) => Math.round(y.rev)), backgroundColor: alpha(pal[i], 0.75), borderColor: pal[i], borderWidth: 1 })),
       };
       if (!finChart) {
         const { box, cv } = chartBox('tall');
@@ -280,23 +325,60 @@
     const strat = el('section', 'org-section');
     strat.innerHTML = cardHead('Go-to-market by segment', 'where to start and why') +
       `<p class="org-note" style="margin:0 0 10px">${esc(M.insight)}</p>` +
-      '<div class="table-wrap"><table class="table org-strategy-table"><thead><tr><th>Segment</th><th>Why it matters</th><th>Channel</th><th>Message</th><th>Priority</th></tr></thead><tbody>' +
-      M.strategy.map((s) => `<tr><td>${esc(s.segment)}</td><td>${esc(s.why)}</td><td>${esc(s.channel)}</td><td>${esc(s.message)}</td><td>${pill(s.priority, s.priority === 'Beachhead' ? 'ok' : s.priority === 'Credibility' ? 'warn' : '')}</td></tr>`).join('') +
+      '<div class="table-wrap"><table class="table org-strategy-table"><thead><tr><th>Segment</th><th>Size</th><th>Why it matters</th><th>Channel</th><th>Message</th><th>Priority</th></tr></thead><tbody>' +
+      M.strategy.map((s) => `<tr><td>${esc(s.segment)}</td><td class="org-size">${esc(s.size || '')}</td><td>${esc(s.why)}</td><td>${esc(s.channel)}</td><td>${esc(s.message)}</td><td>${pill(s.priority, s.priority === 'Beachhead' ? 'ok' : s.priority === 'Credibility' || s.priority === 'Later' ? 'warn' : '')}</td></tr>`).join('') +
       '</tbody></table></div>';
     view.append(strat);
 
+    // --- venue directory (boxing / Queensland) ---
+    if (M.directory && window.VertexQldClubs) renderDirectory(view);
+
     const src = el('section', 'org-section');
-    src.innerHTML = cardHead('Sources', 'participation figures') + '<ol class="org-sources">' + M.sources.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a></li>`).join('') + '</ol>';
+    src.innerHTML = cardHead('Sources', 'every figure above carries its reference number') + '<ol class="org-sources">' + srcIds.map((id) => { const s = M.sources[id]; return `<li id="src-${esc(id)}">${s.verified ? pill('Verified', 'ok') + ' ' : ''}<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a><span class="small muted org-src-url">${esc(s.url)}</span></li>`; }).join('') + '</ol>';
     view.append(src);
+  }
+
+  function renderDirectory(view) {
+    const Q = window.VertexQldClubs;
+    const state = { region: '', type: '', list: '', q: '' };
+    const sec = el('section', 'org-section org-directory');
+    const regions = [...new Set(Q.clubs.map((c) => c.region))];
+    const countBy = (fn) => Q.clubs.reduce((m, c) => { const k = fn(c); if (k) m[k] = (m[k] || 0) + 1; return m; }, {});
+    const byType = countBy((c) => c.type), byList = {};
+    Q.clubs.forEach((c) => c.lists.forEach((l) => { byList[l] = (byList[l] || 0) + 1; }));
+    const unlocated = Q.clubs.filter((c) => c.region === 'Location not listed').length;
+    sec.innerHTML = cardHead(`Queensland boxing venues — ${Q.clubs.length} listed`, 'four public directories, merged by name') +
+      `<div class="org-stats" style="margin-bottom:12px">${Object.keys(Q.types).map((t) => stat(Q.types[t], fmtInt(byType[t] || 0))).join('')}</div>` +
+      `<p class="org-note" style="margin:0 0 10px">Compiled ${esc(Q.compiled)} from ${Object.keys(Q.lists).map((k) => `<a href="${esc(Q.lists[k].url)}" target="_blank" rel="noopener">${esc(Q.lists[k].label)}</a> (${byList[k] || 0})`).join(', ')}. Venues on more than one list are shown once. ${unlocated} Boxing Queensland entries carry no address in the public directory and are kept as "Location not listed". Not every PCYC or fitness venue running boxing classes publishes it, so this is a floor, not a ceiling.</p>` +
+      `<div class="org-filters org-dir-filters">
+        <input class="input" type="search" placeholder="Search venue or suburb" aria-label="Search venues" data-f="q" />
+        <select class="input" data-f="region" aria-label="Region"><option value="">All regions</option>${regions.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join('')}</select>
+        <select class="input" data-f="type" aria-label="Venue type"><option value="">All types</option>${Object.keys(Q.types).map((t) => `<option value="${t}">${esc(Q.types[t])}</option>`).join('')}</select>
+        <select class="input" data-f="list" aria-label="Directory"><option value="">All directories</option>${Object.keys(Q.lists).map((k) => `<option value="${k}">${esc(Q.lists[k].label)}</option>`).join('')}</select>
+        <span class="small muted" id="dirCount"></span>
+      </div>
+      <div class="table-wrap org-dir-wrap"><table class="table org-dir-table" id="dirTable"></table></div>`;
+    view.append(sec);
+    const paint = () => {
+      const q = state.q.toLowerCase();
+      const rows = Q.clubs.filter((c) => (!state.region || c.region === state.region) && (!state.type || c.type === state.type) && (!state.list || c.lists.includes(state.list)) && (!q || (c.name + ' ' + c.suburb).toLowerCase().includes(q)));
+      $('#dirCount').textContent = `${rows.length} of ${Q.clubs.length} venues`;
+      $('#dirTable').innerHTML = '<thead><tr><th>Venue</th><th>Type</th><th>Suburb</th><th>Region</th><th>Listed in</th><th>Coach</th></tr></thead><tbody>' +
+        rows.map((c) => `<tr><td><span class="org-person-name">${esc(c.name)}</span>${c.bqName && c.bqName !== c.name ? `<span class="small muted" style="display:block">Boxing Qld: ${esc(c.bqName)}</span>` : ''}</td><td>${esc(Q.types[c.type] || c.type)}</td><td>${esc(c.suburb || '—')}${c.postcode ? ` <span class="muted">${esc(c.postcode)}</span>` : ''}</td><td>${esc(c.region)}</td><td>${c.lists.map((l) => `<span class="pill org-pill-sm ${l === 'bq' ? 'pill-ok' : ''}" title="${esc(Q.lists[l].note)}">${esc(Q.lists[l].label)}</span>`).join(' ')}</td><td>${esc(c.coach || '')}</td></tr>`).join('') + '</tbody>';
+    };
+    sec.querySelectorAll('[data-f]').forEach((f) => f.addEventListener(f.tagName === 'INPUT' ? 'input' : 'change', () => { state[f.dataset.f] = f.value; paint(); }));
+    paint();
   }
 
   /* ====================================================================
      PERFORMANCE DASHBOARD
      ==================================================================== */
-  const perfState = { club: '', band: '', sex: '', coach: '', sort: { key: 'devScore', dir: -1 }, tab: 'athletes' };
+  const perfState = { club: '', band: '', sex: '', coach: '', segment: '', sort: { key: 'devScore', dir: -1 }, tab: 'athletes' };
+  const segments = [...new Set(C.athletes.map((a) => a.segment).filter(Boolean))];
+  const segLabel = (k) => { const t = M.tiers.find((x) => x.key === k); return t ? t.short : k; };
 
   function filtered() {
-    return C.athletes.filter((a) => (!perfState.club || a.club === perfState.club) && (!perfState.band || a.band === perfState.band) && (!perfState.sex || a.sex === perfState.sex) && (!perfState.coach || a.coaches.includes(perfState.coach)));
+    return C.athletes.filter((a) => (!perfState.club || a.club === perfState.club) && (!perfState.band || a.band === perfState.band) && (!perfState.sex || a.sex === perfState.sex) && (!perfState.coach || a.coaches.includes(perfState.coach)) && (!perfState.segment || a.segment === perfState.segment));
   }
   const median = (arr) => { if (!arr.length) return null; const s = [...arr].sort((x, y) => x - y); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
   const quantile = (arr, q) => { if (!arr.length) return null; const s = [...arr].sort((x, y) => x - y); const p = (s.length - 1) * q, lo = Math.floor(p), hi = Math.ceil(p); return s[lo] + (s[hi] - s[lo]) * (p - lo); };
@@ -325,8 +407,9 @@
       <p>A cumulative view of every athlete the organisation has on Vertex: development trajectories, coach feedback volume (retention and dedication), and source-verified performance and physical metrics. Click any athlete or coach to drill down.</p></div>
       <div class="org-head-aside org-filters" id="perfFilters">
         <select class="input" data-f="club" aria-label="Club"><option value="">All clubs</option>${C.clubs.map((c) => `<option value="${c.id}" ${perfState.club === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
-        <select class="input" data-f="band" aria-label="Age band"><option value="">All ages</option>${['U12', 'U14', 'U16', 'U18', 'Open'].map((b) => `<option ${perfState.band === b ? 'selected' : ''}>${b}</option>`).join('')}</select>
+        <select class="input" data-f="band" aria-label="Age band"><option value="">All ages</option>${C.bands.map((b) => `<option ${perfState.band === b ? 'selected' : ''}>${b}</option>`).join('')}</select>
         <select class="input" data-f="sex" aria-label="Sex"><option value="">All</option><option value="F" ${perfState.sex === 'F' ? 'selected' : ''}>Female</option><option value="M" ${perfState.sex === 'M' ? 'selected' : ''}>Male</option></select>
+        ${segments.length > 1 ? `<select class="input" data-f="segment" aria-label="Market segment"><option value="">All segments</option>${segments.map((k) => `<option value="${k}" ${perfState.segment === k ? 'selected' : ''}>${esc(segLabel(k))}</option>`).join('')}</select>` : ''}
         <select class="input" data-f="coach" aria-label="Coach"><option value="">All coaches</option>${C.coaches.map((c) => `<option value="${c.id}" ${perfState.coach === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
       </div>`));
     $('#perfFilters').querySelectorAll('select').forEach((s) => s.addEventListener('change', () => { perfState[s.dataset.f] = s.value; render(); }));
@@ -386,7 +469,7 @@
     { const { box, cv } = chartBox(); c4.append(box); mkChart(cv, { type: 'doughnut', data: { labels: srcKeys.map((k) => D.sourceLabel[k] || k), datasets: [{ data: srcKeys.map((k) => srcCount[k]), backgroundColor: srcKeys.map((k, i) => alpha(D.VERIFIED.has(k) ? pal[0] : pal[(i % 3) + 1], D.VERIFIED.has(k) ? 0.85 - i * 0.15 : 0.6)), borderColor: tok('--surface'), borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'right' } } } }); }
 
     const kd = metricDef(C.keyMetric);
-    const bands = ['U12', 'U14', 'U16', 'U18', 'Open'].filter((b) => A.some((a) => a.band === b));
+    const bands = C.bands.filter((b) => A.some((a) => a.band === b));
     const meanOf = (arr) => arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
     { const { box, cv } = chartBox(); c5.append(box); mkChart(cv, { type: 'bar', data: { labels: bands, datasets: [
       { label: 'Verified sources', data: bands.map((b) => meanOf(A.filter((a) => a.band === b && a.metrics[C.keyMetric].verified).map((a) => a.metrics[C.keyMetric].value))), backgroundColor: alpha(pal[0], 0.8), borderColor: pal[0], borderWidth: 1 },

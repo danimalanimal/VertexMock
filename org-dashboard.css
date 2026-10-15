@@ -192,3 +192,42 @@
   .org-topbar { gap: 8px; }
   .org-topbar .theme-switch .ts-opt { display: none; }
 }
+
+/* ---- sales page: positioning, citations, control panel, directory ---- */
+.org-positioning { margin: 10px 0 0; padding-left: 18px; font-size: 0.84rem; color: var(--ink-muted); max-width: 72ch; }
+.org-positioning li { margin: 0 0 4px; }
+.org-cite { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.04em; color: var(--accent-strong); text-decoration: none; white-space: nowrap; }
+.org-cite:hover, .org-cite:focus-visible { text-decoration: underline; }
+.org-cite-ok { color: var(--accent-strong); }
+.org-facts { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.org-facts .stat { min-width: 0; }
+.org-facts .stat-hint { display: grid; gap: 4px; min-width: 0; }
+.org-facts .org-cite { white-space: normal; }
+.org-fact-cite { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.org-fact-cite .pill { font-size: 0.58rem; }
+.org-tier .org-tier-sub .org-cite { margin-left: 2px; }
+.org-adopt .org-adopt-presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 12px; }
+.org-adopt .org-adopt-presets .label { margin-right: 4px; }
+.org-adopt-grid { display: grid; gap: 8px 18px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.org-adopt-row { display: grid; grid-template-columns: 1fr auto auto; grid-template-areas: "label pct people" "range range range"; gap: 2px 10px; padding: 8px 10px; border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--surface); align-items: center; }
+.org-adopt-row.is-pinned { border-color: var(--accent-strong); box-shadow: inset 3px 0 0 var(--accent-strong); }
+.org-adopt-row label { grid-area: label; display: flex; flex-direction: column; font-size: 0.78rem; font-weight: 500; }
+.org-adopt-row label .org-adopt-size { font-weight: 400; }
+.org-adopt-row input[type="range"] { grid-area: range; width: 100%; margin: 4px 0 0; }
+.org-adopt-row output { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 0.8rem; }
+.org-adopt-row output[data-out="pct"] { grid-area: pct; color: var(--accent-strong); }
+.org-adopt-row output[data-out="people"] { grid-area: people; min-width: 5ch; text-align: right; }
+.org-adopt-row output[data-out="people"]::after { content: " on Vertex"; font-family: var(--font-body, inherit); font-size: 0.66rem; color: var(--ink-muted); }
+.org-adopt-total { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+.org-adopt-total strong { font-size: 1.5rem; font-family: var(--font-mono); color: var(--accent-strong); font-variant-numeric: tabular-nums; }
+.org-strategy-table td.org-size { font-family: var(--font-mono); font-size: 0.72rem; min-width: 11ch; max-width: 16ch; }
+#finTable th, #finTable td { padding-left: 8px; padding-right: 8px; font-size: 0.78rem; }
+.org-sources li .pill { font-size: 0.58rem; vertical-align: middle; }
+.org-sources li .org-src-url { display: block; word-break: break-all; font-family: var(--font-mono); font-size: 0.62rem; }
+.org-directory .org-dir-filters { margin: 0 0 10px; }
+.org-directory .org-dir-filters .input[type="search"] { min-width: 240px; }
+.org-dir-wrap { max-height: 560px; overflow: auto; }
+.org-dir-table th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.org-dir-table td { vertical-align: top; }
+.org-dir-table .pill { margin: 0 2px 2px 0; }
+@media (max-width: 720px) { .org-adopt-grid { grid-template-columns: 1fr; } .org-strategy-table td.org-size { white-space: normal; } }

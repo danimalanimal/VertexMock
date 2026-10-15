@@ -227,7 +227,7 @@ Load only what a page uses. Each is a CSS + JS pair alongside `theme.css`.
 | `vertebra-media.*` | Thumb grids, masonry, lightbox, dropzone |
 | `vertebra-vitals.*` | Readouts and live figures |
 | `vertebra-charts.js` | Chart.js theming bridge (Chart.js not bundled) |
-| `experiments.*` | Ambient displays and data instruments: radar/scope/spectrum, worldmap, pebblemap, flow ledger, `data-x-market` tape, `data-x-atlas` country plate + site tree, `data-x-pyramid` tiered pyramid (terrace / mirror / ziggurat) |
+| `experiments.*` | Ambient displays and data instruments: radar/scope/spectrum, worldmap, pebblemap, flow ledger, `data-x-market` tape, `data-x-atlas` country plate + site tree, `data-x-pyramid` tiered pyramid (terrace / mirror / ziggurat; `data-labels="count"` for numbers instead of shares) |
 | `integrations.css` | Third-party widget reskins |
 
 ---

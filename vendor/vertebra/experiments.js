@@ -3033,7 +3033,11 @@
      Hover a tier for its readout; click or ↑/↓ pins it
      (vertebraX.pyramid(el).select(i)); Enter / Space toggles the pin on the
      hovered tier; Escape clears. Reduced motion: no reveal, no spin, redraws
-     only on interaction. Empty attribute → athlete pathway demo. */
+     only on interaction. Empty attribute → athlete pathway demo.
+     data-labels="count" — label with real numbers instead of shares: the band
+     carries its own count, the side label its count and the running total to
+     that rung ("to here"), and the readout and tooltip speak in people, not
+     percentages. Default (unset) keeps the share labels. */
   const PYRAMID_DEMO = {
     series: ["GIRLS", "BOYS"],
     tiers: [
@@ -3080,6 +3084,8 @@
     const mono = () => (getComputedStyle(root).getPropertyValue("--font-mono").trim() || "monospace");
     const fmt = (v) => Math.round(v).toLocaleString("en-US");
     const pct = (f) => { const p = f * 100; return (p >= 10 || p === Math.round(p) ? Math.round(p) : p.toFixed(1)) + "%"; };
+    const counts = (host.getAttribute("data-labels") || "").toLowerCase() === "count";
+    const cumOf = (i) => { let c = 0; for (let j = 0; j <= i; j++) c += tiers[j].value; return c; };
 
     /* ---- state ---- */
     let series = ["A", "B"], tiers = [], total = 1, split = false;
@@ -3115,7 +3121,7 @@
       hover = -1; shapes = []; labelZones = [];           /* stale geometry must never index the new tiers */
       hideTip();
       canvas.setAttribute("aria-label", "Pyramid chart, " + tiers.length + " tiers from apex to base: " +
-        tiers.map((t) => t.label + " " + fmt(t.value) + " (" + pct(t.share) + ")").join("; "));
+        tiers.map((t) => t.label + " " + fmt(t.value) + (counts ? "" : " (" + pct(t.share) + ")")).join("; "));
       syncBtns();
       paintRead();
     }
@@ -3143,9 +3149,14 @@
         return;
       }
       const t = tiers[i], below = tiers[i + 1];
-      read.append(el("strong", null, t.label), document.createTextNode(" · " + fmt(t.value) + " · " + pct(t.share) + " of " + fmt(total)));
-      if (i > 0) read.append(document.createTextNode(" · to here " + pct(t.cum)));
-      if (below && below.value > 0) read.append(document.createTextNode(" · " + pct(t.value / below.value) + " of " + below.label));
+      if (counts) {
+        read.append(el("strong", null, t.label), document.createTextNode(" · " + fmt(t.value) + " of " + fmt(total)));
+        if (i > 0) read.append(document.createTextNode(" · " + fmt(cumOf(i)) + " to here"));
+      } else {
+        read.append(el("strong", null, t.label), document.createTextNode(" · " + fmt(t.value) + " · " + pct(t.share) + " of " + fmt(total)));
+        if (i > 0) read.append(document.createTextNode(" · to here " + pct(t.cum)));
+        if (below && below.value > 0) read.append(document.createTextNode(" · " + pct(t.value / below.value) + " of " + below.label));
+      }
       if (split) read.append(document.createTextNode(" · " + series[0] + " " + fmt(t.a) + " / " + series[1] + " " + fmt(t.b)));
       if (sel >= 0) read.append(document.createTextNode(" · pinned"));
     }
@@ -3156,11 +3167,12 @@
       if (!t) { hideTip(); return; }
       tip.textContent = "";
       tip.append(el("strong", null, t.label));
-      tip.append(el("span", null, fmt(t.value) + " · " + pct(t.share) + " of total"));
-      if (below && below.value > 0) tip.append(el("span", null, pct(t.value / below.value) + " of " + below.label + " reach here"));
+      tip.append(el("span", null, counts ? fmt(t.value) + " of " + fmt(total) : fmt(t.value) + " · " + pct(t.share) + " of total"));
+      if (counts) { if (i > 0) tip.append(el("span", null, fmt(cumOf(i)) + " to here")); }
+      else if (below && below.value > 0) tip.append(el("span", null, pct(t.value / below.value) + " of " + below.label + " reach here"));
       if (split) {
         const ab = t.a + t.b || 1;
-        tip.append(el("span", null, series[0] + " " + fmt(t.a) + " (" + pct(t.a / ab) + ") · " + series[1] + " " + fmt(t.b) + " (" + pct(t.b / ab) + ")"));
+        tip.append(el("span", null, counts ? series[0] + " " + fmt(t.a) + " · " + series[1] + " " + fmt(t.b) : series[0] + " " + fmt(t.a) + " (" + pct(t.a / ab) + ") · " + series[1] + " " + fmt(t.b) + " (" + pct(t.b / ab) + ")"));
       }
       if (t.info) tip.append(el("span", "muted", t.info));
       const rect = canvas.getBoundingClientRect(), sx = rect.width / W, sy = rect.height / H;
@@ -3227,7 +3239,8 @@
       ctx.fillText(tiers[i].label, labX, labY - 3);
       ctx.font = "500 11px " + MONOF;
       ctx.fillStyle = k.muted;
-      ctx.fillText(fmt(tiers[i].value) + (big ? "" : " · " + pct(tiers[i].share)), labX, labY + 11);
+      ctx.fillText(counts ? (i > 0 ? fmt(tiers[i].value) + " · " + fmt(cumOf(i)) + " to here" : fmt(tiers[i].value))
+                          : fmt(tiers[i].value) + (big ? "" : " · " + pct(tiers[i].share)), labX, labY + 11);
     }
 
     /* ---- terrace: one silhouette, band area = share ---- */
@@ -3265,7 +3278,7 @@
           ctx.font = "700 " + Math.min(24, thick * 0.62) + "px " + MONOF;
           ctx.textAlign = "center";
           ctx.fillStyle = onBandInk(k, i);
-          ctx.fillText(pct(tiers[i].share), cx, midY + Math.min(24, thick * 0.62) * 0.36);
+          ctx.fillText(counts ? fmt(tiers[i].value) : pct(tiers[i].share), cx, midY + Math.min(24, thick * 0.62) * 0.36);
         }
         anchors.push([cx + hw((d0 + d1) / 2) * r + 2, midY, big]);
       }
@@ -3317,7 +3330,7 @@
         ctx.fillText(tiers[i].label, cx, midY - 2);
         ctx.font = "500 10px " + MONOF;
         ctx.fillStyle = k.muted;
-        ctx.fillText(fmt(tiers[i].value) + " · " + pct(tiers[i].share), cx, midY + 12);
+        ctx.fillText(counts ? fmt(tiers[i].value) : fmt(tiers[i].value) + " · " + pct(tiers[i].share), cx, midY + 12);
         if (r > 0.6) {
           ctx.font = "500 11px " + MONOF;
           ctx.fillStyle = k.muted;
