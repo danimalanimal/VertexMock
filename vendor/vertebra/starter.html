@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New page — Vertebra</title>
+
+  <!-- Apply stored/OS theme before first paint (no light-theme flash).
+       To default off the VISITOR'S CLOCK instead of their OS setting, put
+       data-theme-default="clock" on <html> and swap the media query for the
+       commented line below — the rule has to run here, pre-paint, or the page
+       lands in the wrong theme for a frame. theme.js uses the same boundaries
+       (dark 19:00-07:00) and exports vertebra.darkByClock(). -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("vertebra-theme") || localStorage.getItem("sentinel-theme");
+        var dark = matchMedia("(prefers-color-scheme: dark)").matches;
+        /* clock default: var h = new Date().getHours(); dark = h >= 19 || h < 7; */
+        if (t === "dark" || (!t && dark))
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+
+  <!-- Keep only the pairing you chose (this is A · Standard).
+       B: Chakra+Petch / Share+Tech+Mono   C: Rajdhani / JetBrains+Mono
+       D: Michroma / IBM+Plex+Sans / Space+Mono
+       E: Pixelify+Sans / Space+Mono / Silkscreen (kawaii Y2K)
+       F: Fraunces / Karla / DM+Mono (warm, unhurried)
+       Then set data-font="b|c|d|e|f" on <html> if not using A. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="theme.css?v=1.31.0" />
+  <!-- Alternate palette (optional): load a palette file after theme.css and
+       set the matching attribute on <html>, e.g.
+       <link rel="stylesheet" href="palette-blossom.css" />    <html data-palette="blossom">
+       (also: palette-corporate.css, palette-hud.css, palette-neutrals.css)
+       <link rel="stylesheet" href="palette-corporate.css" />  <html data-palette="corporate"> -->
+</head>
+<body>
+
+  <a class="skip-link" href="#content">Skip to content</a>
+
+  <header class="topbar">
+    <div class="container">
+      <a class="brand" href="#"><span class="brand-mark" aria-hidden="true"></span> Project</a>
+      <button class="nav-toggle" aria-expanded="false" aria-label="Menu" aria-controls="site-nav">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="site-nav" aria-label="Main">
+        <a href="#">Section</a>
+        <a href="#">Section</a>
+      </nav>
+      <div class="topbar-actions">
+        <button class="theme-switch" data-theme-toggle role="switch" aria-checked="false" aria-label="Dark theme">
+          <span class="ts-opt ts-light" aria-hidden="true">Light</span>
+          <span class="ts-track" aria-hidden="true"><span class="ts-thumb"></span></span>
+          <span class="ts-opt ts-dark" aria-hidden="true">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="section">
+      <div class="container">
+        <p class="kicker">Section / 01</p>
+        <h1 data-decode>Page title</h1>
+        <p class="muted">Start building here.</p>
+        <div class="row">
+          <button class="btn btn-primary">Primary</button>
+          <button class="btn">Secondary</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span>Project</span>
+      <a class="theme-credit" href="vertebra.html"><span class="tc-line">Designed with <svg class="brand-logo" viewBox="0 0 490.27 86.98" role="img" aria-label="Vertebra"><use href="vertebra-logo.svg#logo"/></svg></span><span class="tc-line">UX system by DDS/DN</span></a>
+    </div>
+  </footer>
+
+  <script src="theme.js?v=1.31.0"></script>
+</body>
+</html>

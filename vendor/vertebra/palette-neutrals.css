@@ -1,0 +1,106 @@
+/* ==========================================================================
+   VERTEBRA — alternate palette: NEUTRALS
+   --------------------------------------------------------------------------
+   Calming neutrals: clay and tan carry the palette, sand and cream hold the
+   grounds, sage and slate stay in the quiet roles. The quietest palette in
+   the kit — nothing shouts, so the content has to. Made for long sessions in
+   a management tool rather than for a dashboard that needs to alarm you.
+   Dark mode is warm charcoal rather than black, so it reads as dusk instead
+   of a terminal.
+   Source colors:
+     Clay #CDACA1 · Tan #DDC8B7 · Sand #DFD8C5
+     Cream #ECE4D7 · Sage #9FAC9D · Slate #89999A
+
+   WHICH SOURCE DOES WHAT (v1.24.1 — clay and tan promoted, sage demoted):
+     Clay   -> the accent. Buttons, links, focus, active states, user 1.
+     Tan    -> the warm ground: surface-2, the soft accent wash, borders.
+     Sand   -> grounds and the mid surfaces.
+     Cream  -> the page.
+     Sage   -> demoted from the accent to a supporting tint: --ink-faint, the
+               background grid, and user 2's identity colour.
+     Slate  -> the cool note in ink and lines.
+   (Derived shades are used where the sources can't meet contrast — every one
+   of these six is mid-tone, so text, borders and meters need darker anchors.)
+
+   USE IT IN A PROJECT (two steps):
+     1. <link rel="stylesheet" href="theme.css" />
+        <link rel="stylesheet" href="palette-neutrals.css" />  <- after theme.css
+     2. <html data-palette="neutrals">
+   Dark mode works exactly as before: data-theme="dark" on <html> combines
+   with the palette. Every component restyles itself — palettes only redefine
+   the semantic tokens, never component rules.
+
+   Contrast floors: --ink and --ink-muted >= 4.5:1 on --bg/--bg-alt/--surface;
+   --line and --meter >= 3:1 on their surfaces; --on-accent >= 4.5:1 on
+   --accent; each user colour >= 4.5:1 on its own -soft fill. Audit with
+   `python docs/palcheck.py palette-neutrals.css neutrals -v`.
+   ========================================================================== */
+
+[data-palette="neutrals"] {
+  /* raw palette (reference) */
+  --pal-clay: #cdaca1;
+  --pal-tan: #ddc8b7;
+  --pal-sand: #dfd8c5;
+  --pal-cream: #ece4d7;
+  --pal-sage: #9fac9d;
+  --pal-slate: #89999a;
+
+  /* semantic — light */
+  --bg: #f8f4ef;                    /* cream, lifted */
+  --bg-alt: #efe5d9;                /* cream warmed toward tan */
+  --surface: #fdfaf6;
+  --surface-2: #e3d3c3;             /* tan, promoted into the surface ramp */
+  --ink: #39322c;                   /* warm dark — no green cast (11.5:1 on bg) */
+  --ink-muted: #61554b;             /* warm mid (>= 4.9:1 on every ground) */
+  --ink-faint: var(--pal-sage);     /* sage, demoted to the quietest role */
+  --line: #8a7a6c;                  /* warm grey-brown at >= 3:1 for borders */
+  --line-soft: #ddcdbd;
+  --accent: var(--pal-clay);        /* clay carries the palette now */
+  --accent-strong: #8a4a38;         /* terracotta: text/borders/meters on light */
+  --accent-soft: #f3e1d8;           /* tan wash */
+  --on-accent: #2e1b15;             /* deep brown on clay fills (7.8:1) */
+  --meter: var(--accent-strong);
+  --danger: #ab2f1f;                /* a real red — kept clear of the clay accent */
+  --danger-soft: #f8dfd9;
+  --warn: #7a5a24;                  /* sand/tan deepened to a caution ochre */
+  --warn-soft: #f4e7d0;
+  --grid-line: rgba(159, 172, 157, 0.07);   /* the sage, at a whisper */
+  --shadow: 0 2px 10px rgba(57, 50, 44, 0.1);
+
+  /* two-user identity: u1 rides the clay accent, u2 takes the demoted sage —
+     which keeps ownership inside the scheme and gives the pair a warm/cool
+     split that survives being shrunk to an avatar chip */
+  --u1: #8a4a38;
+  --u1-soft: #f3e1d8;
+  --u2: #46604a;
+  --u2-soft: #e5eae2;
+}
+
+[data-palette="neutrals"][data-theme="dark"] {
+  /* semantic — dark: warm charcoal, not black. Dusk, not a terminal. */
+  --bg: #24211f;
+  --bg-alt: #2b2724;
+  --surface: #322d29;
+  --surface-2: #3e3833;
+  --ink: #efe6db;                   /* cream off-white */
+  --ink-muted: #bcb0a4;             /* warm grey (>= 7:1 on surface) */
+  --ink-faint: var(--pal-sage);
+  --line: #8e8175;                  /* >= 3:1 on the dark surfaces */
+  --line-soft: #423b35;
+  --accent: var(--pal-clay);
+  --accent-strong: #e6bcae;         /* clay lifted to read on charcoal */
+  --accent-soft: #45312a;
+  --on-accent: #2e1b15;
+  --meter: var(--accent-strong);
+  --danger: #f08b73;
+  --danger-soft: #45241d;
+  --warn: #d9b26a;                  /* gold rather than tan, so warn ≠ accent */
+  --warn-soft: #3d3323;
+  --grid-line: rgba(205, 172, 161, 0.055);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+
+  --u1: #e6bcae;
+  --u1-soft: #45312a;
+  --u2: #aec0ac;
+  --u2-soft: #333d34;
+}

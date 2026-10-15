@@ -1,0 +1,103 @@
+/* ==========================================================================
+   VERTEBRA — alternate palette: HUD
+   --------------------------------------------------------------------------
+   Cold instrument glass. Deep space-navy grounds, cyan as the carrier signal,
+   amber as the counter-signal, and the warning reds a heads-up display uses
+   when something needs a human. Dark mode is the native state here; light
+   mode is the same instrument read in daylight — navy ink on cold white.
+   Source colors:
+     Signal Cyan #22E3F0 · Amber #FFA51E · Alert Red #FF5A4E
+     Navy #17233C · Deep Navy #0D1424 · Void #080C16
+   (Derived shades are used where the sources can't meet contrast — cyan is
+   gorgeous on black and illegible on white, so light mode runs a deep teal.)
+
+   USE IT IN A PROJECT (two steps):
+     1. <link rel="stylesheet" href="theme.css" />
+        <link rel="stylesheet" href="palette-hud.css" />   <- after theme.css
+     2. <html data-palette="hud">
+   Dark mode works exactly as before: data-theme="dark" on <html> combines
+   with the palette. Every component restyles itself — palettes only redefine
+   the semantic tokens, never component rules.
+
+   Contrast floors: --ink and --ink-muted >= 4.5:1 on --bg/--bg-alt/--surface;
+   --line and --meter >= 3:1 on their surfaces; --on-accent >= 4.5:1 on
+   --accent; each user colour >= 4.5:1 on its own -soft fill.
+   ========================================================================== */
+
+[data-palette="hud"] {
+  /* raw palette (reference) */
+  --pal-cyan: #22e3f0;
+  --pal-amber: #ffa51e;
+  --pal-alert: #ff5a4e;
+  --pal-navy: #17233c;
+  --pal-navy-deep: #0d1424;
+  --pal-void: #080c16;
+
+  /* semantic — light: the instrument in daylight */
+  --bg: #f4f7fb;                    /* cold white, faint blue cast */
+  --bg-alt: #e7edf5;
+  --surface: #ffffff;
+  --surface-2: #dde6f1;
+  --ink: #0b1424;                   /* void navy for body text (~17:1) */
+  --ink-muted: #465872;             /* navy-grey (>= 4.5:1 on bg and bg-alt) */
+  --ink-faint: #8fa1bb;
+  --line: #6a7d99;                  /* >= 3:1 for control borders */
+  --line-soft: #ccd8e6;
+  --accent: var(--pal-cyan);
+  --accent-strong: #0a6a78;         /* deep teal: text/borders/meters on light */
+  --accent-soft: #d8f4f8;
+  --on-accent: #04222a;             /* near-black teal on cyan fills */
+  /* THE DATA LAYER IS AMBER. On a HUD the cyan draws the structure — frames,
+     labels, links — and amber carries the readings: progress, meters, gauges,
+     the numbers that matter. Deepened here to clear 4.5:1 on white, because
+     --meter-ink points at it and therefore paints text. */
+  --meter: #8a5a00;
+  --meter-ink: var(--meter);        /* the percentage beside a bar, in amber */
+  --danger: #b32b20;                /* alert red, deepened for text on light */
+  --danger-soft: #fadedb;
+  /* WARN SITS BETWEEN THE DATA AMBER AND THE ALERT RED. Once --meter became
+     amber, an amber warn was the same colour as a perfectly normal reading —
+     a low-time gauge or an over-threshold meter changed nothing on screen.
+     Burnt orange keeps the family and restores the signal (dE 25 from the
+     meter, 24 from danger). */
+  --warn: #b45000;
+  --warn-soft: #fdf0e6;
+  --grid-line: rgba(11, 20, 36, 0.05);
+  --shadow: 0 2px 10px rgba(11, 20, 36, 0.12);
+
+  /* two-user identity: u1 rides the cyan carrier, u2 the amber counter-signal */
+  --u1: #0a6a78;
+  --u1-soft: #d8f4f8;
+  --u2: #8a4a00;
+  --u2-soft: #fbe7cf;
+}
+
+[data-palette="hud"][data-theme="dark"] {
+  /* semantic — dark: the native state. Void grounds, cyan carrier. */
+  --bg: var(--pal-void);
+  --bg-alt: var(--pal-navy-deep);
+  --surface: #111a2e;
+  --surface-2: var(--pal-navy);
+  --ink: #e6f3ff;                   /* cold off-white */
+  --ink-muted: #9db4d2;             /* blue-grey (>= 6:1 on surface) */
+  --ink-faint: #5b7095;
+  --line: #6d84ab;                  /* >= 3:1 on the dark surfaces */
+  --line-soft: #23324f;
+  --accent: var(--pal-cyan);
+  --accent-strong: var(--pal-cyan); /* cyan is at its best on void */
+  --accent-soft: #10364a;
+  --on-accent: #04222a;
+  --meter: var(--pal-amber);        /* readings in amber, structure in cyan */
+  --meter-ink: var(--meter);
+  --danger: var(--pal-alert);
+  --danger-soft: #3d1a16;
+  --warn: #ff8a3d;                  /* orange: distinct from the amber meter */
+  --warn-soft: #40230c;
+  --grid-line: rgba(34, 227, 240, 0.055);
+  --shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+
+  --u1: var(--pal-cyan);
+  --u1-soft: #10364a;
+  --u2: var(--pal-amber);
+  --u2-soft: #3a2708;
+}

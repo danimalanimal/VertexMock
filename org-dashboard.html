@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-palette="hud">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Vertex — Organisation Dashboard Demo</title>
+
+  <!-- VERTEBRA pre-paint: must run before the stylesheet (see vendor/vertebra/AGENTS.md).
+       Vertex defaults to dark when the visitor has not chosen a theme. -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("vertebra-theme");
+        if (t === "dark" || !t) document.documentElement.setAttribute("data-theme", "dark");
+        var f = localStorage.getItem("vertebra-font");
+        if (f && /^[a-f]$/.test(f)) document.documentElement.setAttribute("data-font", f);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- theme.css FIRST, palette AFTER, modules, then app CSS -->
+  <link rel="stylesheet" href="vendor/vertebra/theme.css?v=1.31.0" />
+  <link rel="stylesheet" href="vendor/vertebra/palette-hud.css?v=1.31.0" />
+  <link rel="stylesheet" href="vendor/vertebra/experiments.css?v=1.31.0" />
+  <link rel="stylesheet" href="org-dashboard.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body class="shell">
+  <a class="skip-link" href="#content">Skip to content</a>
+
+  <header class="topbar">
+    <div class="container org-topbar">
+      <a class="brand" href="index.html" title="Back to the Vertex admin hub">
+        <img class="org-logo" src="assets/vertex-logo-inverted.svg" alt="Vertex Sport Systems" />
+      </a>
+      <span class="org-topbar-title">
+        <span class="label">Organisation dashboard</span>
+        <strong id="orgSportTitle">Demo</strong>
+      </span>
+      <nav class="org-sport-switch" aria-label="Sport" id="sportSwitch">
+        <a href="?sport=basketball#sales" data-sport="basketball">Basketball</a>
+        <a href="?sport=boxing#sales" data-sport="boxing">Boxing</a>
+      </nav>
+      <div class="topbar-actions">
+        <a class="btn btn-ghost btn-sm org-hub-link" href="index.html">← Admin hub</a>
+        <button class="theme-switch" data-theme-toggle role="switch" aria-checked="false" aria-label="Dark theme">
+          <span class="ts-opt ts-light" aria-hidden="true">Light</span>
+          <span class="ts-track" aria-hidden="true"><span class="ts-thumb"></span></span>
+          <span class="ts-opt ts-dark" aria-hidden="true">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell-body">
+    <nav class="sidebar" aria-label="Dashboard pages">
+      <p class="sidebar-label">Organisation</p>
+      <div class="sidebar-group">
+        <a href="#sales" data-route-default><span class="sidebar-icon" aria-hidden="true">▲</span><span class="sidebar-text">Sales &amp; Marketing Strategy</span></a>
+        <a href="#performance"><span class="sidebar-icon" aria-hidden="true">◈</span><span class="sidebar-text">Performance Dashboard</span></a>
+        <a href="#examples"><span class="sidebar-icon" aria-hidden="true">▦</span><span class="sidebar-text">Examples &amp; Links</span></a>
+      </div>
+      <p class="sidebar-label">Drill-down</p>
+      <div class="sidebar-group" id="sidebarDrill">
+        <a href="#performance/athletes"><span class="sidebar-icon" aria-hidden="true">●</span><span class="sidebar-text">Athletes</span><span class="nav-badge" id="badgeAthletes"></span></a>
+        <a href="#performance/coaches"><span class="sidebar-icon" aria-hidden="true">◆</span><span class="sidebar-text">Coaches</span><span class="nav-badge" id="badgeCoaches"></span></a>
+      </div>
+      <div class="sidebar-spacer"></div>
+      <p class="small muted org-sidebar-note">Demo surface for early conversations with clubs and institutions. Cohort data is illustrative; market tiers are sourced on the strategy page.</p>
+      <button class="sidebar-toggle" data-shell-toggle aria-pressed="false">‹‹ <span class="sidebar-text">Collapse</span></button>
+    </nav>
+
+    <main class="shell-main" id="content">
+      <div class="container org-main" id="view" aria-live="polite"></div>
+      <footer class="footer org-footer">
+        <div class="container">
+          <span>Vertex Sport Systems · Organisation Dashboard Demo · all cohort data illustrative · financials notional</span>
+          <a class="theme-credit" href="vendor/vertebra/AGENTS.md"><span class="tc-line">Built on VERTEBRA 1.31.0</span></a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <nav class="tabbar" aria-label="Dashboard pages">
+    <a href="#sales" data-route-default><span class="sidebar-icon" aria-hidden="true">▲</span><span>Strategy</span></a>
+    <a href="#performance"><span class="sidebar-icon" aria-hidden="true">◈</span><span>Performance</span></a>
+    <a href="#examples"><span class="sidebar-icon" aria-hidden="true">▦</span><span>Examples</span></a>
+  </nav>
+
+  <template id="tpl-empty"><div class="empty-state"><div class="empty-state-icon" aria-hidden="true">◌</div><p>Nothing here yet.</p></div></template>
+
+  <script src="vendor/vertebra/theme.js?v=1.31.0"></script>
+  <script src="vendor/vertebra/vertebra-charts.js?v=1.31.0"></script>
+  <script src="vendor/vertebra/experiments.js?v=1.31.0-count"></script>
+  <script src="org-qld-clubs.js"></script>
+  <script src="org-data.js"></script>
+  <script src="org-dashboard.js"></script>
+</body>
+</html>
