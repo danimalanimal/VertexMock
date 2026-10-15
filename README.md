@@ -45,6 +45,24 @@ assets/          Logo (SVG) and player photo
 
 To swap mock data for an API later, replace the `window.VertexData` object in `data.js` with a fetch + transform; `app.js` consumes it via a stable shape.
 
+## Organisation Dashboard Demo
+
+`org-dashboard.html?sport=basketball` and `org-dashboard.html?sport=boxing` (tiles 05 and 06 on the hub) are the surface for early demonstrations to clubs and sporting institutions. Built on the [VERTEBRA](https://github.com/danimalanimal/VERTEBRA) kit (vendored under `vendor/vertebra/`, v1.31.0, untouched — see `vendor/vertebra/AGENTS.md` for the consumption contract).
+
+- **Sales & Marketing Strategy** (`#sales`) — participation / addressable-market pyramid using VERTEBRA's `data-x-pyramid` in ziggurat mode (terrace / mirror / ziggurat switchable, drag to turn, click a tier to make it the target segment, Low / Mid / High estimate position). Three notional pricing models (athlete subscription, club / organisation licence, assessment workshops) with sliders, a three-year ramp chart and a side-by-side table, then a go-to-market table and the source list. Market tiers and sources live in `org-data.js` (`market.basketball`, `market.boxing`); boxing figures follow the *Boxing in Australia: Participation, Aspiration and Active Boxers* brief, basketball figures are AusPlay 2025 via the ASC Clearinghouse and Basketball Australia.
+- **Performance Dashboard** (`#performance`) — cumulative view of every Vertex athlete in the sport: filters (club, age band, sex, coach), headline stats, development-score distribution, consistent-cohort trajectory (median + IQR), coach feedback volume by coach, metric provenance, key metric by age band (verified sources vs all entries), four standout panels (developing fastest, most coach feedback, verified key metric, physicality), and sortable athlete / coach tables. Drill down to `#performance/athlete/<id>` (radar, trajectory vs cohort, source-tagged metrics, physicality percentiles, feedback by coach, auto-generated "Vertex read") and `#performance/coach/<id>` (activity, attribute mix, athletes coached).
+- **Examples & Links** (`#examples`) — links to the coach test interfaces, workshop report, player profiles and coach profiles. Edit `examples` in `org-data.js` to add more (the `workshopReports` array is where a basketball workshop report link goes once one exists in the repo).
+
+Cohort data is generated deterministically in `org-data.js` (`VertexOrgData.cohort(sport)`) and seeded with the named rosters from `coach-data.js` and `boxer-data.js`; Ava Thompson and Mateo Reyes link through to their full dashboards. All figures in the financial models are notional.
+
+```
+org-dashboard.html   Shell page (VERTEBRA app shell, HUD palette, dark default)
+org-dashboard.css    Surface-specific styles, all `org-` prefixed, tokens only
+org-data.js          Market tiers + sources, pricing defaults, cohort generator, example links
+org-dashboard.js     Hash router + renderers (sales, performance, athlete, coach, examples)
+vendor/vertebra/     VERTEBRA kit copy (theme, palettes, charts adapter, experiments incl. pyramid)
+```
+
 ## Run locally
 
 ```bash

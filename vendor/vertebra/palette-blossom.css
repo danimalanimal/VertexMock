@@ -1,0 +1,91 @@
+/* ==========================================================================
+   VERTEBRA — alternate palette: BLOSSOM
+   --------------------------------------------------------------------------
+   Soft pastel palette over the same component system.
+   Source colors:
+     Cherry Blossom #EDAFB8 · Powder Petal #F7E1D7 · Dust Grey #DEDBD2
+     Ash Grey #B0C4B1 · Iron Grey #4A5759
+   (Derived shades are used where the sources can't meet contrast — text,
+   borders, and meters need darker/lighter anchors than the pastels give.)
+
+   USE IT IN A PROJECT (two steps):
+     1. <link rel="stylesheet" href="theme.css" />
+        <link rel="stylesheet" href="palette-blossom.css" />   <- after theme.css
+     2. <html data-palette="blossom">
+   Dark mode works exactly as before: data-theme="dark" on <html> combines
+   with the palette. Remove the attribute (or the link) to fall back to the
+   Sentinel greens. Every component restyles itself — palettes only redefine
+   the semantic tokens, never component rules.
+
+   MAKE YOUR OWN PALETTE: copy this file, rename "blossom" in both selectors,
+   and re-point the ~20 semantic tokens. Keep the contrast notes: --ink and
+   --ink-muted >= 4.5:1 on --bg/--bg-alt/--surface; --line and --meter >= 3:1
+   on their surfaces; --on-accent >= 4.5:1 on --accent.
+   ========================================================================== */
+
+[data-palette="blossom"] {
+  /* raw palette (reference) */
+  --pal-blossom: #edafb8;
+  --pal-powder: #f7e1d7;
+  --pal-dust: #dedbd2;
+  --pal-ash: #b0c4b1;
+  --pal-iron: #4a5759;
+
+  /* semantic — light */
+  --bg: #fbf7f3;                    /* powder, lifted near-white */
+  --bg-alt: var(--pal-powder);
+  --surface: #fffdfb;
+  --surface-2: #f2e9e1;
+  --ink: #353f41;                   /* iron, deepened for body text (10:1) */
+  --ink-muted: #5d696b;             /* iron mid (5.2:1 on bg, 4.5:1 on powder) */
+  --ink-faint: var(--pal-ash);
+  --line: #7f8d89;                  /* ash+iron blend at >= 3:1 for control borders */
+  --line-soft: var(--pal-dust);
+  --accent: var(--pal-blossom);
+  --accent-strong: #964754;         /* deep rose: text/borders/meters on light */
+  --accent-soft: #f8e3e6;
+  --on-accent: #3a2226;             /* rosewood on blossom fills (7.8:1) */
+  --meter: var(--accent-strong);
+  --danger: #ac3c2a;                /* clay red — kept away from the pink accent */
+  --danger-soft: #f7ded7;
+  --warn: #7c600e;
+  --warn-soft: #f4e8d2;
+  --grid-line: rgba(74, 87, 89, 0.05);
+  --shadow: 0 2px 10px rgba(74, 87, 89, 0.12);
+
+  /* two-user identity: u2 (J) owns the rose accent here; u1 (D) gets an
+     ash-green counterpoint derived from --pal-ash at text weight */
+  --u1: #42604a;
+  --u1-soft: #e3ece3;
+  --u2: var(--accent-strong);
+  --u2-soft: var(--accent-soft);
+}
+
+[data-palette="blossom"][data-theme="dark"] {
+  /* semantic — dark: iron-grey ground, blossom carries over as the accent */
+  --bg: #222929;                    /* iron, deepened */
+  --bg-alt: #273030;
+  --surface: #2e3738;               /* iron surface */
+  --surface-2: #3a4547;
+  --ink: #f2e7e2;                   /* powder-tinted off-white */
+  --ink-muted: var(--pal-ash);      /* ash grey, palette-true (6.5:1 on surface) */
+  --ink-faint: #6f7d75;
+  --line: #849290;                  /* >= 3:1 on the dark surfaces */
+  --line-soft: #3d4749;
+  --accent: var(--pal-blossom);
+  --accent-strong: var(--pal-blossom); /* blossom reads well on dark (7.8:1) */
+  --accent-soft: #4b3237;           /* deep rosewood surface tint */
+  --on-accent: #3a2226;
+  --meter: var(--accent-strong);
+  --danger: #e8896b;
+  --danger-soft: #402a24;
+  --warn: #d9b45e;
+  --warn-soft: #383019;
+  --grid-line: rgba(237, 175, 184, 0.05);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+
+  --u1: #aecbaf;                    /* ash lifted to read on the iron grounds */
+  --u1-soft: #32423a;
+  --u2: var(--pal-blossom);
+  --u2-soft: var(--accent-soft);
+}
